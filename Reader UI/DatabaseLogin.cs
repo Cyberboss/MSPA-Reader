@@ -16,6 +16,7 @@ namespace Reader_UI
         {
             InitializeComponent();
             dataSourceInput.Items.Add("SQL Server");
+            dataSourceInput.SelectedIndex = 0;
             this.AcceptButton = okButton;
         }
 
@@ -32,7 +33,28 @@ namespace Reader_UI
                     return;
             }
             Database db = new Database(dSource);
-            db.Connect(ipInput.Text, usernameInput.Text, passwordInput.Text);
+            foreach (Control c in Controls)
+            {
+                c.Enabled = false;
+            }
+            Cursor.Current = Cursors.WaitCursor;
+            Update();
+            try
+            {
+                db.Connect(ipInput.Text, usernameInput.Text, passwordInput.Text);
+                Hide();
+                new Reader(db).Show();
+                Close();
+            }
+            catch (Exception)
+            {
+                Cursor.Current = Cursors.Default;
+                MessageBox.Show("Can not open connection to " + ipInput.Text + "! Check that the database MSPAArchive exists on the specified server and the user you entered has to dbo role.");
+                foreach (Control c in Controls)
+                {
+                    c.Enabled = true;
+                }
+            }
         }
 
 

@@ -28,14 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Reader));
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.dbWriter = new System.ComponentModel.BackgroundWorker();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
             this.pictureBox1.ImageLocation = "";
             this.pictureBox1.Location = new System.Drawing.Point(43, 36);
             this.pictureBox1.MaximumSize = new System.Drawing.Size(650, 450);
@@ -45,13 +44,17 @@
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
-            // Form1
+            // dbWriter
+            // 
+            this.dbWriter.DoWork += new System.ComponentModel.DoWorkEventHandler(this.dbWriter_DoWork);
+            // 
+            // Reader
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(752, 549);
             this.Controls.Add(this.pictureBox1);
-            this.Name = "Form1";
+            this.Name = "Reader";
             this.Text = "Homestuck";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
@@ -61,6 +64,7 @@
         #endregion
 
         private System.Windows.Forms.PictureBox pictureBox1;
+        private System.ComponentModel.BackgroundWorker dbWriter;
     }
 }
 

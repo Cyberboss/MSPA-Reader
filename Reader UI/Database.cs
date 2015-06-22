@@ -8,47 +8,125 @@ using System.Windows.Forms;
 
 namespace Reader_UI
 {
-    class Database
+    public class Database
     {
         public enum DataSource { SQLCOMPACT, SQLSERVER, MYSQL, SQLITE };
 
-        readonly DataSource dSource;
-        SqlConnection sqlsConn = null;
-
-        void ConnectSQLServer(string serverName, string username, string password)
+        enum PagesOfImportance
         {
-            sqlsConn = new SqlConnection("Data Source=" + serverName + ";Initial Catalog=MSPAArchive;User ID=" + username + ";Password=" + password);
-            try
-            {
-                sqlsConn.Open();
-            }
-            catch (Exception)
-            {
-                sqlsConn = null;
-                MessageBox.Show("Can not open connection to "+serverName+"! Check that the database MSPAArchive exists on the specified server and the user you entered has to dbo role.");
-            }
-            Environment.Exit(0);
+            HOMESTUCK_PAGE_ONE = 001901
         }
-        public void Connect(string serverName, string username, string password)
+
+        readonly DataSource dSource;
+        SqlConnection sqlsRConn = null,sqlsWConn = null;
+        string connectionString = null;
+
+        void ConnectSQLServer(string serverName, string username, string password, bool read)
+        {
+            if (read)
+            {
+                connectionString = "Data Source=" + serverName + ";Initial Catalog=MSPAArchive;User ID=" + username + ";Password=" + password;
+                sqlsRConn = new SqlConnection(connectionString);
+                sqlsRConn.Open();
+            }
+            else
+            {
+                sqlsWConn = new SqlConnection(connectionString);
+                sqlsWConn.Open();
+            }
+        }
+        public void Connect(string serverName, string username, string password, bool read = true)
         {
             switch (dSource)
             {
                 case DataSource.SQLSERVER:
-                    ConnectSQLServer(serverName, username, password);
+                    ConnectSQLServer(serverName, username, password, read);
                     break;
             }
+        }
+        int SQLSReadLastIndexedOrCreateDatabase()
+        {
+            try
+            {
+                SqlDataReader myReader = null;
+                SqlCommand myCommand = new SqlCommand("SELECT MAX(page_id) FROM PagesArchived",sqlsWConn);
+                myReader = myCommand.ExecuteReader();
+                myReader.Read();
+                return myReader.GetInt32(0);
+            }
+            catch (Exception)
+            {
+                //Assume databse either
+                //a) hasn't been created
+                //b) is corrupt
+                //c) hasn't parsed page 1
+
+                //drop any tables that may exist
+                try { new SqlCommand("DROP TABLE Conversations", sqlsWConn).ExecuteNonQuery(); }
+                catch (Exception) { }
+                try { new SqlCommand("DROP TABLE Links", sqlsWConn).ExecuteNonQuery(); }
+                catch (Exception) { }
+                try { new SqlCommand("DROP TABLE PagesArchived", sqlsWConn).ExecuteNonQuery(); }
+                catch (Exception) { }
+                try { new SqlCommand("DROP TABLE Resources", sqlsWConn).ExecuteNonQuery(); }
+                catch (Exception) { }
+                try
+                {
+                    SqlCommand creationCommands = new SqlCommand("CREATE TABLE [Conversations](	[id] [int] NOT NULL,	[page_id] [int] NOT NULL,	[text] [nvarchar](max) NULL, CONSTRAINT [PK_Conversations] PRIMARY KEY CLUSTERED (	[id] ASC)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]",sqlsWConn);
+
+                    creationCommands.ExecuteNonQuery();
+                    creationCommands.CommandText = "CREATE TABLE [Links](	[id] [int] NOT NULL,	[page_id] [int] NOT NULL,	[linked_page_id] [int] NULL,	[link_text] [nvarchar](50) NULL, CONSTRAINT [PK_Links] PRIMARY KEY CLUSTERED (	[id] ASC)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]) ON [PRIMARY]";
+                    creationCommands.ExecuteNonQuery();
+                    creationCommands.CommandText = "CREATE TABLE [PagesArchived](	[page_id] [int] NOT NULL, CONSTRAINT [PK_PagesArchived] PRIMARY KEY CLUSTERED (	[page_id] ASC)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]) ON [PRIMARY]";
+                    creationCommands.ExecuteNonQuery();
+                    creationCommands.CommandText = "CREATE TABLE [Resources](	[id] [int] NOT NULL,	[page_id] [int] NOT NULL,	[data] [varbinary](max) NULL,	[original_filename] [nvarchar](max) NULL, CONSTRAINT [PK_Resources] PRIMARY KEY CLUSTERED (	[id] ASC)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]";
+                    creationCommands.ExecuteNonQuery();
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("Error creating database, make sure the specified account has read/write permissions.");
+                    Application.Exit();
+                }
+                return 0;
+            }
+        }
+        int ReadLastIndexedOrCreateDatabase()
+        {
+            switch (dSource)
+            {
+                case DataSource.SQLSERVER:
+                    return SQLSReadLastIndexedOrCreateDatabase();
+                default:
+                    throw new Exception();
+            }
+        }
+
+        public void ResumeWork()
+        {
+            Connect(null, null, null, false);
+            int beginAt = ReadLastIndexedOrCreateDatabase() + 1;
+            if (beginAt == 1)
+                beginAt = (int)PagesOfImportance.HOMESTUCK_PAGE_ONE;
         }
         public Database(DataSource source)
         {
             dSource = source;
         }
-        ~Database()
+        public void Close()
         {
             switch (dSource)
             {
                 case DataSource.SQLSERVER:
-                    if (sqlsConn != null)
-                        sqlsConn.Close();
+                    if (sqlsRConn != null)
+                    {
+                        sqlsRConn.Close();
+                        sqlsRConn = null;
+                    }
+                    if (sqlsWConn != null)
+                    {
+                        sqlsWConn.Close();
+                        sqlsRConn = null;
+                    }
                     break;
             }
         }

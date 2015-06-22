@@ -16,7 +16,9 @@ namespace Reader_UI
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new DatabaseLogin());
+            new DatabaseLogin().Show();
+            Application.Run();
+            
         }
     }
 }

@@ -12,9 +12,23 @@ namespace Reader_UI
 {
     public partial class Reader : Form
     {
-        public Reader()
+        Database db;
+        public Reader(Database idb)
         {
+            db = idb;
             InitializeComponent();
+            FormClosed += Reader_Closed;
+            dbWriter.RunWorkerAsync();
+        }
+        void Reader_Closed(object sender, System.EventArgs e)
+        {
+            db.Close();
+            Application.Exit();
+        }
+
+        private void dbWriter_DoWork(object sender, DoWorkEventArgs e)
+        {
+            db.ResumeWork();
         }
     }
 }
