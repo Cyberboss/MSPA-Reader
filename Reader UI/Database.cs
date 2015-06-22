@@ -12,9 +12,12 @@ namespace Reader_UI
     {
         public enum DataSource { SQLCOMPACT, SQLSERVER, MYSQL, SQLITE };
 
+        Parser parser;
+
         enum PagesOfImportance
         {
-            HOMESTUCK_PAGE_ONE = 001901
+            HOMESTUCK_PAGE_ONE = 001901,
+            LAST_PAGE = 009594  //TODO: Add some dynamic page calculator
         }
 
         readonly DataSource dSource;
@@ -25,7 +28,7 @@ namespace Reader_UI
         {
             if (read)
             {
-                connectionString = "Data Source=" + serverName + ";Initial Catalog=MSPAArchive;User ID=" + username + ";Password=" + password;
+                connectionString = "Data Source=" + serverName + ";MultipleActiveResultSets=true;Initial Catalog=MSPAArchive;User ID=" + username + ";Password=" + password;
                 sqlsRConn = new SqlConnection(connectionString);
                 sqlsRConn.Open();
             }
@@ -52,7 +55,9 @@ namespace Reader_UI
                 SqlCommand myCommand = new SqlCommand("SELECT MAX(page_id) FROM PagesArchived",sqlsWConn);
                 myReader = myCommand.ExecuteReader();
                 myReader.Read();
-                return myReader.GetInt32(0);
+                int res = myReader.GetInt32(0);
+                myReader.Close();
+                return res;
             }
             catch (Exception)
             {
@@ -103,10 +108,16 @@ namespace Reader_UI
 
         public void ResumeWork()
         {
+            parser = new Parser();
             Connect(null, null, null, false);
-            int beginAt = ReadLastIndexedOrCreateDatabase() + 1;
-            if (beginAt == 1)
-                beginAt = (int)PagesOfImportance.HOMESTUCK_PAGE_ONE;
+            int currentPage = ReadLastIndexedOrCreateDatabase() + 1;
+            if (currentPage == 1)
+                currentPage = (int)PagesOfImportance.HOMESTUCK_PAGE_ONE;
+
+            while (currentPage < (int)PagesOfImportance.LAST_PAGE)
+            {
+                parser.LoadPage(currentPage);
+            }
         }
         public Database(DataSource source)
         {

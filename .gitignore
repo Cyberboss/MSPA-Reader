@@ -5,3 +5,4 @@
 /Reader UI/bin/Debug
 /Reader UI/obj/Debug
 *.suo
+packages*/
