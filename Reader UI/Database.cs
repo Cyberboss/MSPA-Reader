@@ -10,35 +10,47 @@ namespace Reader_UI
 {
     class Database
     {
-        enum DataSource { SQLCOMPACT, SQLSERVER, MYSQL };
+        public enum DataSource { SQLCOMPACT, SQLSERVER, MYSQL, SQLITE };
 
         readonly DataSource dSource;
-        SqlConnection conn = null;
+        SqlConnection sqlsConn = null;
 
-        private void ConnectSQLServer(string serverName, string username, string password)
+        void ConnectSQLServer(string serverName, string username, string password)
         {
-            conn = new SqlConnection("Data Source=" + serverName + ";Initial Catalog=MSPAArchive;User ID=" + username + ";Password=" + password);
+            sqlsConn = new SqlConnection("Data Source=" + serverName + ";Initial Catalog=MSPAArchive;User ID=" + username + ";Password=" + password);
             try
             {
-                conn.Open();
-                conn.Close();
+                sqlsConn.Open();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show("Can not open connection ! ");
+                sqlsConn = null;
+                MessageBox.Show("Can not open connection to "+serverName+"! Check that the database MSPAArchive exists on the specified server and the user you entered has to dbo role.");
+            }
+            Environment.Exit(0);
+        }
+        public void Connect(string serverName, string username, string password)
+        {
+            switch (dSource)
+            {
+                case DataSource.SQLSERVER:
+                    ConnectSQLServer(serverName, username, password);
+                    break;
             }
         }
-        public Database(DataSource source, bool create, string serverName, string username, string password)
+        public Database(DataSource source)
         {
             dSource = source;
-            switch (dSource){
+        }
+        ~Database()
+        {
+            switch (dSource)
+            {
                 case DataSource.SQLSERVER:
-                    ConnectSQLServer(serverName,username,password);
+                    if (sqlsConn != null)
+                        sqlsConn.Close();
                     break;
-                default:
-                    throw new Exception();
             }
         }
-
     }
 }

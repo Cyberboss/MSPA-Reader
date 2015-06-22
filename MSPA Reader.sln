@@ -21,6 +21,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SQL Scripts", "SQL Scripts"
 	ProjectSection(SolutionItems) = preProject
 		DB Scripts\SQLS Create Conversations.sql = DB Scripts\SQLS Create Conversations.sql
 		DB Scripts\SQLS Create Links.sql = DB Scripts\SQLS Create Links.sql
+		DB Scripts\SQLS Create PagesArchived.sql = DB Scripts\SQLS Create PagesArchived.sql
 		DB Scripts\SQLS Create Resources.sql = DB Scripts\SQLS Create Resources.sql
 	EndProjectSection
 EndProject

@@ -15,6 +15,7 @@ CREATE TABLE [dbo].[Resources](
 	[id] [int] NOT NULL,
 	[page_id] [int] NOT NULL,
 	[data] [varbinary](max) NULL,
+	[original_filename] [nvarchar](max) NULL,
  CONSTRAINT [PK_Resources] PRIMARY KEY CLUSTERED 
 (
 	[id] ASC
