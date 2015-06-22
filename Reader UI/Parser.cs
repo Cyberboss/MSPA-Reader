@@ -12,7 +12,7 @@ namespace Reader_UI
     class Parser
     {
         const string prepend = "http://www.mspaintadventures.com/?s=6&p=";
-        HtmlDocument html;
+        HtmlNode contentTable;
 
         HttpClient http = new HttpClient();
         
@@ -24,8 +24,13 @@ namespace Reader_UI
                 var response = http.GetByteArrayAsync(new Uri(prepend + pageno.ToString("D6"))).Result;
                 String source = Encoding.GetEncoding("utf-8").GetString(response, 0, response.Length - 1);
                 source = WebUtility.HtmlDecode(source);
-                html = new HtmlDocument();
+                var html = new HtmlDocument();
                 html.LoadHtml(source);
+                //TODO: Support for scratch and 2x pages
+
+                if(true){    //regular or trickster
+                    contentTable = html.DocumentNode.Descendants("table").First().SelectNodes("tr").ElementAt(1).SelectNodes("td").First().SelectNodes("table").First();
+                }
             }
             catch (Exception)
             {
