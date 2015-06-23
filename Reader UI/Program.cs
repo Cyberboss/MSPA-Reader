@@ -14,8 +14,6 @@ namespace Reader_UI
         [STAThread]
         static void Main()
         {
-            new Parser().LoadPage(1901);
-            return;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             new DatabaseLogin().Show();

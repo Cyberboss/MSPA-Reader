@@ -9,7 +9,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 CREATE TABLE [dbo].[Conversations](
-	[id] [int] NOT NULL,
+	[id] [int] NOT NULL IDENTITY (1,1),
 	[page_id] [int] NOT NULL,
 	[text] [nvarchar](max) NULL,
  CONSTRAINT [PK_Conversations] PRIMARY KEY CLUSTERED 

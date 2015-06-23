@@ -22,17 +22,7 @@ namespace Reader_UI
 
         private void okButton_Click(object sender, EventArgs e)
         {
-            Database.DataSource dSource;
-            switch (dataSourceInput.SelectedIndex)
-            {
-                case 0:
-                    dSource = Database.DataSource.SQLSERVER;
-                    break;
-                default:
-                    MessageBox.Show("Invalid datasource!");
-                    return;
-            }
-            Database db = new Database(dSource);
+            Database db = new SQLServerDatabase();
             foreach (Control c in Controls)
             {
                 c.Enabled = false;

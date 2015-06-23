@@ -12,7 +12,7 @@ SET ANSI_PADDING ON
 GO
 
 CREATE TABLE [dbo].[Resources](
-	[id] [int] NOT NULL,
+	[id] [int] NOT NULL IDENTITY (1,1),
 	[page_id] [int] NOT NULL,
 	[data] [varbinary](max) NULL,
 	[original_filename] [nvarchar](max) NULL,

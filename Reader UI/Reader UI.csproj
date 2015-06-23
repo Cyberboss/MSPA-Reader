@@ -66,6 +66,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SQLServerDatabase.cs" />
     <EmbeddedResource Include="DatabaseLogin.resx">
       <DependentUpon>DatabaseLogin.cs</DependentUpon>
     </EmbeddedResource>
