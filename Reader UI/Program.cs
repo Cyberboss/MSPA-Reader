@@ -19,10 +19,7 @@ namespace Reader_UI
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             new DatabaseLogin().Show();
-            Application.Run();
-           // new DatabaseLogin().Show();
-            //Application.Run();
-            
+            Application.Run();            
         }
         public static void Shutdown(Form window, Database db)
         {

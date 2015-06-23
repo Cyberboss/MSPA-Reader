@@ -62,8 +62,12 @@ namespace Reader_UI
 
             if (!bgw.CancellationPending)
                 bgw.ReportProgress(currentProgress, "MSPA is up to page " + startPage);
+            else
+                return;
             if (!bgw.CancellationPending)
                 bgw.ReportProgress(currentProgress, "Starting archive operation at page " + currentPage);
+            else
+                return;
 
             while (currentPage != lastPage + 1 && !bgw.CancellationPending)
             {
@@ -76,40 +80,48 @@ namespace Reader_UI
                         if (bgw.CancellationPending)
                         {
                             Rollback();
-                            break;
+                            return;
                         }
                         var res = parser.GetResources();
                         WriteResource(res, currentPage);
                         if (bgw.CancellationPending)
                         {
                             Rollback();
-                            break;
+                            return;
                         }
                         ArchivePageNumber(currentPage);
                         if (bgw.CancellationPending)
                         {
                             Rollback();
-                            break;
+                            return;
                         }
                         Commit();
                         if (!bgw.CancellationPending)
-                            bgw.ReportProgress(currentProgress,"Page " + currentPage + " archived. " + res.Count() + " resources.");
+                            bgw.ReportProgress(currentProgress, "Page " + currentPage + " archived. " + res.Count() + " resources.");
+                        else
+                            return;
                         for (int i = 0; i < res.Count(); ++i)
                         {
                             var fileSize = res[i].data.Count();
                             totalMegabytesDownloaded += (float)fileSize / (1024.0f * 1024.0f);
                             if (!bgw.CancellationPending)
                                 bgw.ReportProgress(currentProgress, res[i].originalFileName + ": " + fileSize / 1024 + "KB");
+                            else
+                                return;
                         }
                         if (!bgw.CancellationPending)
                             bgw.ReportProgress(currentProgress, "Total Data Downloaded: " + (int)totalMegabytesDownloaded + "MB");
+                        else
+                            return;
                     }
                     catch (Exception)
                     {
-                        if (!bgw.CancellationPending)
-                            bgw.ReportProgress(currentProgress, "Error in archivng page: " + currentPage);
                         pagesToParse++;
                         Rollback();
+                        if (!bgw.CancellationPending)
+                            bgw.ReportProgress(currentProgress, "Error in archivng page: " + currentPage);
+                        else
+                            return;
                     }
                 }
                 currentPage = FindLowestPage(currentPage,lastPage);
