@@ -47,6 +47,7 @@
             this.dataSourceInput.Name = "dataSourceInput";
             this.dataSourceInput.Size = new System.Drawing.Size(201, 21);
             this.dataSourceInput.TabIndex = 0;
+            this.dataSourceInput.SelectedIndexChanged += new System.EventHandler(this.dataSourceInput_SelectedIndexChanged);
             // 
             // label1
             // 
