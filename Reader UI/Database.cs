@@ -11,6 +11,7 @@ namespace Reader_UI
     {
         Parser parser;
 
+        protected List<int> archivedPages = new List<int>();
         enum PagesOfImportance
         {
             HOMESTUCK_PAGE_ONE = 001901,
@@ -19,7 +20,7 @@ namespace Reader_UI
 
 
         public abstract void Connect(string serverName, string username, string password);
-        public abstract int ReadLastIndexedOrCreateDatabase();
+        public abstract bool ReadLastIndexedOrCreateDatabase();
         public abstract void WriteResource(Parser.Resource[] res, int page);
         public abstract void ArchivePageNumber(int page);
         public abstract void Transact();
@@ -27,21 +28,41 @@ namespace Reader_UI
         public abstract void Commit();
         public abstract void Close();
 
+        bool IsPageArchived(int page)
+        {
+            return archivedPages.IndexOf(page) >= 0;
+        }
+        int FindLowestPage(int start)
+        {
+            for (int i = start; i < (int)PagesOfImportance.LAST_PAGE; ++i)
+                if (archivedPages.IndexOf(i) < 0)
+                    return i;
+            return (int)PagesOfImportance.LAST_PAGE + 1;
+        }
         public void ResumeWork(System.ComponentModel.BackgroundWorker bgw)
         {
-            parser = new Parser();
-            int currentPage = ReadLastIndexedOrCreateDatabase() + 1;
-            if (currentPage == 1)
-                currentPage = (int)PagesOfImportance.HOMESTUCK_PAGE_ONE;
 
+            if (!ReadLastIndexedOrCreateDatabase())
+            {
+                if (!bgw.CancellationPending)
+                    bgw.ReportProgress(0, "Error creating database.");
+                return;
+            }
+
+            if (parser == null)
+                parser = new Parser();
+
+            int currentPage = FindLowestPage((int)PagesOfImportance.HOMESTUCK_PAGE_ONE);
             int pagesToParse = 245;
             int currentProgress = (int)(((float)(currentPage - 1 - (int)PagesOfImportance.HOMESTUCK_PAGE_ONE) / (float)(pagesToParse)) * 100.0f);
+
             if (!bgw.CancellationPending)
                 bgw.ReportProgress(currentProgress, "Starting at page " + currentPage);
+
             while (currentPage - (int)PagesOfImportance.HOMESTUCK_PAGE_ONE <= pagesToParse && !bgw.CancellationPending)
             {
                 currentProgress = (int)(((float)(currentPage - 1 - (int)PagesOfImportance.HOMESTUCK_PAGE_ONE) / (float)(pagesToParse)) * 100.0f);
-                if (parser.LoadPage(currentPage) && !bgw.CancellationPending)
+                if (!IsPageArchived(currentPage) && parser.LoadPage(currentPage) && !bgw.CancellationPending)
                 {
                     try
                     {
@@ -76,7 +97,7 @@ namespace Reader_UI
                         Rollback();
                     }
                 }
-                currentPage++;
+                currentPage = FindLowestPage(currentPage);
             }
             if (!bgw.CancellationPending)
                 bgw.ReportProgress(currentProgress, "Operation completed. " + (pagesToParse - (currentPage - 1 - (int)PagesOfImportance.HOMESTUCK_PAGE_ONE)) + " pages remaining.");

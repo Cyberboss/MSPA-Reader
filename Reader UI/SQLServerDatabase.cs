@@ -22,18 +22,21 @@ namespace Reader_UI
             sqlsRConn.Open();
             sqlsWConn = new SqlConnection(connectionString);
             sqlsWConn.Open();
+            
         }
-        override public int ReadLastIndexedOrCreateDatabase()
+        override public bool ReadLastIndexedOrCreateDatabase()
         {
             SqlDataReader myReader = null;
             try
             {
-                SqlCommand myCommand = new SqlCommand("SELECT MAX(page_id) FROM PagesArchived", sqlsWConn);
+                SqlCommand myCommand = new SqlCommand("SELECT * FROM PagesArchived", sqlsWConn);
                 myReader = myCommand.ExecuteReader();
-                myReader.Read();
-                int res = myReader.GetInt32(0);
+                while (myReader.Read())
+                {
+                    archivedPages.Add(myReader.GetInt32(0));
+                }
                 myReader.Close();
-                return res;
+                return true;
             }
             catch (Exception)
             {
@@ -68,9 +71,9 @@ namespace Reader_UI
                 catch (Exception)
                 {
                     MessageBox.Show("Error creating database, make sure the specified account has read/write permissions.");
-                    Application.Exit();
+                    return false;
                 }
-                return 0;
+                return true;
             }
         }
 
@@ -95,6 +98,7 @@ namespace Reader_UI
             pageWrite.Transaction = sqlsTrans;
             pageWrite.CommandText = "INSERT INTO PagesArchived VALUES (" + page + ")";
             pageWrite.ExecuteNonQuery();
+            archivedPages.Add(page);
         }
         override public void Rollback()
         {
