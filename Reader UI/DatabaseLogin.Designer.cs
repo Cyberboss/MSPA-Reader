@@ -41,6 +41,7 @@
             // 
             // dataSourceInput
             // 
+            this.dataSourceInput.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.dataSourceInput.FormattingEnabled = true;
             this.dataSourceInput.Location = new System.Drawing.Point(286, 12);
             this.dataSourceInput.Name = "dataSourceInput";

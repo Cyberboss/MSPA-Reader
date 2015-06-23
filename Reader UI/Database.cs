@@ -17,6 +17,7 @@ namespace Reader_UI
             HOMESTUCK_PAGE_ONE = 001901,
             LAST_PAGE = 009594  //TODO: Add some dynamic page calculator
         }
+        float totalMegabytesDownloaded = 0;
 
 
         public abstract void Connect(string serverName, string username, string password);
@@ -32,12 +33,12 @@ namespace Reader_UI
         {
             return archivedPages.IndexOf(page) >= 0;
         }
-        int FindLowestPage(int start)
+        int FindLowestPage(int start, int end)
         {
-            for (int i = start; i < (int)PagesOfImportance.LAST_PAGE; ++i)
+            for (int i = start; i <= end; ++i)
                 if (archivedPages.IndexOf(i) < 0)
                     return i;
-            return (int)PagesOfImportance.LAST_PAGE + 1;
+            return end + 1;
         }
         public void ResumeWork(System.ComponentModel.BackgroundWorker bgw)
         {
@@ -52,16 +53,21 @@ namespace Reader_UI
             if (parser == null)
                 parser = new Parser();
 
-            int currentPage = FindLowestPage((int)PagesOfImportance.HOMESTUCK_PAGE_ONE);
-            int pagesToParse = 245;
-            int currentProgress = (int)(((float)(currentPage - 1 - (int)PagesOfImportance.HOMESTUCK_PAGE_ONE) / (float)(pagesToParse)) * 100.0f);
+            int lastPage = parser.GetLatestPage();
+            int startPage = FindLowestPage((int)PagesOfImportance.HOMESTUCK_PAGE_ONE, lastPage);
+            int currentPage = startPage;
+            int pagesToParse = lastPage - startPage;
+            int currentProgress = (int)(((float)(currentPage - 1 - startPage) / (float)(pagesToParse)) * 100.0f);
+
 
             if (!bgw.CancellationPending)
-                bgw.ReportProgress(currentProgress, "Starting at page " + currentPage);
+                bgw.ReportProgress(currentProgress, "MSPA is up to page " + startPage);
+            if (!bgw.CancellationPending)
+                bgw.ReportProgress(currentProgress, "Starting archive operation at page " + currentPage);
 
-            while (currentPage - (int)PagesOfImportance.HOMESTUCK_PAGE_ONE <= pagesToParse && !bgw.CancellationPending)
+            while (currentPage != lastPage + 1 && !bgw.CancellationPending)
             {
-                currentProgress = (int)(((float)(currentPage - 1 - (int)PagesOfImportance.HOMESTUCK_PAGE_ONE) / (float)(pagesToParse)) * 100.0f);
+                currentProgress = (int)(((float)(currentPage - 1 - startPage) / (float)(pagesToParse)) * 100.0f);
                 if (!IsPageArchived(currentPage) && parser.LoadPage(currentPage) && !bgw.CancellationPending)
                 {
                     try
@@ -88,6 +94,15 @@ namespace Reader_UI
                         Commit();
                         if (!bgw.CancellationPending)
                             bgw.ReportProgress(currentProgress,"Page " + currentPage + " archived. " + res.Count() + " resources.");
+                        for (int i = 0; i < res.Count(); ++i)
+                        {
+                            var fileSize = res[i].data.Count();
+                            totalMegabytesDownloaded += (float)fileSize / (1024.0f * 1024.0f);
+                            if (!bgw.CancellationPending)
+                                bgw.ReportProgress(currentProgress, res[i].originalFileName + ": " + fileSize / 1024 + "KB");
+                        }
+                        if (!bgw.CancellationPending)
+                            bgw.ReportProgress(currentProgress, "Total Data Downloaded: " + (int)totalMegabytesDownloaded + "MB");
                     }
                     catch (Exception)
                     {
@@ -97,10 +112,10 @@ namespace Reader_UI
                         Rollback();
                     }
                 }
-                currentPage = FindLowestPage(currentPage);
+                currentPage = FindLowestPage(currentPage,lastPage);
             }
             if (!bgw.CancellationPending)
-                bgw.ReportProgress(currentProgress, "Operation completed. " + (pagesToParse - (currentPage - 1 - (int)PagesOfImportance.HOMESTUCK_PAGE_ONE)) + " pages remaining.");
+                bgw.ReportProgress(currentProgress, "Operation completed. " + (pagesToParse - (currentPage - 1 - startPage)) + " pages remaining.");
         }
     }
 }

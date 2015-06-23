@@ -30,13 +30,32 @@ namespace Reader_UI
             + @"|.*spacer"
             + @")(.*)\.gif";
         const string swfRegex = @"http:\/\/.*?\.swf";
+        const string linkNumberRegex = @"[0-9]{6}";
         WebClient web = new WebClient();
         HttpClient client = new HttpClient();
 
         HtmlNode contentTable;
 
         List<string> resources = new List<string>();
-        
+
+        public int GetLatestPage()
+        {
+            var response = client.GetByteArrayAsync(new Uri("http://www.mspaintadventures.com/?viewlog=6")).Result;
+            String source = Encoding.GetEncoding("utf-8").GetString(response, 0, response.Length - 1);
+            source = WebUtility.HtmlDecode(source);
+            var html = new HtmlDocument();
+            html.LoadHtml(source);
+
+            //look for view oldest to newest key phrase
+            //magic from http://stackoverflow.com/questions/8948895/using-xpath-and-htmlagilitypack-to-find-all-elements-with-innertext-containing-a
+            var labelHref = html.DocumentNode.SelectNodes("//*[text()[contains(., 'View oldest to newest')]]").First();
+            var firstEntry = labelHref.ParentNode.ParentNode.SelectNodes("a").First();
+            var linkText = firstEntry.Attributes["href"].Value;
+
+            string pageNumberAsString = Regex.Match(linkText, linkNumberRegex).Value;
+
+            return Convert.ToInt32(pageNumberAsString);
+        }
         void ParseText()
         {
 
