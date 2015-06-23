@@ -29,6 +29,12 @@ namespace Reader_UI
         void Writer_Closing(object sender, System.EventArgs e)
         {
             worker.CancelAsync();
+            foreach (Control c in Controls)
+            {
+                c.Enabled = false;
+            }
+            Update();
+            while (worker.IsBusy) { System.Threading.Thread.Sleep(1); }
         }
         void worker_progress(object sender, ProgressChangedEventArgs e)
         {

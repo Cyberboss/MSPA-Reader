@@ -136,6 +136,17 @@ namespace Reader_UI
         {
             return links.ToArray();
         }
+        public byte[] DownloadFile(string file)
+        {
+            try
+            {
+                return web.DownloadData(file);
+            }
+            catch
+            {
+                return web.DownloadData(file.Replace("cdn.mspaintadventures.com", "www.mspaintadventures.com"));
+            }
+        }
         public bool LoadPage(int pageno)
         {
             try
