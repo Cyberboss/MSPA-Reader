@@ -57,6 +57,12 @@
     <Compile Include="DatabaseLogin.Designer.cs">
       <DependentUpon>DatabaseLogin.cs</DependentUpon>
     </Compile>
+    <Compile Include="DatabaseWriter.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DatabaseWriter.Designer.cs">
+      <DependentUpon>DatabaseWriter.cs</DependentUpon>
+    </Compile>
     <Compile Include="Parser.cs" />
     <Compile Include="Reader.cs">
       <SubType>Form</SubType>
@@ -69,6 +75,9 @@
     <Compile Include="SQLServerDatabase.cs" />
     <EmbeddedResource Include="DatabaseLogin.resx">
       <DependentUpon>DatabaseLogin.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseWriter.resx">
+      <DependentUpon>DatabaseWriter.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Reader.resx">
       <DependentUpon>Reader.cs</DependentUpon>

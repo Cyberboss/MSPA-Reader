@@ -28,43 +28,35 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.dbWriter = new System.ComponentModel.BackgroundWorker();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
-            // pictureBox1
+            // button1
             // 
-            this.pictureBox1.ImageLocation = "";
-            this.pictureBox1.Location = new System.Drawing.Point(43, 36);
-            this.pictureBox1.MaximumSize = new System.Drawing.Size(650, 450);
-            this.pictureBox1.MinimumSize = new System.Drawing.Size(650, 450);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(650, 450);
-            this.pictureBox1.TabIndex = 0;
-            this.pictureBox1.TabStop = false;
-            // 
-            // dbWriter
-            // 
-            this.dbWriter.DoWork += new System.ComponentModel.DoWorkEventHandler(this.dbWriter_DoWork);
+            this.button1.Location = new System.Drawing.Point(362, 104);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(101, 71);
+            this.button1.TabIndex = 0;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // Reader
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(752, 549);
-            this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.button1);
             this.Name = "Reader";
             this.Text = "Homestuck";
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.PictureBox pictureBox1;
-        private System.ComponentModel.BackgroundWorker dbWriter;
+        private System.Windows.Forms.Button button1;
+
     }
 }
 

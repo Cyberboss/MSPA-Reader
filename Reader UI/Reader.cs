@@ -18,17 +18,16 @@ namespace Reader_UI
             db = idb;
             InitializeComponent();
             FormClosed += Reader_Closed;
-            dbWriter.RunWorkerAsync();
         }
         void Reader_Closed(object sender, System.EventArgs e)
         {
-            db.Close();
-            Application.Exit();
+            Program.Shutdown(this, db);
         }
 
-        private void dbWriter_DoWork(object sender, DoWorkEventArgs e)
+        private void button1_Click(object sender, EventArgs e)
         {
-            db.ResumeWork();
+            Program.Open(db, true);
         }
+
     }
 }

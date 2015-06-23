@@ -7,7 +7,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 namespace Reader_UI
 {
-    abstract class Database
+    public abstract class Database
     {
         Parser parser;
 
@@ -18,42 +18,68 @@ namespace Reader_UI
         }
 
 
-        public abstract void Connect(string serverName, string username, string password, bool read = true);
+        public abstract void Connect(string serverName, string username, string password);
         public abstract int ReadLastIndexedOrCreateDatabase();
         public abstract void WriteResource(Parser.Resource[] res, int page);
+        public abstract void ArchivePageNumber(int page);
         public abstract void Transact();
         public abstract void Rollback();
         public abstract void Commit();
         public abstract void Close();
 
-        public void ResumeWork()
+        public void ResumeWork(System.ComponentModel.BackgroundWorker bgw)
         {
             parser = new Parser();
-            Connect(null, null, null, false);
             int currentPage = ReadLastIndexedOrCreateDatabase() + 1;
             if (currentPage == 1)
                 currentPage = (int)PagesOfImportance.HOMESTUCK_PAGE_ONE;
 
-            while (currentPage <= 2146)
+            int pagesToParse = 245;
+            int currentProgress = (int)(((float)(currentPage - 1 - (int)PagesOfImportance.HOMESTUCK_PAGE_ONE) / (float)(pagesToParse)) * 100.0f);
+            if (!bgw.CancellationPending)
+                bgw.ReportProgress(currentProgress, "Starting at page " + currentPage);
+            while (currentPage - (int)PagesOfImportance.HOMESTUCK_PAGE_ONE <= pagesToParse && !bgw.CancellationPending)
             {
-                if (parser.LoadPage(currentPage))
+                currentProgress = (int)(((float)(currentPage - 1 - (int)PagesOfImportance.HOMESTUCK_PAGE_ONE) / (float)(pagesToParse)) * 100.0f);
+                if (parser.LoadPage(currentPage) && !bgw.CancellationPending)
                 {
                     try
                     {
                         Transact();
-                        WriteResource(parser.GetResources(),currentPage);
+                        if (bgw.CancellationPending)
+                        {
+                            Rollback();
+                            break;
+                        }
+                        var res = parser.GetResources();
+                        WriteResource(res, currentPage);
+                        if (bgw.CancellationPending)
+                        {
+                            Rollback();
+                            break;
+                        }
+                        ArchivePageNumber(currentPage);
+                        if (bgw.CancellationPending)
+                        {
+                            Rollback();
+                            break;
+                        }
                         Commit();
+                        if (!bgw.CancellationPending)
+                            bgw.ReportProgress(currentProgress,"Page " + currentPage + " archived. " + res.Count() + " resources.");
                     }
                     catch (Exception)
                     {
-                        MessageBox.Show("Save failure on page " + currentPage);
+                        if (!bgw.CancellationPending)
+                            bgw.ReportProgress(currentProgress, "Error in archivng page: " + currentPage);
+                        pagesToParse++;
                         Rollback();
                     }
                 }
                 currentPage++;
             }
-            MessageBox.Show("done");
-            Application.Exit();
+            if (!bgw.CancellationPending)
+                bgw.ReportProgress(currentProgress, "Operation completed. " + (pagesToParse - (currentPage - 1 - (int)PagesOfImportance.HOMESTUCK_PAGE_ONE)) + " pages remaining.");
         }
     }
 }

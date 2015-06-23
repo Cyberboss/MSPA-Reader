@@ -17,7 +17,12 @@ namespace Reader_UI
             InitializeComponent();
             dataSourceInput.Items.Add("SQL Server");
             dataSourceInput.SelectedIndex = 0;
-            this.AcceptButton = okButton;
+            AcceptButton = okButton;
+            FormClosed += DatabaseLogin_Closed;
+        }
+        private void DatabaseLogin_Closed(object sender, EventArgs e)
+        {
+            Program.Shutdown(null, null);
         }
 
         private void okButton_Click(object sender, EventArgs e)
@@ -33,7 +38,8 @@ namespace Reader_UI
             {
                 db.Connect(ipInput.Text, usernameInput.Text, passwordInput.Text);
                 Hide();
-                new Reader(db).Show();
+                Program.Open(db, false);
+                Program.Open(db, true);
                 Close();
             }
             catch (Exception)

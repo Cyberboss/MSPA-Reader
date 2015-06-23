@@ -15,19 +15,13 @@ namespace Reader_UI
         SqlTransaction sqlsTrans = null;
         string connectionString = null;
 
-        override public void Connect(string serverName, string username, string password, bool read)
+        override public void Connect(string serverName, string username, string password)
         {
-            if (read)
-            {
-                connectionString = "Data Source=" + serverName + ";Initial Catalog=MSPAArchive;User ID=" + username + ";Password=" + password;
-                sqlsRConn = new SqlConnection("MultipleActiveResultSets=true;"+connectionString);
-                sqlsRConn.Open();
-            }
-            else
-            {
-                sqlsWConn = new SqlConnection(connectionString);
-                sqlsWConn.Open();
-            }
+            connectionString = "Data Source=" + serverName + ";Initial Catalog=MSPAArchive;User ID=" + username + ";Password=" + password;
+            sqlsRConn = new SqlConnection("MultipleActiveResultSets=true;" + connectionString);
+            sqlsRConn.Open();
+            sqlsWConn = new SqlConnection(connectionString);
+            sqlsWConn.Open();
         }
         override public int ReadLastIndexedOrCreateDatabase()
         {
@@ -94,6 +88,13 @@ namespace Reader_UI
                 resourceWrite.Parameters.AddWithValue("@originalFN", res[i].originalFileName);
                 resourceWrite.ExecuteNonQuery();
             }
+        }
+        public override void ArchivePageNumber(int page)
+        {
+            SqlCommand pageWrite = sqlsWConn.CreateCommand();
+            pageWrite.Transaction = sqlsTrans;
+            pageWrite.CommandText = "INSERT INTO PagesArchived VALUES (" + page + ")";
+            pageWrite.ExecuteNonQuery();
         }
         override public void Rollback()
         {

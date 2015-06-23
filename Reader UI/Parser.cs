@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 
 namespace Reader_UI
 {
-    class Parser
+    public class Parser
     {
         public class Resource
         {
