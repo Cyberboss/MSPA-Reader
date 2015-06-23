@@ -16,7 +16,7 @@ namespace Reader_UI
         {
             InitializeComponent();
             dataSourceInput.Items.Add("SQL Server");
-            dataSourceInput.Items.Add("SQL LocalDB: MSPAArchive.mdf");
+            dataSourceInput.Items.Add("SQL LocalDB: Database/MSPAArchive.mdf");
             dataSourceInput.SelectedIndex = 0;
             AcceptButton = okButton;
             FormClosed += DatabaseLogin_Closed;

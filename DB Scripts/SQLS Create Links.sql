@@ -12,7 +12,7 @@ CREATE TABLE [dbo].[Links](
 	[id] [int] NOT NULL IDENTITY (1,1),
 	[page_id] [int] NOT NULL,
 	[linked_page_id] [int] NULL,
-	[link_text] [nvarchar](50) NULL,
+	[link_text] [nvarchar](max) NULL,
  CONSTRAINT [PK_Links] PRIMARY KEY CLUSTERED 
 (
 	[id] ASC

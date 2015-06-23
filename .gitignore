@@ -6,3 +6,4 @@
 /Reader UI/obj/Debug
 *.suo
 packages*/
+/Reader UI/bin/Database

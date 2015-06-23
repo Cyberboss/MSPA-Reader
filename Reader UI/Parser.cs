@@ -7,11 +7,13 @@ using HtmlAgilityPack;
 using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 
 namespace Reader_UI
 {
     public class Parser
     {
+        
         public class Resource
         {
             readonly public byte[] data;
@@ -20,6 +22,16 @@ namespace Reader_UI
             {
                 data = idata;
                 originalFileName = ioFN;
+            }
+        }
+        public class Link
+        {
+            readonly public string originalText;
+            readonly public int pageNumber;
+            public Link(string oT, int pN)
+            {
+                originalText = oT;
+                pageNumber = pN;
             }
         }
         const string prepend = "http://www.mspaintadventures.com/?s=6&p=";
@@ -37,6 +49,7 @@ namespace Reader_UI
         HtmlNode contentTable;
 
         List<string> resources = new List<string>();
+        List<Link> links = new List<Link>();
 
         public int GetLatestPage()
         {
@@ -101,9 +114,28 @@ namespace Reader_UI
         }
         void ParseLinks()
         {
-
+            links.Clear();
+            foreach (HtmlNode link in contentTable.Descendants().Where(z => z.Attributes.Contains("href")))
+            {
+                string actualLink = link.Attributes["href"].Value;
+                //we want to ignore the everypage navigation links
+                if (link.InnerText == "Go Back"
+                    || link.InnerText == "Start Over"
+                    || link.InnerText == "Save Game"
+                    || link.InnerText == "(?)"
+                    || link.InnerText == "Auto-Save!"
+                    || link.InnerText == "Delete Game Data"
+                    || link.InnerText == "Load Game")
+                    continue;
+                var res = Regex.Match(Regex.Unescape(actualLink), linkNumberRegex);
+                if (res.Success)
+                    links.Add(new Link(link.InnerText,Convert.ToInt32(res.Value)));
+            }
         }
-        
+        public Link[] GetLinks()
+        {
+            return links.ToArray();
+        }
         public bool LoadPage(int pageno)
         {
             try
@@ -113,11 +145,11 @@ namespace Reader_UI
                 source = WebUtility.HtmlDecode(source);
                 var html = new HtmlDocument();
                 html.LoadHtml(source);
-                //TODO: Support for scratch and 2x pages
+                //TODO: Support for scratch, and 2x pages
 
-                if(true){    //regular or trickster
+                if(true){
+                    //regular, homosuck, or trickster
                     contentTable = html.DocumentNode.Descendants("table").First().SelectNodes("tr").ElementAt(1).SelectNodes("td").First().SelectNodes("table").First();
-                    
                 }
                 ParseText();
                 ParseResources();

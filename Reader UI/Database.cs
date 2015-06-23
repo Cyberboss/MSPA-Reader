@@ -9,13 +9,12 @@ namespace Reader_UI
 {
     public abstract class Database
     {
-        Parser parser;
+        Parser parser = null;
 
         protected List<int> archivedPages = new List<int>();
         enum PagesOfImportance
         {
             HOMESTUCK_PAGE_ONE = 001901,
-            LAST_PAGE = 009594  //TODO: Add some dynamic page calculator
         }
         float totalMegabytesDownloaded = 0;
 
@@ -23,6 +22,7 @@ namespace Reader_UI
         public abstract void Connect(string serverName, string username, string password);
         public abstract bool ReadLastIndexedOrCreateDatabase();
         public abstract void WriteResource(Parser.Resource[] res, int page);
+        public abstract void WriteLinks(Parser.Link[] res, int page);
         public abstract void ArchivePageNumber(int page);
         public abstract void Transact();
         public abstract void Rollback();
@@ -89,6 +89,13 @@ namespace Reader_UI
                             Rollback();
                             return;
                         }
+                        var links = parser.GetLinks();
+                        WriteLinks(links, currentPage);
+                        if (bgw.CancellationPending)
+                        {
+                            Rollback();
+                            return;
+                        }
                         ArchivePageNumber(currentPage);
                         if (bgw.CancellationPending)
                         {
@@ -100,6 +107,13 @@ namespace Reader_UI
                             bgw.ReportProgress(currentProgress, "Page " + currentPage + " archived. " + res.Count() + " resources.");
                         else
                             return;
+                        for (int i = 0; i < links.Count(); ++i)
+                        {
+                            if (!bgw.CancellationPending)
+                                bgw.ReportProgress(currentProgress, "\"" + links[i].originalText + "\" links to " + links[i].pageNumber);
+                            else
+                                return;
+                        }
                         for (int i = 0; i < res.Count(); ++i)
                         {
                             var fileSize = res[i].data.Count();
@@ -124,7 +138,7 @@ namespace Reader_UI
                             return;
                     }
                 }
-                currentPage = FindLowestPage(currentPage,lastPage);
+                currentPage = FindLowestPage(currentPage + 1,lastPage);
             }
             if (!bgw.CancellationPending)
                 bgw.ReportProgress(currentProgress, "Operation completed. " + (pagesToParse - (currentPage - 1 - startPage)) + " pages remaining.");
