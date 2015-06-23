@@ -185,7 +185,7 @@ namespace Reader_UI
                     creationCommands.ExecuteNonQuery();
                     creationCommands.CommandText = "CREATE TABLE [PagesArchived](	[page_id] [int] NOT NULL, CONSTRAINT [PK_PagesArchived] PRIMARY KEY CLUSTERED (	[page_id] ASC)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]) ON [PRIMARY]";
                     creationCommands.ExecuteNonQuery();
-                    creationCommands.CommandText = "CREATE TABLE [Resources](	[id] [int] NOT NULL IDENTITY (1,1),	[page_id] [int] NOT NULL,	[data] [varbinary](max) NULL,	[original_filename] [nvarchar](max) NULL, CONSTRAINT [PK_Resources] PRIMARY KEY CLUSTERED (	[id] ASC)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]";
+                    creationCommands.CommandText = "CREATE TABLE [Resources](	[id] [int] NOT NULL IDENTITY (1,1),	[page_id] [int] NOT NULL,	[data] [varbinary](max) NULL,	[original_filename] [nvarchar](max) NULL, [title_text] [nvarchar](max) NULL, CONSTRAINT [PK_Resources] PRIMARY KEY CLUSTERED (	[id] ASC)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]";
                     creationCommands.ExecuteNonQuery();
                 }
                 catch (Exception)
@@ -211,13 +211,14 @@ namespace Reader_UI
         {
             DbCommand resourceWrite = sqlsWConn.CreateCommand();
             resourceWrite.Transaction = sqlsTrans;
-            resourceWrite.CommandText = "INSERT INTO Resources (page_id,data,original_filename) VALUES (@page_id,@data,@originalFN)";
+            resourceWrite.CommandText = "INSERT INTO Resources (page_id,data,original_filename,title_text) VALUES (@page_id,@data,@originalFN,@title)";
             for (int i = 0; i < res.Count(); ++i)
             {
                 resourceWrite.Parameters.Clear();
                 AddParameterWithValue(resourceWrite, "@page_id", page);
                 AddParameterWithValue(resourceWrite, "@data", res[i].data);
                 AddParameterWithValue(resourceWrite, "@originalFN", res[i].originalFileName);
+                AddParameterWithValue(resourceWrite, "@title", res[i].titleText != null ? (object)res[i].titleText : (object)DBNull.Value);
                 resourceWrite.ExecuteNonQuery();
             }
         }

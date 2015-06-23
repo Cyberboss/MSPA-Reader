@@ -113,6 +113,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             int pagesToParse = lastPage - startPage;
             int currentProgress = (int)(((float)(currentPage - 1 - startPage) / (float)(pagesToParse)) * 100.0f);
 
+            currentPage = 5960;
             if (!bgw.CancellationPending)
                 bgw.ReportProgress(currentProgress, "MSPA is up to page " + lastPage);
             else
@@ -122,7 +123,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             else
                 return;
 
-            while (currentPage != lastPage + 1 && !bgw.CancellationPending && currentPage == 6009)
+            while (currentPage != lastPage + 1 && !bgw.CancellationPending)
             {
                 currentProgress = (int)(((float)(currentPage - 1 - startPage) / (float)(pagesToParse)) * 100.0f);
 

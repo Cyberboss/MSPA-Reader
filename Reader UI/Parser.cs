@@ -17,11 +17,12 @@ namespace Reader_UI
         public class Resource
         {
             readonly public byte[] data;
-            readonly public string originalFileName;
-            public Resource(byte[] idata, string ioFN)
+            readonly public string originalFileName, titleText;
+            public Resource(byte[] idata, string ioFN, string tt = null)
             {
                 data = idata;
                 originalFileName = ioFN;
+                titleText = tt;
             }
         }
         public class Link
@@ -41,6 +42,9 @@ namespace Reader_UI
             + @"|.*v2_blanksquare3"
             + @"|.*spacer"
             + @")(.*)\.gif";
+        const string scratchHeaderImageRegex = "src=\\\"(.*?\\.gif)\\\"";
+        const string scratchHeaderImageFilenameRegex = @".*\/(.*)";
+        const string scratchTitleRegex = "title=\\\"(.*?)\\\"";
         const string swfRegex = @"http:\/\/.*?\.swf";
         const string linkNumberRegex = @"[0-9]{6}";
         WebClient web = new WebClient();
@@ -48,7 +52,7 @@ namespace Reader_UI
 
         HtmlNode contentTable;
 
-        List<string> resources = new List<string>();
+        List<Resource> resources = new List<Resource>();
         List<Link> links = new List<Link>();
 
         public int GetLatestPage()
@@ -73,44 +77,31 @@ namespace Reader_UI
         {
 
         }
-        void ParseResources()
+        void ParseResources(bool clear)
         {
-            resources.Clear();
+            if(clear)
+                resources.Clear();
             //we are mainly looking for .gifs and .swfs, there are some things we should ignore, such as /images/v2_blankstrip.gif
             var matches = Regex.Matches(contentTable.InnerHtml, gifRegex);
 
             for (int i = 0; i < matches.Count; i++)
             {
-                resources.Add(matches[i].Value);
+                resources.Add(new Resource(web.DownloadData(matches[i].Value), System.IO.Path.GetFileName(new Uri(matches[i].Value).LocalPath)));
             }
 
             matches = Regex.Matches(contentTable.InnerHtml, swfRegex);
 
             for (int i = 0; i < matches.Count; i++)
             {
-                resources.Add(matches[i].Captures[0].Value);
+                resources.Add(new Resource(web.DownloadData(matches[i].Captures[0].Value), System.IO.Path.GetFileName(new Uri(matches[i].Captures[0].Value).LocalPath)));
             }
 
             resources = resources.Distinct().ToList();  //filter out any double grabs
         }
         public Resource[] GetResources()
         {
-            Resource[] reses = new Resource[resources.Count];
-
-            for(int i = 0; i < resources.Count; ++i){
-                //for each try once on the cdn then try the www throw otherwise
-                try
-                {
-                    reses[i] = new Resource(web.DownloadData(resources[i]), System.IO.Path.GetFileName(new Uri(resources[i]).LocalPath));
-                }
-                catch (Exception)
-                {
-                    resources[i] = resources[i].Replace("cdn.mspaintadventures.com", "www.mspaintadventures.com");
-                    reses[i] = new Resource(web.DownloadData(resources[i]), System.IO.Path.GetFileName(new Uri(resources[i]).LocalPath));
-                }
-            }
-
-            return reses;
+            
+            return resources.ToArray();
         }
         void ParseLinks()
         {
@@ -147,6 +138,27 @@ namespace Reader_UI
                 return web.DownloadData(file.Replace("cdn.mspaintadventures.com", "www.mspaintadventures.com"));
             }
         }
+        bool IsScratch(int page)
+        {
+            return page >= 5664 && page <= 5981;
+        }
+        void ScratchPreParse(HtmlDocument html)
+        {
+            resources.Clear();
+            var node = html.DocumentNode.Descendants("img").First();
+            string innerHtml = node.OuterHtml;
+            //we are mainly looking for .gifs and .swfs, there are some things we should ignore, such as /images/v2_blankstrip.gif
+            var match = Regex.Match(innerHtml, scratchHeaderImageRegex);
+
+            string actualFilePath = "http://cdn.mspaintadventures.com/" + match.Groups[1].Value;
+            byte[] data = DownloadFile(actualFilePath);
+            string oFN = Regex.Match(actualFilePath, scratchHeaderImageFilenameRegex).Groups[1].Value;
+            string title = Regex.Match(innerHtml, scratchTitleRegex).Groups[1].Value;
+            resources.Add(new Resource(data, oFN, title));
+            
+
+            resources = resources.Distinct().ToList();  //filter out any double grabs
+        }
         public bool LoadPage(int pageno)
         {
             try
@@ -156,14 +168,21 @@ namespace Reader_UI
                 source = WebUtility.HtmlDecode(source);
                 var html = new HtmlDocument();
                 html.LoadHtml(source);
-                //TODO: Support for scratch, and 2x pages
+                //TODO: Support for 2x pages, and sbahj.php
 
-                if(true){
+                //scratch range
+                if (IsScratch(pageno))
+                {
+                    ScratchPreParse(html);
+                    contentTable = html.DocumentNode.Descendants("body").First().Descendants("table").First().Descendants("table").ElementAt(1).Descendants("table").First();
+                }
+                else
+                {
                     //regular, homosuck, or trickster
                     contentTable = html.DocumentNode.Descendants("table").First().SelectNodes("tr").ElementAt(1).SelectNodes("td").First().SelectNodes("table").First();
                 }
                 ParseText();
-                ParseResources();
+                ParseResources(!IsScratch(pageno));
                 ParseLinks();
             }
             catch (Exception)
