@@ -232,7 +232,51 @@ namespace Reader_UI
         }
         override public void WriteText(Parser.Text tex, int page)
         {
-            //TODO: Implement
+            DbCommand textWrite = sqlsWConn.CreateCommand();
+            textWrite.CommandText = "INSERT INTO PageMeta VALUES ("+page+",@tit,@pttt,@lp)";
+            AddParameterWithValue(textWrite, "@tit", tex.title != null ? (object)tex.title : (object)DBNull.Value);
+            AddParameterWithValue(textWrite, "@pttt", tex.promptType != null ? (object)tex.promptType : (object)DBNull.Value);
+            AddParameterWithValue(textWrite, "@lp", tex.linkPrefix != null ? (object)tex.linkPrefix : (object)DBNull.Value);
+            textWrite.Transaction = sqlsTrans;
+            textWrite.ExecuteNonQuery();
+
+            textWrite.CommandText = "INSERT INTO Dialog (page_id,isNarrative,isImg,text,colour) VALUES (" + page + ", @narr,@isIm, @tex,@colour) SELECT SCOPE_IDENTITY()";
+
+            if (tex.narr != null)
+            {
+
+                AddParameterWithValue(textWrite, "@narr", true);
+                AddParameterWithValue(textWrite, "@isIm", tex.narr.isImg);
+                AddParameterWithValue(textWrite, "@tex", tex.narr.text);
+                AddParameterWithValue(textWrite, "@colour", tex.narr.hexColour);
+                textWrite.ExecuteNonQuery();
+            }
+            else
+            {
+                DbCommand specWrite = sqlsWConn.CreateCommand();
+                specWrite.Transaction = sqlsTrans;
+                specWrite.CommandText = "INSERT INTO SpecialText (dialog_id,underline,colour,sbegin,length) VALUES (@did,@ul,@col,@sbeg,@len)";
+                for (int i = 0; i < tex.lines.Count(); ++i)
+                {
+                    textWrite.Parameters.Clear();
+                    AddParameterWithValue(textWrite, "@narr", false);
+                    AddParameterWithValue(textWrite, "@isIm", tex.lines[i].isImg);
+                    AddParameterWithValue(textWrite, "@tex", tex.lines[i].text);
+                    AddParameterWithValue(textWrite, "@colour", tex.lines[i].hexColour != null ? (object)tex.lines[i].hexColour : (object)DBNull.Value);
+                    var diaId = (int)(decimal)textWrite.ExecuteScalar();
+                    if(tex.lines[i].subTexts != null)
+                        for (int j = 0; j < tex.lines[i].subTexts.Count(); ++j)
+                        {
+                            specWrite.Parameters.Clear();
+                            AddParameterWithValue(specWrite, "@did", diaId);
+                            AddParameterWithValue(specWrite, "@ul", tex.lines[i].subTexts[j].underlined);
+                            AddParameterWithValue(specWrite, "@col", tex.lines[i].subTexts[j].colour);
+                            AddParameterWithValue(specWrite, "@sbeg", tex.lines[i].subTexts[j].begin);
+                            AddParameterWithValue(specWrite, "@len", tex.lines[i].subTexts[j].length);
+                            specWrite.ExecuteNonQuery();
+                        }
+                }
+            }
         }
         public override void ArchivePageNumber(int page)
         {

@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace Reader_UI
 {
-    public partial class DatabaseWriter : Form
+    public partial class DatabaseWriter : MSPAForm
     {
         Database db = null;
         bool running = false;

@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace Reader_UI
 {
-    partial class Reader : Form
+    partial class Reader : MSPAForm
     {
         Database db;
         public Reader(Database idb)

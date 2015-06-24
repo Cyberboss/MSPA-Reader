@@ -153,7 +153,6 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
 
 
                 //debug set current page here
-                //currentPage = 2324;
                 //currentPage = 6708;
                 //currentPage = 7326;
                 //currentPage = 4163;
@@ -249,8 +248,6 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                         }
                     }
                     currentPage = FindLowestPage(currentPage + 1,lastPage);
-                    if (currentPage == 2147)
-                        currentPage = lastPage + 1;
                 }
                 if (!(!bgw.CancellationPending && missedPages != 0))
                     break;

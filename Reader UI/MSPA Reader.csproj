@@ -69,6 +69,9 @@
     <Compile Include="DatabaseWriter.Designer.cs">
       <DependentUpon>DatabaseWriter.cs</DependentUpon>
     </Compile>
+    <Compile Include="MSPAForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Parser.cs" />
     <Compile Include="Reader.cs">
       <SubType>Form</SubType>
