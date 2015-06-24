@@ -26,6 +26,7 @@ namespace Reader_UI
         public abstract bool ReadLastIndexedOrCreateDatabase();
         public abstract void WriteResource(Parser.Resource[] res, int page);
         public abstract void WriteLinks(Parser.Link[] res, int page);
+        public abstract void WriteText(Parser.Text tex, int page);
         public abstract void ArchivePageNumber(int page);
         public abstract void Transact();
         public abstract void Rollback();
@@ -154,7 +155,9 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 //debug set current page here
                 //currentPage = 2324;
                 //currentPage = 6708;
-                currentPage = 7326;
+                //currentPage = 7326;
+                //currentPage = 4163;
+                currentPage = 1926;
                 //
                 if (!bgw.CancellationPending)
                     bgw.ReportProgress(currentProgress, "MSPA is up to page " + lastPage);
@@ -202,7 +205,23 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                         {
                             var res = parser.GetResources();
                             var links = parser.GetLinks();
+                            var text = parser.GetText();
 
+                            bgw.ReportProgress(currentProgress, text.title);
+                            if (text.narr == null)
+                            {
+                                bgw.ReportProgress(currentProgress, text.promptType);
+                                for (int i = 0; i < text.lines.Count(); ++i)
+                                {
+                                    if (!text.lines[i].isImg)
+                                        bgw.ReportProgress(currentProgress, text.lines[i].subTexts.Count() + " special subtexts, Colour: " + text.lines[i].hexColour + ": " + text.lines[i].text);
+                                    else
+                                        bgw.ReportProgress(currentProgress, "Imageline");
+                                }
+                            }
+                            else
+                                bgw.ReportProgress(currentProgress, "Narrative: " + text.narr.text);
+                            bgw.ReportProgress(currentProgress, text.linkPrefix);
                             for (int i = 0; i < links.Count(); ++i)
                                 bgw.ReportProgress(currentProgress, "\"" + links[i].originalText + "\" links to " + links[i].pageNumber);
                             for (int i = 0; i < res.Count(); ++i)
@@ -216,12 +235,14 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                             Transact();
                             WriteResource(res, currentPage);
                             WriteLinks(links, currentPage);
+                            WriteText(text, currentPage);
                             ArchivePageNumber(currentPage);
                             Commit();
                         
                         }
                         catch
                         {
+                            Debugger.Break();
                             missedPages++;
                             Rollback();
                             bgw.ReportProgress(currentProgress, "Error in archiving page: " + currentPage);

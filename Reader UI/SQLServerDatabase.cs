@@ -236,6 +236,10 @@ namespace Reader_UI
                 resourceWrite.ExecuteNonQuery();
             }
         }
+        override public void WriteText(Parser.Text tex, int page)
+        {
+            //TODO: Implement
+        }
         public override void ArchivePageNumber(int page)
         {
             DbCommand pageWrite = sqlsWConn.CreateCommand();

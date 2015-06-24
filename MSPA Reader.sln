@@ -16,9 +16,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test Resources", "Test Reso
 		Test Resources\cascade_segment4.swf = Test Resources\cascade_segment4.swf
 		Test Resources\cascade_segment5.swf = Test Resources\cascade_segment5.swf
 		Test Resources\edgeCase1.html = Test Resources\edgeCase1.html
+		Test Resources\edgeCase2.html = Test Resources\edgeCase2.html
 		Test Resources\typicalConversation.html = Test Resources\typicalConversation.html
 		Test Resources\typicalConversation2.html = Test Resources\typicalConversation2.html
+		Test Resources\typicalConversation3.html = Test Resources\typicalConversation3.html
 		Test Resources\typicalNarrative.html = Test Resources\typicalNarrative.html
+		Test Resources\typicalNarrative2.html = Test Resources\typicalNarrative2.html
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SQL Scripts", "SQL Scripts", "{4E3AF806-31F8-4AC8-A46C-E70352F422DB}"

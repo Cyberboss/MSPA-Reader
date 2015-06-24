@@ -43,6 +43,7 @@ namespace Reader_UI
                         colour = col;
                     }
                 }
+                public readonly bool isImg;
                 public readonly string hexColour;
                 public readonly string text;
                 public SpecialSubText[] subTexts = null;
@@ -50,11 +51,19 @@ namespace Reader_UI
                 {
                     hexColour = hx;
                     text = tx;
+                    isImg = false;
+                }
+                public ScriptLine(string resName)
+                {
+                    isImg = true;
+                    hexColour = null;
+                    text = resName;
                 }
             }
 
             public string title = null;
             public ScriptLine narr = null;
+            public string promptType = null;
             public ScriptLine[] lines = null;
             public string linkPrefix = null;
         }
@@ -83,6 +92,7 @@ namespace Reader_UI
         const string logRegex = @"Dialoglog|Spritelog|Pesterlog";
         const string hexColourRegex = @"#[0-9A-Fa-f]{6}";
         const string underlineRegex = @"underline";
+        const string pesterLogRegex = @"-- .*? --";
 
         WebClient web = new WebClient();
         HttpClient client = new HttpClient();
@@ -92,6 +102,7 @@ namespace Reader_UI
         List<Resource> resources = new List<Resource>();
         List<Link> links = new List<Link>();
         Text texts;
+        List<HtmlNode> linkListForTextParse = new List<HtmlNode>();
 
         public int GetLatestPage()
         {
@@ -117,11 +128,11 @@ namespace Reader_UI
         }
         void CheckLineForSpecialSubText(HtmlNode currentLine, Text.ScriptLine scriptLine)
         {
-            if (currentLine.ChildNodes.Count == 1)
+            var lineSpecialSubtext = currentLine.SelectNodes("span");
+            if (lineSpecialSubtext == null)
                 return;
 
             //special subtext alert
-            var lineSpecialSubtext = currentLine.SelectNodes("span");
             Text.ScriptLine.SpecialSubText[] sTs = new Text.ScriptLine.SpecialSubText[lineSpecialSubtext.Count()];
             for (int j = 0; j < lineSpecialSubtext.Count(); ++j)
             {
@@ -142,7 +153,6 @@ namespace Reader_UI
             //all text in homestuck is pure html formatting
             //so the styles are all over the place
             texts = new Text();
-            Debugger.Break();
             {//title
                 //easy enough, its the very first p in the content table
                 //just clean it up a bit
@@ -166,18 +176,33 @@ namespace Reader_UI
                 var reg = Regex.Match(contentTable.InnerText, logRegex);
                 if (reg.Success)
                 {
-
+                    texts.promptType = reg.Value;
                     var convParent = contentTable.SelectSingleNode(".//*[text()[contains(., '" + reg.Value + "')]]").ParentNode.ParentNode;
                     var logBox = convParent.SelectSingleNode(".//p");
-                    var conversationLines = logBox.SelectNodes("span");   //this will grab lines 
+                    var conversationLines = logBox.SelectNodes("span|img");   //this will grab lines 
 
                     if (conversationLines != null)
                     {
-                        //now for each line we need the colour and the text
                         List<Text.ScriptLine> line = new List<Text.ScriptLine>();
-                        for (int i = 0; i < conversationLines.Count(); ++i)
+                        int i = 0;
+                        
+                        var logMessages = Regex.Matches(logBox.InnerHtml,pesterLogRegex);
+                        //the hard part is finding out where 
+
+
+                        //now for each line we need the colour and the text
+                        for (; i < conversationLines.Count(); ++i)
                         {
                             var currentLine = conversationLines.ElementAt(i);
+
+                            if (currentLine.Name == "img")
+                            {
+                                //just add the image
+                                var pathReg = Regex.Match(currentLine.OuterHtml,gifRegex);
+                                var gifReg = Regex.Match(pathReg.Value, scratchHeaderImageFilenameRegex);
+                                line.Add(new Text.ScriptLine(gifReg.Groups[1].Value));
+                                continue;
+                            }
 
                             var hexReg = Regex.Match(currentLine.OuterHtml, hexColourRegex);
 
@@ -212,7 +237,7 @@ namespace Reader_UI
                     if (narrative != null)
                     {
                         var hexReg = Regex.Match(narrative.OuterHtml, hexColourRegex);
-                        Text.ScriptLine narr = new Text.ScriptLine(hexReg.Success ? hexReg.Value : "#000000", narrative.InnerText);
+                        Text.ScriptLine narr = new Text.ScriptLine(hexReg.Success ? hexReg.Value : "#000000", narrative.InnerText.Trim());
                         CheckLineForSpecialSubText(narrative, narr);
                         texts.narr = narr;
                     }
@@ -222,9 +247,12 @@ namespace Reader_UI
             
 
             {//link prefix
-
+                //we find the link to the next page delete it from the contentTable and check the innertext of it's parent
+                var link = linkListForTextParse.Last();
+                var parent = link.ParentNode;
+                link.Remove();
+                texts.linkPrefix = parent.InnerText;
             }
-            Debugger.Break();
         }
         void ParseResources(bool clear)
         {
@@ -255,6 +283,7 @@ namespace Reader_UI
         void ParseLinks()
         {
             links.Clear();
+            linkListForTextParse.Clear();
             foreach (HtmlNode link in contentTable.Descendants().Where(z => z.Attributes.Contains("href")))
             {
                 string actualLink = link.Attributes["href"].Value;
@@ -269,7 +298,10 @@ namespace Reader_UI
                     continue;
                 var res = Regex.Match(actualLink.Trim(), linkNumberRegex);
                 if (res.Success)
-                    links.Add(new Link(link.InnerText,Convert.ToInt32(res.Value)));
+                {
+                    links.Add(new Link(link.InnerText, Convert.ToInt32(res.Value)));
+                    linkListForTextParse.Add(link);
+                }
             }
         }
         public Link[] GetLinks()
@@ -338,9 +370,9 @@ namespace Reader_UI
                     //regular, homosuck, or trickster
                     contentTable = html.DocumentNode.Descendants("table").First().SelectNodes("tr").ElementAt(1).SelectNodes("td").First().SelectNodes("table").First();
                 }
-                ParseText();
                 ParseResources(!IsScratch(pageno));
                 ParseLinks();
+                ParseText();
             }
             catch
             {
