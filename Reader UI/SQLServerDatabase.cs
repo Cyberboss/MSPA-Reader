@@ -179,13 +179,7 @@ namespace Reader_UI
                 {
                     DbCommand creationCommands = sqlsWConn.CreateCommand();
 
-                    creationCommands.CommandText = "CREATE TABLE [Conversations](	[id] [int] NOT NULL IDENTITY (1,1),	[page_id] [int] NOT NULL,	[text] [nvarchar](max) NULL, CONSTRAINT [PK_Conversations] PRIMARY KEY CLUSTERED (	[id] ASC)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]";
-                    creationCommands.ExecuteNonQuery();
-                    creationCommands.CommandText = "CREATE TABLE [Links](	[id] [int] NOT NULL IDENTITY (1,1),	[page_id] [int] NOT NULL,	[linked_page_id] [int] NULL,	[link_text] [nvarchar](max) NULL, CONSTRAINT [PK_Links] PRIMARY KEY CLUSTERED (	[id] ASC)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]) ON [PRIMARY]";
-                    creationCommands.ExecuteNonQuery();
-                    creationCommands.CommandText = "CREATE TABLE [PagesArchived](	[page_id] [int] NOT NULL, CONSTRAINT [PK_PagesArchived] PRIMARY KEY CLUSTERED (	[page_id] ASC)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]) ON [PRIMARY]";
-                    creationCommands.ExecuteNonQuery();
-                    creationCommands.CommandText = "CREATE TABLE [Resources](	[id] [int] NOT NULL IDENTITY (1,1),	[page_id] [int] NOT NULL,	[data] [varbinary](max) NULL,	[original_filename] [nvarchar](max) NULL, [title_text] [nvarchar](max) NULL, CONSTRAINT [PK_Resources] PRIMARY KEY CLUSTERED (	[id] ASC)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]";
+                    creationCommands.CommandText = File.ReadAllText(Application.StartupPath + @"\..\DBCreation.sql");
                     creationCommands.ExecuteNonQuery();
                 }
                 catch

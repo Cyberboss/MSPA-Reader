@@ -44,7 +44,7 @@ namespace Reader_UI
                     }
                 }
                 public readonly bool isImg;
-                public readonly string hexColour;
+                public string hexColour;
                 public readonly string text;
                 public SpecialSubText[] subTexts = null;
                 public ScriptLine(string hx, string tx)
@@ -93,6 +93,8 @@ namespace Reader_UI
         const string hexColourRegex = @"#[0-9A-Fa-f]{6}";
         const string underlineRegex = @"underline";
         const string pesterLogRegex = @"-- .*? --";
+        //TODO: the above regex is way too vague
+        const string chumhandleRegex = @"\[[G|C|A|T]{2}\]|\[EB\]";
 
         WebClient web = new WebClient();
         HttpClient client = new HttpClient();
@@ -132,6 +134,16 @@ namespace Reader_UI
             if (lineSpecialSubtext == null)
                 return;
 
+            bool stay = false;
+            for (int i = 0; i < lineSpecialSubtext.Count; ++i)
+            {
+                if (!Regex.Match(lineSpecialSubtext.ElementAt(i).InnerText, chumhandleRegex).Success)
+                {
+                    stay = true;
+                }
+            }
+            if(!stay)
+                return;
             //special subtext alert
             Text.ScriptLine.SpecialSubText[] sTs = new Text.ScriptLine.SpecialSubText[lineSpecialSubtext.Count()];
             for (int j = 0; j < lineSpecialSubtext.Count(); ++j)
@@ -184,14 +196,19 @@ namespace Reader_UI
                     if (conversationLines != null)
                     {
                         List<Text.ScriptLine> line = new List<Text.ScriptLine>();
-                        int i = 0;
                         
-                        var logMessages = Regex.Matches(logBox.InnerHtml,pesterLogRegex);
-                        //the hard part is finding out where 
 
+                        var logMessages = Regex.Matches(logBox.InnerText.Trim(), pesterLogRegex);
+                        //the hard part is finding out where these go
+                        if(logMessages != null)
+                            for (int i = 0; i < logMessages.Count; i++ )
+                            {
+                                //TODO: figure out where these actually go
+                                line.Add(new Text.ScriptLine("#000000", logMessages[i].Value));
+                            }
 
                         //now for each line we need the colour and the text
-                        for (; i < conversationLines.Count(); ++i)
+                        for (int i = 0; i < conversationLines.Count(); ++i)
                         {
                             var currentLine = conversationLines.ElementAt(i);
 
@@ -204,13 +221,17 @@ namespace Reader_UI
                                 continue;
                             }
 
+                            if (Regex.Match(currentLine.InnerText, chumhandleRegex).Success)
+                            {
+                                //TODO: Handle log msg colours
+                                continue;
+                            }
+
                             var hexReg = Regex.Match(currentLine.OuterHtml, hexColourRegex);
 
                             var scriptLine = new Text.ScriptLine(hexReg.Success ? hexReg.Value : "#000000", currentLine.InnerText);
 
                             CheckLineForSpecialSubText(currentLine, scriptLine);
-
-                            convParent.Remove();
 
                             line.Add(scriptLine);
                         }
@@ -263,17 +284,21 @@ namespace Reader_UI
 
             for (int i = 0; i < matches.Count; i++)
             {
-                resources.Add(new Resource(web.DownloadData(matches[i].Value), System.IO.Path.GetFileName(new Uri(matches[i].Value).LocalPath)));
+                resources.Add(new Resource(DownloadFile(matches[i].Value), System.IO.Path.GetFileName(new Uri(matches[i].Value).LocalPath)));
             }
 
             matches = Regex.Matches(contentTable.InnerHtml, swfRegex);
-
+            List<string> matchNames = new List<string>();
             for (int i = 0; i < matches.Count; i++)
             {
-                resources.Add(new Resource(web.DownloadData(matches[i].Captures[0].Value), System.IO.Path.GetFileName(new Uri(matches[i].Captures[0].Value).LocalPath)));
+                matchNames.Add(matches[i].Captures[0].Value);//filter out any double grabs
             }
+            matchNames = matchNames.Distinct().ToList();
 
-            resources = resources.Distinct().ToList();  //filter out any double grabs
+            for (int i = 0; i < matchNames.Count; i++) 
+                resources.Add(new Resource(DownloadFile(matchNames[i]), System.IO.Path.GetFileName(new Uri(matchNames[i]).LocalPath)));
+
+            resources = resources.Distinct().ToList();  
         }
         public Resource[] GetResources()
         {

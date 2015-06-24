@@ -157,7 +157,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 //currentPage = 6708;
                 //currentPage = 7326;
                 //currentPage = 4163;
-                currentPage = 1926;
+                //currentPage = 1926;
                 //
                 if (!bgw.CancellationPending)
                     bgw.ReportProgress(currentProgress, "MSPA is up to page " + lastPage);
@@ -214,7 +214,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                                 for (int i = 0; i < text.lines.Count(); ++i)
                                 {
                                     if (!text.lines[i].isImg)
-                                        bgw.ReportProgress(currentProgress, text.lines[i].subTexts.Count() + " special subtexts, Colour: " + text.lines[i].hexColour + ": " + text.lines[i].text);
+                                        bgw.ReportProgress(currentProgress, (text.lines[i].subTexts != null ? text.lines[i].subTexts.Count() : 0) + " special subtexts, Colour: " + text.lines[i].hexColour + ": " + text.lines[i].text);
                                     else
                                         bgw.ReportProgress(currentProgress, "Imageline");
                                 }
@@ -249,6 +249,8 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                         }
                     }
                     currentPage = FindLowestPage(currentPage + 1,lastPage);
+                    if (currentPage == 2147)
+                        currentPage = lastPage + 1;
                 }
                 if (!(!bgw.CancellationPending && missedPages != 0))
                     break;

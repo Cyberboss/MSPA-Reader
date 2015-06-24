@@ -15,7 +15,6 @@ namespace Reader_UI
         Database db = null;
         bool running = false;
         bool closeRequested = false;
-        bool cancelRequested = false;
         public DatabaseWriter(Database idb)
         {
             db = idb;
@@ -50,11 +49,8 @@ namespace Reader_UI
             {
                 running = false;
                 Cursor.Current = Cursors.Default;
-                if (cancelRequested)
-                {
-                    updateButton.Enabled = true;
-                    cancelRequested = false;
-                }
+                cancelButton.Enabled = false;
+                updateButton.Enabled = true;
                 if (!closeRequested)
                     return;
                 System.Threading.Thread.Sleep(1000);
@@ -91,7 +87,6 @@ namespace Reader_UI
         {
             if (!running)
                 return;
-            cancelRequested = true;
             Cursor.Current = Cursors.WaitCursor;
             cancelButton.Enabled = false;
             worker.CancelAsync();
