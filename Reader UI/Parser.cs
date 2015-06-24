@@ -28,16 +28,6 @@ namespace Reader_UI
         public class Text
         {
 
-            enum ConversationType
-            {
-                PAGE_TITLE,
-                NARRATIVE,
-                PERSTERLOG,
-                DIALOGLOG,
-                SPRITELOG,
-            };
-            ConversationType type;
-
             public class ScriptLine
             {
                 public class SpecialSubText
@@ -63,10 +53,8 @@ namespace Reader_UI
                 }
             }
 
-            public class Narrative { }
-
             public string title = null;
-            public Narrative narr = null;
+            public ScriptLine narr = null;
             public ScriptLine[] lines = null;
             public string linkPrefix = null;
         }
@@ -127,53 +115,116 @@ namespace Reader_UI
         {
             return texts;
         }
+        void CheckLineForSpecialSubText(HtmlNode currentLine, Text.ScriptLine scriptLine)
+        {
+            if (currentLine.ChildNodes.Count == 1)
+                return;
+
+            //special subtext alert
+            var lineSpecialSubtext = currentLine.SelectNodes("span");
+            Text.ScriptLine.SpecialSubText[] sTs = new Text.ScriptLine.SpecialSubText[lineSpecialSubtext.Count()];
+            for (int j = 0; j < lineSpecialSubtext.Count(); ++j)
+            {
+                var currentSpecialSubtext = lineSpecialSubtext.ElementAt(j);
+                bool underlined = Regex.Match(currentSpecialSubtext.OuterHtml, underlineRegex).Success;
+                var colourReg = Regex.Match(currentSpecialSubtext.OuterHtml, hexColourRegex);
+                string colour = colourReg.Success ? colourReg.Value : scriptLine.hexColour;
+                int begin = currentLine.InnerHtml.IndexOf(currentSpecialSubtext.OuterHtml);
+                int length = currentSpecialSubtext.InnerText.Length;
+                sTs[j] = new Text.ScriptLine.SpecialSubText(begin, length, underlined, colour);
+            }
+            scriptLine.subTexts = sTs;
+            
+        }
         void ParseText()
         {
             //most difficult part here
             //all text in homestuck is pure html formatting
             //so the styles are all over the place
             texts = new Text();
+            Debugger.Break();
+            {//title
+                //easy enough, its the very first p in the content table
+                //just clean it up a bit
+                texts.title = contentTable.Descendants("p").First().InnerText.Trim();
+            }
+            
+            /*
+             * There are cases where there can be narritive and script on one page so we need something to independantly check if the narrative exists
+             * ...
+             * which is damn near impossible
+             * 
+             * 
+             * try handling the script first then remove it from it's parent node to clean the doc somewhat
+             * 
+             * NEVER MIND ALL THAT THE ONE EDGE CASE I THOUGHT OF WAS PART OF THE GIF
+             */
 
-            //check if page HAS a dialoglog , find it and get the lines within
-            var reg = Regex.Match(contentTable.InnerText, logRegex);
-            if (reg.Success)
-            {
 
-                var conversationLines = contentTable.SelectSingleNode(".//*[text()[contains(., '" + reg.Value + "')]]").ParentNode.ParentNode.SelectSingleNode(".//p").SelectNodes("span");   //this will grab lines 
-                
-                //now for each line we need the colour and the text
-                List<Text.ScriptLine> line = new List<Text.ScriptLine>();
-                for (int i = 0; i < conversationLines.Count(); ++i)
+               //script
+                //check if page HAS a dialoglog , find it and get the lines within
+                var reg = Regex.Match(contentTable.InnerText, logRegex);
+                if (reg.Success)
                 {
-                    var currentLine = conversationLines.ElementAt(i);
 
-                    var hexReg = Regex.Match(currentLine.OuterHtml, hexColourRegex);
+                    var convParent = contentTable.SelectSingleNode(".//*[text()[contains(., '" + reg.Value + "')]]").ParentNode.ParentNode;
+                    var logBox = convParent.SelectSingleNode(".//p");
+                    var conversationLines = logBox.SelectNodes("span");   //this will grab lines 
 
-                    var scriptLine = new Text.ScriptLine(hexReg.Success ? hexReg.Value : "#000000", currentLine.InnerText);
-
-                    if (currentLine.ChildNodes.Count > 1)
+                    if (conversationLines != null)
                     {
-                        //special subtext alert
-                        var lineSpecialSubtext = currentLine.SelectNodes("span");
-                        Text.ScriptLine.SpecialSubText[] sTs = new Text.ScriptLine.SpecialSubText[lineSpecialSubtext.Count()];
-                        for (int j = 0; j < lineSpecialSubtext.Count(); ++j)
+                        //now for each line we need the colour and the text
+                        List<Text.ScriptLine> line = new List<Text.ScriptLine>();
+                        for (int i = 0; i < conversationLines.Count(); ++i)
                         {
-                            var currentSpecialSubtext = lineSpecialSubtext.ElementAt(j);
-                            bool underlined = Regex.Match(currentSpecialSubtext.OuterHtml, underlineRegex).Success;
-                            var colourReg = Regex.Match(currentSpecialSubtext.OuterHtml, hexColourRegex);
-                            string colour = colourReg.Success ? colourReg.Value : scriptLine.hexColour;
-                            int begin = currentLine.InnerHtml.IndexOf(currentSpecialSubtext.OuterHtml);
-                            int length = currentSpecialSubtext.InnerText.Length;
-                            sTs[j] = new Text.ScriptLine.SpecialSubText(begin, length, underlined, colour);
+                            var currentLine = conversationLines.ElementAt(i);
+
+                            var hexReg = Regex.Match(currentLine.OuterHtml, hexColourRegex);
+
+                            var scriptLine = new Text.ScriptLine(hexReg.Success ? hexReg.Value : "#000000", currentLine.InnerText);
+
+                            CheckLineForSpecialSubText(currentLine, scriptLine);
+
+                            convParent.Remove();
+
+                            line.Add(scriptLine);
                         }
-                        scriptLine.subTexts = sTs;
+                        texts.lines = line.ToArray();
+                    }
+                    else
+                    {
+                        //Assume text in a box
+                        texts.lines = new Text.ScriptLine[1];
+                        var hexReg = Regex.Match(logBox.OuterHtml, hexColourRegex);
+                        texts.lines[0] = new Text.ScriptLine(hexReg.Success ? hexReg.Value : "#000000", logBox.InnerText.Trim());
+                        CheckLineForSpecialSubText(logBox, texts.lines[0]);
+
+                    }
+                }
+                else
+                {
+                    //check for narrative
+                    //narrative
+                    //I seriously don't know if this is reliable but narrative seems to come on the second p if it exists
+
+                    //TODO: Support different fonts
+                    var narrative = contentTable.Descendants("p").ElementAt(1);
+                    if (narrative != null)
+                    {
+                        var hexReg = Regex.Match(narrative.OuterHtml, hexColourRegex);
+                        Text.ScriptLine narr = new Text.ScriptLine(hexReg.Success ? hexReg.Value : "#000000", narrative.InnerText);
+                        CheckLineForSpecialSubText(narrative, narr);
+                        texts.narr = narr;
                     }
 
-                    line.Add(scriptLine);
+                    
                 }
-                texts.lines = line.ToArray();
-                Debugger.Break();
+            
+
+            {//link prefix
+
             }
+            Debugger.Break();
         }
         void ParseResources(bool clear)
         {
@@ -216,7 +267,7 @@ namespace Reader_UI
                     || link.InnerText == "Delete Game Data"
                     || link.InnerText == "Load Game")
                     continue;
-                var res = Regex.Match(Regex.Unescape(actualLink), linkNumberRegex);
+                var res = Regex.Match(actualLink.Trim(), linkNumberRegex);
                 if (res.Success)
                     links.Add(new Link(link.InnerText,Convert.ToInt32(res.Value)));
             }
