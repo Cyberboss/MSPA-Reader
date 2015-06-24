@@ -159,6 +159,10 @@ namespace Reader_UI
 
             resources = resources.Distinct().ToList();  //filter out any double grabs
         }
+        bool IsSBAHJ(int pageno)
+        {
+            return pageno == 5982;
+        }
         public bool LoadPage(int pageno)
         {
             try
@@ -168,13 +172,17 @@ namespace Reader_UI
                 source = WebUtility.HtmlDecode(source);
                 var html = new HtmlDocument();
                 html.LoadHtml(source);
-                //TODO: Support for 2x pages, and sbahj.php
+                //TODO: Support for 2x pages
 
                 //scratch range
                 if (IsScratch(pageno))
                 {
                     ScratchPreParse(html);
                     contentTable = html.DocumentNode.Descendants("body").First().Descendants("table").First().Descendants("table").ElementAt(1).Descendants("table").First();
+                }
+                else if (IsSBAHJ(pageno))
+                {
+                    contentTable = html.DocumentNode.Descendants("table").First().Descendants("table").ElementAt(1).Descendants("table").First();
                 }
                 else
                 {
