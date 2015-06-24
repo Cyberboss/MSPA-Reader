@@ -152,7 +152,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
 
 
                 //debug set current page here
-                currentPage = 2324;
+                //currentPage = 2324;
                 //currentPage = 6708;
                 //
                 if (!bgw.CancellationPending)
