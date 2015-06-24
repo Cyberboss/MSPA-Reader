@@ -56,7 +56,7 @@ namespace Reader_UI
                 Program.Open(db, true);
                 Close();
             }
-            catch (Exception)
+            catch
             {
                 Cursor.Current = Cursors.Default;
                 MessageBox.Show("Can not open connection to " + ipInput.Text + "! Check that the database MSPAArchive exists on the specified server and the user you entered has to dbo role.");

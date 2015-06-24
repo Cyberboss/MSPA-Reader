@@ -99,7 +99,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
         //eventually we'll have to apply a diff on these to get the flash to do what we want it to do when the link is clicked
         void HandlePageSmash(System.ComponentModel.BackgroundWorker bgw, int progress)
         {
-            bgw.ReportProgress(progress, "Now parsing Caliborn's hissy fit, page 7395");
+            bgw.ReportProgress(progress, "Now parsing Caliborn's hissy fit.");
             Parser.Resource[] FUCKYOU = new Parser.Resource[1];
             FUCKYOU[0] = new Parser.Resource(parser.DownloadFile("http://cdn.mspaintadventures.com/007395/05492.swf"), "05492.swf");
 
@@ -218,7 +218,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                             Commit();
                         
                         }
-                        catch (Exception)
+                        catch
                         {
                             missedPages++;
                             Rollback();

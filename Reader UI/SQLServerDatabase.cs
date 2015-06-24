@@ -140,10 +140,10 @@ namespace Reader_UI
                 myReader.Close();
                 return true;
             }
-            catch (Exception)
+            catch
             {
                 try { myReader.Close(); }
-                catch (Exception) { }
+                catch { }
                 //Assume databse either
                 //a) hasn't been created
                 //b) is corrupt
@@ -156,25 +156,25 @@ namespace Reader_UI
                 try {
                     dropCommands.ExecuteNonQuery();
                 }
-                catch (Exception) { }
+                catch{ }
                 dropCommands.CommandText = "DROP TABLE Links";
                 try
                 {
                     dropCommands.ExecuteNonQuery();
                 }
-                catch (Exception) { }
+                catch { }
                 dropCommands.CommandText = "DROP TABLE PagesArchived";
                 try
                 {
                     dropCommands.ExecuteNonQuery();
                 }
-                catch (Exception) { }
+                catch  { }
                 dropCommands.CommandText = "DROP TABLE Resources";
                 try
                 {
                     dropCommands.ExecuteNonQuery();
                 }
-                catch (Exception) { }
+                catch { }
                 try
                 {
                     DbCommand creationCommands = sqlsWConn.CreateCommand();
@@ -188,7 +188,7 @@ namespace Reader_UI
                     creationCommands.CommandText = "CREATE TABLE [Resources](	[id] [int] NOT NULL IDENTITY (1,1),	[page_id] [int] NOT NULL,	[data] [varbinary](max) NULL,	[original_filename] [nvarchar](max) NULL, [title_text] [nvarchar](max) NULL, CONSTRAINT [PK_Resources] PRIMARY KEY CLUSTERED (	[id] ASC)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]";
                     creationCommands.ExecuteNonQuery();
                 }
-                catch (Exception)
+                catch
                 {
                     if(compact)
                         MessageBox.Show("Error creating database, make sure the application has read/write permissions in the working directory.");

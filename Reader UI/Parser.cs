@@ -135,6 +135,7 @@ namespace Reader_UI
             }
             catch
             {
+                //try the www if the cdn is jank
                 return web.DownloadData(file.Replace("cdn.mspaintadventures.com", "www.mspaintadventures.com"));
             }
         }
@@ -174,7 +175,6 @@ namespace Reader_UI
                 html.LoadHtml(source);
                 //TODO: Support for 2x pages
 
-                //scratch range
                 if (IsScratch(pageno))
                 {
                     ScratchPreParse(html);
@@ -193,7 +193,7 @@ namespace Reader_UI
                 ParseResources(!IsScratch(pageno));
                 ParseLinks();
             }
-            catch (Exception)
+            catch
             {
                 return false;
             }
