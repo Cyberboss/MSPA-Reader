@@ -14,10 +14,14 @@ namespace Reader_UI
     {
         Database db = null;
         bool running = false;
+        bool closeRequested = false;
+        bool cancelRequested = false;
         public DatabaseWriter(Database idb)
         {
             db = idb;
             InitializeComponent();
+            updateButton.Enabled = false;
+            running = true;
             worker.ProgressChanged += worker_progress;
             worker.RunWorkerAsync();
             FormClosing += Writer_Closing;
@@ -32,6 +36,7 @@ namespace Reader_UI
             if (!running)
                 return;
             e.Cancel = true;
+            closeRequested = true;
             Cursor.Current = Cursors.WaitCursor;
             worker.CancelAsync();
             foreach (Control c in Controls)
@@ -43,6 +48,15 @@ namespace Reader_UI
         {
             if ((string)e.UserState == "FormMessageClose")
             {
+                running = false;
+                Cursor.Current = Cursors.Default;
+                if (cancelRequested)
+                {
+                    updateButton.Enabled = true;
+                    cancelRequested = false;
+                }
+                if (!closeRequested)
+                    return;
                 System.Threading.Thread.Sleep(1000);
                 Close();
             }
@@ -59,10 +73,28 @@ namespace Reader_UI
 
         private void worker_DoWork(object sender, DoWorkEventArgs e)
         {
-            running = true;
             db.ResumeWork(worker);
-            running = false;
             worker.ReportProgress(100, "FormMessageClose");
+        }
+
+        private void updateButton_Click(object sender, EventArgs e)
+        {
+            if (running)
+                return;
+            running = true;
+            updateButton.Enabled = false;
+            cancelButton.Enabled = true;
+            worker.RunWorkerAsync();
+        }
+
+        private void cancelButton_Click(object sender, EventArgs e)
+        {
+            if (!running)
+                return;
+            cancelRequested = true;
+            Cursor.Current = Cursors.WaitCursor;
+            cancelButton.Enabled = false;
+            worker.CancelAsync();
         }
     }
 }

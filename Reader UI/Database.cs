@@ -115,94 +115,101 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
         public void ResumeWork(System.ComponentModel.BackgroundWorker bgw)
         {
 
+            if (parser == null)
+                parser = new Parser();
             if (!ReadLastIndexedOrCreateDatabase())
             {
                 if (!bgw.CancellationPending)
                     bgw.ReportProgress(0, "Error creating database.");
                 return;
             }
-
-            if (parser == null)
-                parser = new Parser();
-
             int lastPage = parser.GetLatestPage();
-            int startPage = FindLowestPage((int)PagesOfImportance.HOMESTUCK_PAGE_ONE, lastPage);
-            int currentPage = startPage;
-            int pagesToParse = lastPage - startPage;
-            int currentProgress = (int)(((float)(currentPage - 1 - startPage) / (float)(pagesToParse)) * 100.0f);
+            int currentProgress;
+            while (true){
+                int missedPages = 0;
 
-            if (!bgw.CancellationPending)
-                bgw.ReportProgress(currentProgress, "MSPA is up to page " + lastPage);
-            else
-                return;
-            if (!bgw.CancellationPending)
-                bgw.ReportProgress(currentProgress, "Starting archive operation at page " + currentPage);
-            else
-                return;
-
-            while (currentPage != lastPage + 1 && !bgw.CancellationPending)
-            {
+                int startPage = FindLowestPage((int)PagesOfImportance.HOMESTUCK_PAGE_ONE, lastPage);
+                int currentPage = startPage;
+                int pagesToParse = lastPage - startPage;
                 currentProgress = (int)(((float)(currentPage - 1 - startPage) / (float)(pagesToParse)) * 100.0f);
 
-                if (Enum.IsDefined(typeof(PagesOfImportance), currentPage) && currentPage != (int)PagesOfImportance.HOMESTUCK_PAGE_ONE)
+                if (!bgw.CancellationPending)
+                    bgw.ReportProgress(currentProgress, "MSPA is up to page " + lastPage);
+                else
+                    return;
+                if (!bgw.CancellationPending)
+                    bgw.ReportProgress(currentProgress, "Starting archive operation at page " + currentPage);
+                else
+                    return;
+
+                while (currentPage != lastPage + 1 && !bgw.CancellationPending)
                 {
-                    try
+                    currentProgress = (int)(((float)(currentPage - 1 - startPage) / (float)(pagesToParse)) * 100.0f);
+
+                    if (Enum.IsDefined(typeof(PagesOfImportance), currentPage) && currentPage != (int)PagesOfImportance.HOMESTUCK_PAGE_ONE)
                     {
-                        switch ((PagesOfImportance)currentPage)
+                        try
                         {
-                            case PagesOfImportance.CASCADE:
-                                HandleCascade(bgw, currentProgress);
-                                break;
-                            case PagesOfImportance.CALIBORN_PAGE_SMASH:
-                                HandlePageSmash(bgw, currentProgress);
-                                break;
+                            switch ((PagesOfImportance)currentPage)
+                            {
+                                case PagesOfImportance.CASCADE:
+                                    HandleCascade(bgw, currentProgress);
+                                    break;
+                                case PagesOfImportance.CALIBORN_PAGE_SMASH:
+                                    HandlePageSmash(bgw, currentProgress);
+                                    break;
+                            }
                         }
-                    }
-                    catch
-                    {
-                        Rollback();
-                        bgw.ReportProgress(currentProgress, "Error parsing special page " + currentPage);
-                    }
-                    currentPage = FindLowestPage(currentPage + 1, lastPage);
-                    continue;
-                }
-
-                if (!IsPageArchived(currentPage) && parser.LoadPage(currentPage) && !bgw.CancellationPending)
-                {
-                    try
-                    {
-                        var res = parser.GetResources();
-                        var links = parser.GetLinks();
-
-                        for (int i = 0; i < links.Count(); ++i)
-                            bgw.ReportProgress(currentProgress, "\"" + links[i].originalText + "\" links to " + links[i].pageNumber);
-                        for (int i = 0; i < res.Count(); ++i)
+                        catch
                         {
-                            var fileSize = res[i].data.Count();
-                            totalMegabytesDownloaded += (float)fileSize / (1024.0f * 1024.0f);
-                            bgw.ReportProgress(currentProgress, res[i].originalFileName + ": " + fileSize / 1024 + "KB");
+                            Rollback();
+                            bgw.ReportProgress(currentProgress, "Error parsing special page " + currentPage);
                         }
-                        bgw.ReportProgress(currentProgress, "Total Data Downloaded: " + (int)totalMegabytesDownloaded + "MB");
+                        currentPage = FindLowestPage(currentPage + 1, lastPage);
+                        continue;
+                    }
 
-                        Transact();
-                        WriteResource(res, currentPage);
-                        WriteLinks(links, currentPage);
-                        ArchivePageNumber(currentPage);
-                        Commit();
+                    if (!IsPageArchived(currentPage) && parser.LoadPage(currentPage) && !bgw.CancellationPending)
+                    {
+                        try
+                        {
+                            var res = parser.GetResources();
+                            var links = parser.GetLinks();
 
-                        bgw.ReportProgress(currentProgress, "Page " + currentPage + " archived.");
+                            for (int i = 0; i < links.Count(); ++i)
+                                bgw.ReportProgress(currentProgress, "\"" + links[i].originalText + "\" links to " + links[i].pageNumber);
+                            for (int i = 0; i < res.Count(); ++i)
+                            {
+                                var fileSize = res[i].data.Count();
+                                totalMegabytesDownloaded += (float)fileSize / (1024.0f * 1024.0f);
+                                bgw.ReportProgress(currentProgress, res[i].originalFileName + ": " + fileSize / 1024 + "KB");
+                            }
+                            bgw.ReportProgress(currentProgress, "Total Data Downloaded: " + (int)totalMegabytesDownloaded + "MB");
+
+                            Transact();
+                            WriteResource(res, currentPage);
+                            WriteLinks(links, currentPage);
+                            ArchivePageNumber(currentPage);
+                            Commit();
+
+                            bgw.ReportProgress(currentProgress, "Page " + currentPage + " archived.");
                         
+                        }
+                        catch (Exception)
+                        {
+                            missedPages++;
+                            Rollback();
+                            bgw.ReportProgress(currentProgress, "Error in archiving page: " + currentPage);
+                        }
                     }
-                    catch (Exception)
-                    {
-                        pagesToParse++;
-                        Rollback();
-                        bgw.ReportProgress(currentProgress, "Error in archiving page: " + currentPage);
-                    }
+                    currentPage = FindLowestPage(currentPage + 1,lastPage);
                 }
-                currentPage = FindLowestPage(currentPage + 1,lastPage);
+                if (!(!bgw.CancellationPending && missedPages != 0))
+                    break;
+                bgw.ReportProgress(currentProgress,"Missed " + missedPages + " pages. Looping back.");
             }
-            bgw.ReportProgress(currentProgress, "Operation completed. " + (pagesToParse - (currentPage - 1 - startPage)) + " pages remaining.");
+
+            bgw.ReportProgress(100, "Operation completed.");
         }
     }
 }
