@@ -247,7 +247,7 @@ namespace Reader_UI
         override public void Rollback()
         {
             if (sqlsTrans == null)
-                throw new Exception();
+                return;
             sqlsTrans.Rollback();
             sqlsTrans = null;
         }

@@ -13,6 +13,7 @@ namespace Reader_UI
     public partial class DatabaseWriter : Form
     {
         Database db = null;
+        bool running = false;
         public DatabaseWriter(Database idb)
         {
             db = idb;
@@ -26,20 +27,30 @@ namespace Reader_UI
         {
             Program.Shutdown(this, db);
         }
-        void Writer_Closing(object sender, System.EventArgs e)
+        void Writer_Closing(object sender, FormClosingEventArgs e)
         {
+            if (!running)
+                return;
+            e.Cancel = true;
+            Cursor.Current = Cursors.WaitCursor;
             worker.CancelAsync();
             foreach (Control c in Controls)
             {
                 c.Enabled = false;
             }
-            Update();
-            while (worker.IsBusy) { System.Threading.Thread.Sleep(1); }
         }
         void worker_progress(object sender, ProgressChangedEventArgs e)
         {
-            progressBar1.Value = e.ProgressPercentage;
-            logOutput.AppendText((string)e.UserState + Environment.NewLine);
+            if ((string)e.UserState == "FormMessageClose")
+            {
+                System.Threading.Thread.Sleep(1000);
+                Close();
+            }
+            else
+            {
+                progressBar1.Value = e.ProgressPercentage;
+                logOutput.AppendText((string)e.UserState + Environment.NewLine);
+            }
         }
         private void openReader_Click(object sender, EventArgs e)
         {
@@ -48,7 +59,10 @@ namespace Reader_UI
 
         private void worker_DoWork(object sender, DoWorkEventArgs e)
         {
+            running = true;
             db.ResumeWork(worker);
+            running = false;
+            worker.ReportProgress(100, "FormMessageClose");
         }
     }
 }

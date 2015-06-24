@@ -16,6 +16,7 @@ namespace Reader_UI
         {
             HOMESTUCK_PAGE_ONE = 001901,
             CASCADE = 006009,
+            CALIBORN_PAGE_SMASH = 007395,
         }
         float totalMegabytesDownloaded = 0;
 
@@ -94,6 +95,23 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             Commit();
             bgw.ReportProgress(progress, "Cascade committed!");
         }
+
+        void HandlePageSmash(System.ComponentModel.BackgroundWorker bgw, int progress)
+        {
+            bgw.ReportProgress(progress, "Now parsing Caliborn's hissy fit, page 7395");
+            Parser.Resource[] FUCKYOU = new Parser.Resource[1];
+            FUCKYOU[0] = new Parser.Resource(parser.DownloadFile("http://www.mspaintadventures.com/007395/05492.swf"), "05492.swf");
+
+            var fileSize2 = FUCKYOU[0].data.Count();
+            totalMegabytesDownloaded += (float)fileSize2 / (1024.0f * 1024.0f);
+            bgw.ReportProgress(progress, FUCKYOU[0].originalFileName + ": " + fileSize2 / 1024 + "KB");
+
+            Transact();
+            WriteResource(FUCKYOU, 7395);
+            ArchivePageNumber(7395);
+            Commit();
+
+        }
         public void ResumeWork(System.ComponentModel.BackgroundWorker bgw)
         {
 
@@ -113,7 +131,6 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             int pagesToParse = lastPage - startPage;
             int currentProgress = (int)(((float)(currentPage - 1 - startPage) / (float)(pagesToParse)) * 100.0f);
 
-            currentPage = 5960;
             if (!bgw.CancellationPending)
                 bgw.ReportProgress(currentProgress, "MSPA is up to page " + lastPage);
             else
@@ -129,10 +146,22 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
 
                 if (Enum.IsDefined(typeof(PagesOfImportance), currentPage) && currentPage != (int)PagesOfImportance.HOMESTUCK_PAGE_ONE)
                 {
-                    switch((PagesOfImportance)currentPage){
-                        case PagesOfImportance.CASCADE:
-                            HandleCascade(bgw,currentProgress);
-                            break;
+                    try
+                    {
+                        switch ((PagesOfImportance)currentPage)
+                        {
+                            case PagesOfImportance.CASCADE:
+                                HandleCascade(bgw, currentProgress);
+                                break;
+                            case PagesOfImportance.CALIBORN_PAGE_SMASH:
+                                HandlePageSmash(bgw, currentProgress);
+                                break;
+                        }
+                    }
+                    catch
+                    {
+                        Rollback();
+                        bgw.ReportProgress(currentProgress, "Error parsing special page " + currentPage);
                     }
                     currentPage = FindLowestPage(currentPage + 1, lastPage);
                     continue;
@@ -145,14 +174,6 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                         var res = parser.GetResources();
                         var links = parser.GetLinks();
 
-                        Transact();
-                        WriteResource(res, currentPage);
-                        WriteLinks(links, currentPage);
-                        ArchivePageNumber(currentPage);
-                        Commit();
-
-                        bgw.ReportProgress(currentProgress, "Page " + currentPage + " archived. " + res.Count() + " resources.");
-                        
                         for (int i = 0; i < links.Count(); ++i)
                             bgw.ReportProgress(currentProgress, "\"" + links[i].originalText + "\" links to " + links[i].pageNumber);
                         for (int i = 0; i < res.Count(); ++i)
@@ -162,6 +183,15 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                             bgw.ReportProgress(currentProgress, res[i].originalFileName + ": " + fileSize / 1024 + "KB");
                         }
                         bgw.ReportProgress(currentProgress, "Total Data Downloaded: " + (int)totalMegabytesDownloaded + "MB");
+
+                        Transact();
+                        WriteResource(res, currentPage);
+                        WriteLinks(links, currentPage);
+                        ArchivePageNumber(currentPage);
+                        Commit();
+
+                        bgw.ReportProgress(currentProgress, "Page " + currentPage + " archived.");
+                        
                     }
                     catch (Exception)
                     {

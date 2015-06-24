@@ -144,10 +144,10 @@ namespace Reader_UI
         }
         void ScratchPreParse(HtmlDocument html)
         {
+            //grab the header from the top of the page
             resources.Clear();
             var node = html.DocumentNode.Descendants("img").First();
             string innerHtml = node.OuterHtml;
-            //we are mainly looking for .gifs and .swfs, there are some things we should ignore, such as /images/v2_blankstrip.gif
             var match = Regex.Match(innerHtml, scratchHeaderImageRegex);
 
             string actualFilePath = "http://cdn.mspaintadventures.com/" + match.Groups[1].Value;
