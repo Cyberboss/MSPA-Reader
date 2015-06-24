@@ -152,7 +152,8 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
 
 
                 //debug set current page here
-                currentPage = 6715;
+                currentPage = 2324;
+                //currentPage = 6708;
                 //
                 if (!bgw.CancellationPending)
                     bgw.ReportProgress(currentProgress, "MSPA is up to page " + lastPage);

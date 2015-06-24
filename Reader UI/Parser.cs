@@ -25,6 +25,33 @@ namespace Reader_UI
                 titleText = tt;
             }
         }
+        public class Text
+        {
+
+            enum ConversationType
+            {
+                PAGE_TITLE,
+                NARRATIVE,
+                PERSTERLOG,
+                DIALOGLOG,
+                SPRITELOG,
+            };
+            ConversationType type;
+
+            public class ScriptLine
+            {
+                readonly string hexColour;
+                readonly string text;
+                public ScriptLine(string hx, string tx)
+                {
+                    hexColour = hx;
+                    text = tx;
+                }
+            }
+
+            ScriptLine[] lines;
+
+        }
         public class Link
         {
             readonly public string originalText;
@@ -47,6 +74,9 @@ namespace Reader_UI
         const string scratchTitleRegex = "title=\\\"(.*?)\\\"";
         const string swfRegex = @"http:\/\/.*?\.swf";
         const string linkNumberRegex = @"[0-9]{6}";
+        const string logRegex = @"Dialoglog|Spritelog|Pesterlog";
+        const string hexColourRegex = @"#[0-9A-Fa-f]{6}";
+
         WebClient web = new WebClient();
         HttpClient client = new HttpClient();
 
@@ -75,7 +105,29 @@ namespace Reader_UI
         }
         void ParseText()
         {
+            //most difficult part here
+            //all text in homestuck is pure html formatting
+            //so the styles are all over the place
 
+
+            //check if page HAS a dialoglog , find it and get the lines within
+            Debugger.Break();
+            var reg = Regex.Match(contentTable.InnerText, logRegex);
+            if (reg.Success)
+            {
+
+                var conversationLines = contentTable.SelectNodes("//*[text()[contains(., '"+reg.Value+"')]]").First().ParentNode.ParentNode.Descendants("span");   //this will grab lines 
+                
+                //now for each line we need the colour and the text
+                Text.ScriptLine[] line = new Text.ScriptLine[conversationLines.Count()];
+                for (int i = 0; i < conversationLines.Count(); ++i)
+                {
+                    var currentLine = conversationLines.ElementAt(i);
+                    var hexReg = Regex.Match(currentLine.OuterHtml, hexColourRegex);
+                   
+                    line[i] = new Text.ScriptLine(hexReg.Success ? hexReg.Value : "#000000",currentLine.InnerText);
+                }
+            }
         }
         void ParseResources(bool clear)
         {
