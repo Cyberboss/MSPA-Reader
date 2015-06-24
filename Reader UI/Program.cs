@@ -47,8 +47,6 @@ namespace Reader_UI
             {
                 if (dbw == null)
                     dbw = new DatabaseWriter(db);
-                if (dbr != null)
-                    dbw.Location = new System.Drawing.Point(dbr.Left + dbr.Width + 50, dbr.Top);
                 dbw.Show();
                 dbw.Focus();
             }
@@ -56,8 +54,6 @@ namespace Reader_UI
             {
                 if (dbr == null)
                     dbr = new Reader(db);
-                if (dbw != null)
-                    dbr.Location = new System.Drawing.Point(dbw.Left - dbr.Width - 50, dbw.Top);
                 dbr.Show();
                 dbr.Focus();
             } 

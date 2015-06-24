@@ -34,11 +34,11 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(362, 104);
+            this.button1.Location = new System.Drawing.Point(623, 506);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(101, 71);
+            this.button1.Size = new System.Drawing.Size(117, 31);
             this.button1.TabIndex = 0;
-            this.button1.Text = "button1";
+            this.button1.Text = "Start Archiving";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
@@ -50,7 +50,7 @@
             this.Controls.Add(this.button1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Reader";
-            this.Text = "Homestuck";
+            this.Text = "MS Paint Adventures";
             this.ResumeLayout(false);
 
         }
