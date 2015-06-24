@@ -152,8 +152,21 @@ namespace Reader_UI
                 //drop any tables that may exist
 
                 DbCommand dropCommands = sqlsWConn.CreateCommand();
-                dropCommands.CommandText = "DROP TABLE Conversations";
-                try {
+                dropCommands.CommandText = "DROP TABLE SpecialText";
+                try
+                {
+                    dropCommands.ExecuteNonQuery();
+                }
+                catch { }
+                dropCommands.CommandText = "DROP TABLE Dialog";
+                try
+                {
+                    dropCommands.ExecuteNonQuery();
+                }
+                catch { }
+                dropCommands.CommandText = "DROP TABLE PageMeta";
+                try
+                {
                     dropCommands.ExecuteNonQuery();
                 }
                 catch{ }
