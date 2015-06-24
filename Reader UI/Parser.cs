@@ -40,8 +40,22 @@ namespace Reader_UI
 
             public class ScriptLine
             {
-                readonly string hexColour;
-                readonly string text;
+                public class SpecialSubText
+                {
+                    public readonly int begin, length;
+                    public readonly bool underlined;
+                    public readonly string colour;
+                    public SpecialSubText(int beg, int len, bool under, string col)
+                    {
+                        begin = beg;
+                        length = len;
+                        underlined = under;
+                        colour = col;
+                    }
+                }
+                public readonly string hexColour;
+                public readonly string text;
+                public SpecialSubText[] subTexts = null;
                 public ScriptLine(string hx, string tx)
                 {
                     hexColour = hx;
@@ -49,8 +63,12 @@ namespace Reader_UI
                 }
             }
 
-            ScriptLine[] lines;
+            public class Narrative { }
 
+            public string title = null;
+            public Narrative narr = null;
+            public ScriptLine[] lines = null;
+            public string linkPrefix = null;
         }
         public class Link
         {
@@ -76,6 +94,7 @@ namespace Reader_UI
         const string linkNumberRegex = @"[0-9]{6}";
         const string logRegex = @"Dialoglog|Spritelog|Pesterlog";
         const string hexColourRegex = @"#[0-9A-Fa-f]{6}";
+        const string underlineRegex = @"underline";
 
         WebClient web = new WebClient();
         HttpClient client = new HttpClient();
@@ -84,6 +103,7 @@ namespace Reader_UI
 
         List<Resource> resources = new List<Resource>();
         List<Link> links = new List<Link>();
+        Text texts;
 
         public int GetLatestPage()
         {
@@ -103,30 +123,56 @@ namespace Reader_UI
 
             return Convert.ToInt32(pageNumberAsString);
         }
+        public Text GetText()
+        {
+            return texts;
+        }
         void ParseText()
         {
             //most difficult part here
             //all text in homestuck is pure html formatting
             //so the styles are all over the place
-
+            texts = new Text();
 
             //check if page HAS a dialoglog , find it and get the lines within
-            Debugger.Break();
             var reg = Regex.Match(contentTable.InnerText, logRegex);
             if (reg.Success)
             {
 
-                var conversationLines = contentTable.SelectNodes("//*[text()[contains(., '"+reg.Value+"')]]").First().ParentNode.ParentNode.Descendants("span");   //this will grab lines 
+                var conversationLines = contentTable.SelectSingleNode(".//*[text()[contains(., '" + reg.Value + "')]]").ParentNode.ParentNode.SelectSingleNode(".//p").SelectNodes("span");   //this will grab lines 
                 
                 //now for each line we need the colour and the text
-                Text.ScriptLine[] line = new Text.ScriptLine[conversationLines.Count()];
+                List<Text.ScriptLine> line = new List<Text.ScriptLine>();
                 for (int i = 0; i < conversationLines.Count(); ++i)
                 {
                     var currentLine = conversationLines.ElementAt(i);
+
                     var hexReg = Regex.Match(currentLine.OuterHtml, hexColourRegex);
-                   
-                    line[i] = new Text.ScriptLine(hexReg.Success ? hexReg.Value : "#000000",currentLine.InnerText);
+
+                    var scriptLine = new Text.ScriptLine(hexReg.Success ? hexReg.Value : "#000000", currentLine.InnerText);
+
+                    if (currentLine.ChildNodes.Count > 1)
+                    {
+                        //special subtext alert
+                        var lineSpecialSubtext = currentLine.SelectNodes("span");
+                        Text.ScriptLine.SpecialSubText[] sTs = new Text.ScriptLine.SpecialSubText[lineSpecialSubtext.Count()];
+                        for (int j = 0; j < lineSpecialSubtext.Count(); ++j)
+                        {
+                            var currentSpecialSubtext = lineSpecialSubtext.ElementAt(j);
+                            bool underlined = Regex.Match(currentSpecialSubtext.OuterHtml, underlineRegex).Success;
+                            var colourReg = Regex.Match(currentSpecialSubtext.OuterHtml, hexColourRegex);
+                            string colour = colourReg.Success ? colourReg.Value : scriptLine.hexColour;
+                            int begin = currentLine.InnerHtml.IndexOf(currentSpecialSubtext.OuterHtml);
+                            int length = currentSpecialSubtext.InnerText.Length;
+                            sTs[j] = new Text.ScriptLine.SpecialSubText(begin, length, underlined, colour);
+                        }
+                        scriptLine.subTexts = sTs;
+                    }
+
+                    line.Add(scriptLine);
                 }
+                texts.lines = line.ToArray();
+                Debugger.Break();
             }
         }
         void ParseResources(bool clear)
