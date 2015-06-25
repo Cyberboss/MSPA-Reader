@@ -39,6 +39,7 @@
             this.label4 = new System.Windows.Forms.Label();
             this.okButton = new System.Windows.Forms.Button();
             this.resetDatabase = new System.Windows.Forms.CheckBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // dataSourceInput
@@ -111,11 +112,11 @@
             // 
             // okButton
             // 
-            this.okButton.Location = new System.Drawing.Point(214, 178);
+            this.okButton.Location = new System.Drawing.Point(182, 178);
             this.okButton.Name = "okButton";
             this.okButton.Size = new System.Drawing.Size(75, 23);
             this.okButton.TabIndex = 8;
-            this.okButton.Text = "Login";
+            this.okButton.Text = "Connect";
             this.okButton.UseVisualStyleBackColor = true;
             this.okButton.Click += new System.EventHandler(this.okButton_Click);
             // 
@@ -129,11 +130,21 @@
             this.resetDatabase.Text = "Reset Database";
             this.resetDatabase.UseVisualStyleBackColor = true;
             // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(295, 183);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(199, 13);
+            this.label5.TabIndex = 11;
+            this.label5.Text = "Note: Homestuck is about 1.3GB of data";
+            // 
             // DatabaseLogin
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(499, 213);
+            this.Controls.Add(this.label5);
             this.Controls.Add(this.resetDatabase);
             this.Controls.Add(this.okButton);
             this.Controls.Add(this.label4);
@@ -165,5 +176,6 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button okButton;
         private System.Windows.Forms.CheckBox resetDatabase;
+        private System.Windows.Forms.Label label5;
     }
 }

@@ -96,6 +96,7 @@ namespace Reader_UI
                     break;
             }
             resetDatabase.Enabled = true;
+            label5.Enabled = true;
         }
 
 

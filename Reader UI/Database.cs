@@ -10,6 +10,19 @@ namespace Reader_UI
 {
     public abstract class Database
     {
+
+        public enum Style
+        {
+            REGULAR,
+            SCRATCH,
+            X2,
+            SBAHJ,
+            HOMOSUCK,
+            TRICKSTER,
+            CASCADE,
+            DOTA,
+            SHESBACK
+        }
         public class Page
         {
             public Parser.Text meta,meta2;
@@ -104,6 +117,9 @@ namespace Reader_UI
         public abstract void Close();
 
         public abstract Page GetPage(int pageno,bool x2);
+        public Style GetStyle(int pageno){
+            return Style.REGULAR;
+        }
         public Page WaitPage(int pageno, bool x2)
         {
             if (!archivedPages.IsPageArchived(pageno))
