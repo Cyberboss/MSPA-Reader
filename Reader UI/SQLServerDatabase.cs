@@ -132,6 +132,11 @@ namespace Reader_UI
             sqlsRConn.Open();
             sqlsWConn.Open();
         }
+        public override Page GetPage(int pageno)
+        {
+            System.Diagnostics.Debugger.Break();
+            return new Page();
+        }
         override public bool ReadLastIndexedOrCreateDatabase()
         {
             DbDataReader myReader = null;

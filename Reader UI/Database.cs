@@ -5,21 +5,78 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.Collections.Concurrent;
 namespace Reader_UI
 {
     public abstract class Database
     {
         public class Page
         {
-            public Parser.Text meta;
-            public Parser.Resource[] resources;
-            public Parser.Link[] links;
+            public Parser.Text meta,meta2;
+            public Parser.Resource[] resources,resources2;
+            public Parser.Link[] links,links2;
+            public bool x2;
         }
 
         Parser parser = null;
+        public int lastPage;
+        protected class ArchiveLock
+        {
+            private List<int> archivedPages = new List<int>();
+            private int request = 0;
+            private object _sync = new object();
 
-        protected List<int> archivedPages = new List<int>();
-        enum PagesOfImportance
+            public bool IsPageArchived(int page)
+            {
+                bool ret;
+                lock (_sync)
+                {
+                    ret = archivedPages.IndexOf(page) >= 0;
+                }
+                return ret;
+            }
+            public int FindLowestPage(int start, int end)
+            {
+                int ret;
+                lock (_sync)
+                {
+                    ret = end + 1;
+                    for (int i = start; i <= end; ++i)
+                        if (archivedPages.IndexOf(i) < 0)
+                        {
+                            ret = i;
+                            break;
+                        }
+                }
+                return ret;
+            }
+            public void Add(int page)
+            {
+                lock (_sync)
+                {
+                    archivedPages.Add(page);
+                }
+            }
+            public int GetRequest()
+            {
+                int ret;
+                lock (_sync)
+                {
+                    ret = request;
+                }
+                return ret;
+            }
+            public void Request(int pgno)
+            {
+                lock (_sync)
+                {
+                    request = pgno;
+                }
+            }
+        }
+
+        protected ArchiveLock archivedPages = new ArchiveLock();
+       public  enum PagesOfImportance
         {
             HOMESTUCK_PAGE_ONE = 001901,
             CASCADE = 006009,
@@ -40,17 +97,20 @@ namespace Reader_UI
         public abstract void Commit();
         public abstract void Close();
 
-        bool IsPageArchived(int page)
+        public abstract Page GetPage(int pageno);
+        public Page WaitPage(int pageno)
         {
-            return archivedPages.IndexOf(page) >= 0;
+            if (!archivedPages.IsPageArchived(pageno))
+            {
+                archivedPages.Request(pageno);
+                do
+                {
+                    System.Threading.Thread.Sleep(1000);
+                } while (!archivedPages.IsPageArchived(pageno));
+            }
+            return GetPage(pageno);
         }
-        int FindLowestPage(int start, int end)
-        {
-            for (int i = start; i <= end; ++i)
-                if (archivedPages.IndexOf(i) < 0)
-                    return i;
-            return end + 1;
-        }
+
         void HandleCascade(System.ComponentModel.BackgroundWorker bgw, int progress)
         {
             //cascade is hosted on newgrounds
@@ -168,12 +228,12 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                     bgw.ReportProgress(0, "Error creating database.");
                 return;
             }
-            int lastPage = parser.GetLatestPage();
+            lastPage = parser.GetLatestPage();
             int currentProgress;
             while (true){
                 int missedPages = 0;
 
-                int startPage = FindLowestPage((int)PagesOfImportance.HOMESTUCK_PAGE_ONE, lastPage);
+                int startPage = archivedPages.FindLowestPage((int)PagesOfImportance.HOMESTUCK_PAGE_ONE, lastPage);
                 int currentPage = startPage;
                 int pagesToParse = lastPage - startPage;
                 currentProgress = (int)(((float)(currentPage - 1 - startPage) / (float)(pagesToParse)) * 100.0f);
@@ -195,8 +255,14 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 else
                     return;
 
+                int oldPage = currentPage;
                 while (currentPage != lastPage + 1 && !bgw.CancellationPending)
                 {
+                    oldPage = currentPage;
+                    var req = (archivedPages.GetRequest());
+                    if (req != 0)
+                        currentPage = req;
+
 
                     currentProgress = (int)(((float)(currentPage - 1 - startPage) / (float)(pagesToParse)) * 100.0f);
                     if (Enum.IsDefined(typeof(PagesOfImportance), currentPage) && currentPage != (int)PagesOfImportance.HOMESTUCK_PAGE_ONE)
@@ -221,12 +287,13 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                             Rollback();
                             bgw.ReportProgress(currentProgress, "Error parsing special page " + currentPage);
                         }
-                        currentPage = FindLowestPage(currentPage + 1, lastPage);
+                        currentPage = archivedPages.FindLowestPage(currentPage + 1, lastPage);
                         continue;
                     }
 
-                    if (!IsPageArchived(currentPage) && parser.LoadPage(currentPage) && !bgw.CancellationPending)
+                    if (!archivedPages.IsPageArchived(currentPage) && parser.LoadPage(currentPage) && !bgw.CancellationPending)
                     {
+                        var oldMissedPages = missedPages;
                         if (!parser.x2Flag)
                         {
                             if (!WritePage(bgw, currentPage, currentProgress, 0))
@@ -237,9 +304,14 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                             if (!(WritePage(bgw, currentPage, currentProgress, 1) && WritePage(bgw, currentPage, currentProgress, 2)))
                                 missedPages += 2;
                         }
+                        if (req != 0 && currentPage == req &&  oldMissedPages == missedPages)
+                        {
+                            currentPage = oldPage;
+                            archivedPages.Request(0);
+                        }
                         //simple enough, leave it to the reader to decode the multiple pages
                     }
-                    currentPage = FindLowestPage(currentPage + 1,lastPage);
+                    currentPage = archivedPages.FindLowestPage(currentPage + 1, lastPage);
                 }
                 if (!(!bgw.CancellationPending && missedPages != 0))
                     break;
