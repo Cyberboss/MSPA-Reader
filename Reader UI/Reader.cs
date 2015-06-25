@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace Reader_UI
 {
@@ -18,6 +19,8 @@ namespace Reader_UI
         Label[] mspaHeaderLink = new Label[REGULAR_NUMBER_OF_HEADER_LABELS];
         PictureBox[] candyCorn = new PictureBox[REGULAR_NUMBER_OF_HEADER_CANDY_CORNS];
         ProgressBar pageLoadingProgress = null;
+        int pageRequest;
+        Database.Page page = null;
         public Reader(Database idb)
         {
             db = idb;
@@ -32,6 +35,15 @@ namespace Reader_UI
                 mspaHeaderLink[i] = null;
             for (int i = 0; i < candyCorn.Count(); ++i)
                 candyCorn[i] = null;
+            mrAjax.RunWorkerCompleted += mrAjax_RunWorkerCompleted;
+            pageRequest = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
+            mrAjax.RunWorkerAsync();
+        }
+
+        void mrAjax_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            RemoveControl(pageLoadingProgress);
+            pageLoadingProgress = null;
         }
 
         void Reader_Shown(object sender, EventArgs e)
@@ -271,8 +283,10 @@ namespace Reader_UI
 
         private void button2_Click(object sender, EventArgs e)
         {
-            var pg = db.WaitPage((int)numericUpDown1.Value,false);
-            MessageBox.Show("Page Loaded");
+            if (mrAjax.IsBusy)
+                return;
+            pageRequest = (int)numericUpDown1.Value;
+            mrAjax.RunWorkerAsync();
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -283,6 +297,11 @@ namespace Reader_UI
         private void button4_Click(object sender, EventArgs e)
         {
             WindowState = FormWindowState.Minimized;
+        }
+
+        private void mrAjax_DoWork(object sender, DoWorkEventArgs e)
+        {
+            page = db.WaitPage((int)numericUpDown1.Value);
         }
 
 

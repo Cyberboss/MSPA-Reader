@@ -377,7 +377,7 @@ namespace Reader_UI
         {
             return page >= 5664 && page <= 5981;
         }
-        bool Is2x(int page)
+        public bool Is2x(int page)
         {
             return page >= 7688 && page <= 7825;
         }

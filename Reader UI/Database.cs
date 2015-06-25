@@ -28,7 +28,7 @@ namespace Reader_UI
             public Parser.Text meta,meta2;
             public Parser.Resource[] resources,resources2;
             public Parser.Link[] links,links2;
-            public bool x2;
+            public bool x2 = false;
         }
 
         Parser parser = null;
@@ -77,6 +77,11 @@ namespace Reader_UI
                 {
                     ret = request;
                 }
+                if (IsPageArchived(ret))
+                {
+                    Request(0);
+                    return 0;
+                }
                 return ret;
             }
             public void Request(int pgno)
@@ -120,7 +125,7 @@ namespace Reader_UI
         public Style GetStyle(int pageno){
             return Style.REGULAR;
         }
-        public Page WaitPage(int pageno, bool x2)
+        public Page WaitPage(int pageno)
         {
             if (!archivedPages.IsPageArchived(pageno))
             {
@@ -130,7 +135,7 @@ namespace Reader_UI
                     System.Threading.Thread.Sleep(1000);
                 } while (!archivedPages.IsPageArchived(pageno));
             }
-            return GetPage(pageno,x2);
+            return GetPage(pageno,parser.Is2x(pageno));
         }
 
         void HandleCascade(System.ComponentModel.BackgroundWorker bgw, int progress)

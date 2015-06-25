@@ -286,6 +286,7 @@ namespace Reader_UI
 
             if (x2)
             {
+                page.x2 = true;
                 page.meta2 = GetMeta(pageno, true);
                 page.resources2 = GetResources(pageno, true);
                 page.links = GetLinks(pageno, true);
