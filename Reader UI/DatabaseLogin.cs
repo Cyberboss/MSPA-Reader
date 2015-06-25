@@ -50,7 +50,15 @@ namespace Reader_UI
             Update();
             try
             {
-                db.Connect(ipInput.Text, usernameInput.Text, passwordInput.Text,resetDatabase.Checked);
+                db.Connect(ipInput.Text, usernameInput.Text, passwordInput.Text, resetDatabase.Checked);
+                if (!db.Initialize())
+                {
+                    db.Close();
+                    Cursor.Current = Cursors.Default;
+                    MessageBox.Show("Error creating the database!");
+                    dataSourceInput_SelectedIndexChanged(null, null);
+                    return;
+                }
                 Hide();
                 Program.Open(db, false);
                 Program.Open(db, true);

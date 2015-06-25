@@ -217,13 +217,52 @@ namespace Reader_UI
                 throw;
             }
         }
+        Parser.Resource[] GetResources(int pageno, bool x2)
+        {
+            DbDataReader reader = null;
+            try
+            {
+                DbCommand selector = sqlsRConn.CreateCommand();
+                selector.CommandText = "SELECT data,original_filename,title_text FROM Resources WHERE page_id = " + pageno + " AND x2 = " + (x2 ? 1 : 0);
+
+                reader = selector.ExecuteReader();
+
+                List<Parser.Resource> res = new List<Parser.Resource>();
+
+                while (reader.Read())
+                {
+                    
+                    if (!reader.IsDBNull(2))
+                        res.Add(new Parser.Resource((byte[])reader.GetValue(0),reader.GetString(1),reader.GetString(2)));
+                    else
+                        res.Add(new Parser.Resource((byte[])reader.GetValue(0), reader.GetString(1)));
+
+                }
+
+                return res.ToArray();
+
+            }
+            catch
+            {
+                reader.Close();
+                throw;
+            }
+        }
         public override Page GetPage(int pageno, bool x2)
         {
             System.Diagnostics.Debugger.Break();
 
             Page page = new Page();
                 
-            page.meta = GetMeta(pageno,x2);
+            page.meta = GetMeta(pageno,false);
+            page.resources = GetResources(pageno,false);
+
+            if (x2)
+            {
+                page.meta2 = GetMeta(pageno, false);
+                page.resources2 = GetResources(pageno, false);
+
+            }
            
 
             return page;

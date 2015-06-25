@@ -19,8 +19,9 @@ namespace Reader_UI
             InitializeComponent();
             FormClosed += Reader_Closed;
             System.Threading.Thread.Sleep(1000);
-            numericUpDown1.Maximum = 10000;
+            numericUpDown1.Maximum = db.lastPage;
             numericUpDown1.Minimum = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
+            numericUpDown1.Value = numericUpDown1.Minimum;
         }
         void Reader_Closed(object sender, System.EventArgs e)
         {
@@ -36,12 +37,6 @@ namespace Reader_UI
         {
             db.WaitPage((int)numericUpDown1.Value,false);
             MessageBox.Show("Page Loaded");
-        }
-
-        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
-        {
-
-            numericUpDown1.Maximum = db.lastPage;
         }
 
     }

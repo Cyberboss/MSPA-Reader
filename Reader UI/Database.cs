@@ -87,6 +87,12 @@ namespace Reader_UI
 
 
         public abstract void Connect(string serverName, string username, string password, bool resetDatabase);
+        public bool Initialize()
+        {
+            parser = new Parser();
+            lastPage = parser.GetLatestPage();
+            return ReadLastIndexedOrCreateDatabase();
+        }
         public abstract bool ReadLastIndexedOrCreateDatabase();
         public abstract void WriteResource(Parser.Resource[] res, int page, bool x2);
         public abstract void WriteLinks(Parser.Link[] res, int page, bool x2);
@@ -220,15 +226,6 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
         public void ResumeWork(System.ComponentModel.BackgroundWorker bgw)
         {
 
-            if (parser == null)
-                parser = new Parser();
-            if (!ReadLastIndexedOrCreateDatabase())
-            {
-                if (!bgw.CancellationPending)
-                    bgw.ReportProgress(0, "Error creating database.");
-                return;
-            }
-            lastPage = parser.GetLatestPage();
             int currentProgress;
             while (true){
                 int missedPages = 0;
