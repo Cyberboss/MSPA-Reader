@@ -322,14 +322,15 @@ namespace Reader_UI
             parameter.Value = parameterValue;
             command.Parameters.Add(parameter);
         }
-        override public void WriteResource(Parser.Resource[] res, int page)
+        override public void WriteResource(Parser.Resource[] res, int page,bool x2)
         {
             DbCommand resourceWrite = sqlsWConn.CreateCommand();
             resourceWrite.Transaction = sqlsTrans;
-            resourceWrite.CommandText = "INSERT INTO Resources (page_id,data,original_filename,title_text) VALUES (@page_id,@data,@originalFN,@title)";
+            resourceWrite.CommandText = "INSERT INTO Resources (page_id,x2,data,original_filename,title_text) VALUES (@page_id,@xt,@data,@originalFN,@title)";
             for (int i = 0; i < res.Count(); ++i)
             {
                 resourceWrite.Parameters.Clear();
+                AddParameterWithValue(resourceWrite, "@xt", x2);
                 AddParameterWithValue(resourceWrite, "@page_id", page);
                 AddParameterWithValue(resourceWrite, "@data", res[i].data);
                 AddParameterWithValue(resourceWrite, "@originalFN", res[i].originalFileName);
@@ -337,14 +338,15 @@ namespace Reader_UI
                 resourceWrite.ExecuteNonQuery();
             }
         }
-        override public void WriteLinks(Parser.Link[] res, int page)
+        override public void WriteLinks(Parser.Link[] res, int page, bool x2)
         {
             DbCommand resourceWrite = sqlsWConn.CreateCommand();
             resourceWrite.Transaction = sqlsTrans;
-            resourceWrite.CommandText = "INSERT INTO Links (page_id,linked_page_id,link_text) VALUES (@page_id,@data,@originalFN)";
+            resourceWrite.CommandText = "INSERT INTO Links (page_id,x2,linked_page_id,link_text) VALUES (@page_id,@xt,@data,@originalFN)";
             for (int i = 0; i < res.Count(); ++i)
             {
                 resourceWrite.Parameters.Clear();
+                AddParameterWithValue(resourceWrite, "@xt", x2);
                 AddParameterWithValue(resourceWrite, "@page_id", page);
                 AddParameterWithValue(resourceWrite, "@data", res[i].pageNumber);
                 AddParameterWithValue(resourceWrite, "@originalFN", res[i].originalText);

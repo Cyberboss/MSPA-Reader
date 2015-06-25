@@ -88,8 +88,8 @@ namespace Reader_UI
 
         public abstract void Connect(string serverName, string username, string password, bool resetDatabase);
         public abstract bool ReadLastIndexedOrCreateDatabase();
-        public abstract void WriteResource(Parser.Resource[] res, int page);
-        public abstract void WriteLinks(Parser.Link[] res, int page);
+        public abstract void WriteResource(Parser.Resource[] res, int page, bool x2);
+        public abstract void WriteLinks(Parser.Link[] res, int page, bool x2);
         public abstract void WriteText(Parser.Text tex, int page, bool x2);
         public abstract void ArchivePageNumber(int page, bool x2);
         public abstract void Transact();
@@ -158,8 +158,8 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             }
             bgw.ReportProgress(progress, "Saving to Database...");
             Transact();
-            WriteResource(cascadeSegments, 6009);
-            WriteLinks(next, 6009);
+            WriteResource(cascadeSegments, 6009,false);
+            WriteLinks(next, 6009,false);
             Parser.Text asdf = new Parser.Text();
             asdf.narr = new Parser.Text.ScriptLine("#000000","");
             asdf.title = "[S] Cascade.";
@@ -182,10 +182,10 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             bgw.ReportProgress(progress, FUCKYOU[0].originalFileName + ": " + fileSize2 / 1024 + "KB");
 
             Transact();
-            WriteResource(FUCKYOU, 7395);
+            WriteResource(FUCKYOU, 7395, false);
             Parser.Link[] lnk = new Parser.Link[1];
             lnk[0] = new Parser.Link("", 7396);
-            WriteLinks(lnk, 7395);
+            WriteLinks(lnk, 7395, false);
             Parser.Text asdf = new Parser.Text();
             asdf.narr = new Parser.Text.ScriptLine("#000000", "");
             asdf.title = "[S] Cascade.";
@@ -206,13 +206,13 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             bgw.ReportProgress(progress, FUCKYOU[0].originalFileName + ": " + fileSize2 / 1024 + "KB");
 
             Transact();
-            WriteResource(FUCKYOU, 6715);
+            WriteResource(FUCKYOU, 6715, false);
             Parser.Text asdf = new Parser.Text();
             asdf.narr = new Parser.Text.ScriptLine("#000000", "");
             asdf.title = "";
             Parser.Link[] lnk = new Parser.Link[1];
             lnk[0] = new Parser.Link("", 6716);
-            WriteLinks(lnk, 6715);
+            WriteLinks(lnk, 6715, false);
             WriteText(asdf, 6715, false);
             ArchivePageNumber(6715,false);
             Commit();
@@ -355,8 +355,8 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
 
                 if(x2phase != 2)
                     Transact();
-                WriteResource(res, currentPage);
-                WriteLinks(links, currentPage);
+                WriteResource(res, currentPage, x2phase == 2);
+                WriteLinks(links, currentPage, x2phase == 2);
                 WriteText(text, currentPage, x2phase == 2);
                 ArchivePageNumber(currentPage, x2phase == 2);
                 if(x2phase != 1)
