@@ -34,7 +34,7 @@ namespace Reader_UI
 
         private void button2_Click(object sender, EventArgs e)
         {
-            db.WaitPage((int)numericUpDown1.Value);
+            db.WaitPage((int)numericUpDown1.Value,false);
             MessageBox.Show("Page Loaded");
         }
 

@@ -132,10 +132,101 @@ namespace Reader_UI
             sqlsRConn.Open();
             sqlsWConn.Open();
         }
-        public override Page GetPage(int pageno)
+        Parser.Text.ScriptLine.SpecialSubText[] GetSpecialText(DbDataReader reader)
+        {
+            List<Parser.Text.ScriptLine.SpecialSubText> list = new List<Parser.Text.ScriptLine.SpecialSubText>();
+            while (reader.Read())
+            {
+                // underline,colour,sbegin,length 
+                list.Add(new Parser.Text.ScriptLine.SpecialSubText(reader.GetInt32(2),reader.GetInt32(3),reader.GetBoolean(0),reader.GetString(2)));
+            }
+            return list.ToArray();
+        }
+        Parser.Text GetMeta(int pageno, bool x2)
+        {
+            DbDataReader reader = null;
+            try
+            {
+                DbCommand selector = sqlsRConn.CreateCommand();
+                selector.CommandText = "SELECT title,promptType FROM PageMeta WHERE page_id = " + pageno + " AND x2 = " + (x2 ? 1 : 0);
+            
+                reader = selector.ExecuteReader();
+
+                var meta = new Parser.Text();
+                if (!reader.HasRows || !reader.Read())
+                    throw new Exception();  //should never happen if called using waitpage
+
+                if (!reader.IsDBNull(0))
+                    meta.title = reader.GetString(0);
+                if (!reader.IsDBNull(1))
+                    meta.promptType = reader.GetString(1);
+
+                reader.Close();
+
+                selector.CommandText = "SELECT id,isNarrative,isImg,text,colour FROM Dialog WHERE page_id = " + pageno + " AND x2 = " + (x2 ? 1 : 0);
+
+                reader = selector.ExecuteReader();
+                if (!reader.HasRows || !reader.Read())
+                    throw new Exception();  //should never happen if called using waitpage
+
+
+                if (reader.GetBoolean(1))
+                {//isNarrative
+                    if (reader.GetBoolean(2))//isImg
+                        meta.narr = new Parser.Text.ScriptLine(reader.GetString(3));
+                    else
+                        meta.narr = new Parser.Text.ScriptLine(reader.GetString(4), reader.GetString(3));
+                    selector.CommandText = "SELECT underline,colour,sbegin,length FROM SpecialText WHERE dialog_id = " + reader.GetInt32(0);
+                    reader.Close();
+                    reader = selector.ExecuteReader();
+                    meta.narr.subTexts = GetSpecialText(reader);
+                    reader.Close();
+                }
+                else
+                {
+                    List<Parser.Text.ScriptLine> lines = new List<Parser.Text.ScriptLine>();
+                    do
+                    {
+                        DbDataReader specReader = null;
+                        try
+                        {
+                            Parser.Text.ScriptLine currentLine;
+                            if (reader.GetBoolean(2))//isImg
+                                currentLine = new Parser.Text.ScriptLine(reader.GetString(3));
+                            else
+                                currentLine = new Parser.Text.ScriptLine(reader.GetString(4), reader.GetString(3));
+
+                            selector.CommandText = "SELECT underline,colour,sbegin,length FROM SpecialText WHERE dialog_id = " + reader.GetInt32(0);
+                            specReader = selector.ExecuteReader();
+
+                            currentLine.subTexts = GetSpecialText(reader);
+                            specReader.Close();
+                            lines.Add(currentLine);
+                        }catch{
+                            specReader.Close();
+                            throw;
+                        }
+
+                    } while (reader.Read());
+                    reader.Close();
+                    meta.lines = lines.ToArray();
+                }
+                return meta;
+            }catch{
+                reader.Close();
+                throw;
+            }
+        }
+        public override Page GetPage(int pageno, bool x2)
         {
             System.Diagnostics.Debugger.Break();
-            return new Page();
+
+            Page page = new Page();
+                
+            page.meta = GetMeta(pageno,x2);
+           
+
+            return page;
         }
         override public bool ReadLastIndexedOrCreateDatabase()
         {
@@ -270,11 +361,12 @@ namespace Reader_UI
             textWrite.Transaction = sqlsTrans;
             textWrite.ExecuteNonQuery();
 
-            textWrite.CommandText = "INSERT INTO Dialog (page_id,isNarrative,isImg,text,colour) VALUES (" + page + ", @narr,@isIm, @tex,@colour) SELECT SCOPE_IDENTITY()";
+            textWrite.CommandText = "INSERT INTO Dialog (page_id,x2,isNarrative,isImg,text,colour) VALUES (" + page + ",@xt, @narr,@isIm, @tex,@colour) SELECT SCOPE_IDENTITY()";
 
             if (tex.narr != null)
             {
-
+                textWrite.Parameters.Clear();
+                AddParameterWithValue(textWrite, "@xt", x2);
                 AddParameterWithValue(textWrite, "@narr", true);
                 AddParameterWithValue(textWrite, "@isIm", tex.narr.isImg);
                 AddParameterWithValue(textWrite, "@tex", tex.narr.text);
@@ -289,6 +381,7 @@ namespace Reader_UI
                 for (int i = 0; i < tex.lines.Count(); ++i)
                 {
                     textWrite.Parameters.Clear();
+                    AddParameterWithValue(textWrite, "@xt", x2);
                     AddParameterWithValue(textWrite, "@narr", false);
                     AddParameterWithValue(textWrite, "@isIm", tex.lines[i].isImg);
                     AddParameterWithValue(textWrite, "@tex", tex.lines[i].text);

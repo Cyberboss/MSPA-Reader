@@ -97,8 +97,8 @@ namespace Reader_UI
         public abstract void Commit();
         public abstract void Close();
 
-        public abstract Page GetPage(int pageno);
-        public Page WaitPage(int pageno)
+        public abstract Page GetPage(int pageno,bool x2);
+        public Page WaitPage(int pageno, bool x2)
         {
             if (!archivedPages.IsPageArchived(pageno))
             {
@@ -108,7 +108,7 @@ namespace Reader_UI
                     System.Threading.Thread.Sleep(1000);
                 } while (!archivedPages.IsPageArchived(pageno));
             }
-            return GetPage(pageno);
+            return GetPage(pageno,x2);
         }
 
         void HandleCascade(System.ComponentModel.BackgroundWorker bgw, int progress)
