@@ -142,7 +142,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             WriteResource(FUCKYOU, 6715);
             Parser.Text asdf = new Parser.Text();
             asdf.narr = new Parser.Text.ScriptLine("#000000", "");
-            asdf.title = "[S] Cascade.";
+            asdf.title = "";
             Parser.Link[] lnk = new Parser.Link[1];
             lnk[0] = new Parser.Link("", 6716);
             WriteLinks(lnk, 6715);
