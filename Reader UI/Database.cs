@@ -192,7 +192,6 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 {
 
                     currentProgress = (int)(((float)(currentPage - 1 - startPage) / (float)(pagesToParse)) * 100.0f);
-                    bgw.ReportProgress(currentProgress, "Page " + currentPage + ":");
                     if (Enum.IsDefined(typeof(PagesOfImportance), currentPage) && currentPage != (int)PagesOfImportance.HOMESTUCK_PAGE_ONE)
                     {
                         try
@@ -250,7 +249,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 var links = parser.GetLinks();
                 var text = parser.GetText();
 
-                bgw.ReportProgress(currentProgress, text.title);
+                bgw.ReportProgress(currentProgress, "Page " + currentPage + ": text.title");
                 if (text.narr == null)
                 {
                     bgw.ReportProgress(currentProgress, text.promptType);
