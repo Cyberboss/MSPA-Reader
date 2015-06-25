@@ -256,15 +256,22 @@ namespace Reader_UI
                     //I seriously don't know if this is reliable but narrative seems to come on the second p if it exists
 
                     //TODO: Support different fonts
-                    var narrative = contentTable.Descendants("p").ElementAt(1);
-                    if (narrative != null)
+                    try
                     {
-                        var hexReg = Regex.Match(narrative.OuterHtml, hexColourRegex);
-                        Text.ScriptLine narr = new Text.ScriptLine(hexReg.Success ? hexReg.Value : "#000000", narrative.InnerText.Trim());
-                        CheckLineForSpecialSubText(narrative, narr);
-                        texts.narr = narr;
+                        var decs = contentTable.Descendants("p");
+                        var narrative = decs.ElementAt(1);
+                        if (narrative != null)
+                        {
+                            var hexReg = Regex.Match(narrative.OuterHtml, hexColourRegex);
+                            Text.ScriptLine narr = new Text.ScriptLine(hexReg.Success ? hexReg.Value : "#000000", narrative.InnerText.Trim());
+                            CheckLineForSpecialSubText(narrative, narr);
+                            texts.narr = narr;
+                        }
                     }
-
+                    catch
+                    {
+                        texts.narr = new Text.ScriptLine("#000000","");
+                    }
                     
                 }
             
@@ -388,7 +395,6 @@ namespace Reader_UI
                 source = WebUtility.HtmlDecode(source);
                 var html = new HtmlDocument();
                 html.LoadHtml(source);
-                //TODO: Support for 2x pages
 
                 if (IsScratch(pageno))
                 {
@@ -425,6 +431,6 @@ namespace Reader_UI
                 return false;
             }
             return true;
-        }
+         }
     }
 }

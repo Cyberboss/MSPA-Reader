@@ -9,6 +9,13 @@ namespace Reader_UI
 {
     public abstract class Database
     {
+        public class Page
+        {
+            public Parser.Text meta;
+            public Parser.Resource[] resources;
+            public Parser.Link[] links;
+        }
+
         Parser parser = null;
 
         protected List<int> archivedPages = new List<int>();
@@ -122,7 +129,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             Parser.Text asdf = new Parser.Text();
             asdf.narr = new Parser.Text.ScriptLine("#000000", "");
             asdf.title = "[S] Cascade.";
-            WriteText(asdf, 6009, false);
+            WriteText(asdf, 7395, false);
             ArchivePageNumber(7395,false);
             Commit();
 
