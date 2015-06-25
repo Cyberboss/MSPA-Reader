@@ -127,7 +127,7 @@ namespace Reader_UI
                 connectionString = GetLocalDB("MSPAArchive");
             }
 
-            sqlsRConn = new SqlConnection(connectionString);
+            sqlsRConn = new SqlConnection(connectionString + "MultipleActiveResultSets=True;");
             sqlsWConn = new SqlConnection(connectionString);
             sqlsRConn.Open();
             sqlsWConn.Open();
@@ -195,9 +195,9 @@ namespace Reader_UI
                                 currentLine = new Parser.Text.ScriptLine(reader.GetString(3));
                             else
                                 currentLine = new Parser.Text.ScriptLine(reader.GetString(4), reader.GetString(3));
-
-                            selector.CommandText = "SELECT underline,colour,sbegin,length FROM SpecialText WHERE dialog_id = " + reader.GetInt32(0);
-                            specReader = selector.ExecuteReader();
+                            var selector2 = sqlsRConn.CreateCommand();
+                            selector2.CommandText = "SELECT underline,colour,sbegin,length FROM SpecialText WHERE dialog_id = " + reader.GetInt32(0);
+                            specReader = selector2.ExecuteReader();
 
                             currentLine.subTexts = GetSpecialText(reader);
                             specReader.Close();
@@ -278,7 +278,7 @@ namespace Reader_UI
         public override Page GetPage(int pageno, bool x2)
         {
 
-            Page page = new Page();
+            Page page = new Page(pageno);
                 
             page.meta = GetMeta(pageno,false);
             page.resources = GetResources(pageno,false);

@@ -25,6 +25,11 @@ namespace Reader_UI
         }
         public class Page
         {
+            public readonly int number;
+            public Page(int no)
+            {
+                number = no;
+            }
             public Parser.Text meta,meta2;
             public Parser.Resource[] resources,resources2;
             public Parser.Link[] links,links2;

@@ -1,15 +1,26 @@
-﻿//https://social.msdn.microsoft.com/Forums/windows/en-US/97c18a1d-729e-4a68-8223-0fcc9ab9012b/automatically-wrap-text-in-label?forum=winforms
+﻿//heavily modified idea from
+//https://social.msdn.microsoft.com/Forums/windows/en-US/97c18a1d-729e-4a68-8223-0fcc9ab9012b/automatically-wrap-text-in-label?forum=winforms
 using System;
 using System.Text;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
-public class GrowLabel : Label
+public class GrowLabel : TextBox
 {
+    private const int EM_GETLINECOUNT = 0xba;
+    [DllImport("user32", EntryPoint = "SendMessageA", CharSet = CharSet.Ansi, SetLastError = true, ExactSpelling = true)]
+    private static extern int SendMessage(int hwnd, int wMsg, int wParam, int lParam);
     private bool mGrowing;
     public GrowLabel()
     {
-        this.AutoSize = false;
+        ReadOnly = true;
+        BorderStyle = 0;
+        TabStop = false;
+        Multiline = true;
+        WordWrap = true;
+        //we are a textbox bc you actually cant read mspa without highlighting
+        //this.AutoSize = true;
     }
     private void resizeLabel()
     {
@@ -17,9 +28,8 @@ public class GrowLabel : Label
         try
         {
             mGrowing = true;
-            Size sz = new Size(this.Width, Int32.MaxValue);
-            sz = TextRenderer.MeasureText(this.Text, this.Font, sz, TextFormatFlags.WordBreak);
-            this.Height = sz.Height;
+            var numberOfLines = SendMessage(Handle.ToInt32(), EM_GETLINECOUNT, 0, 0);
+            this.Height = (Font.Height + 2) * numberOfLines;
         }
         finally
         {

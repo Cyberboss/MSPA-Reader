@@ -40,12 +40,12 @@ namespace Reader_UI
         {
             db = idb;
             InitializeComponent();
+            WindowState = FormWindowState.Maximized;
             FormClosed += Reader_Closed;
             numericUpDown1.Maximum = db.lastPage;
             numericUpDown1.Minimum = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
             numericUpDown1.Value = numericUpDown1.Minimum;
             AcceptButton = jumpButton;
-            WindowState = FormWindowState.Maximized;
             Shown += Reader_Shown;
             for (int i = 0; i < mspaHeaderLink.Count(); ++i)
                 mspaHeaderLink[i] = null;
@@ -54,8 +54,16 @@ namespace Reader_UI
             mrAjax.RunWorkerCompleted += mrAjax_RunWorkerCompleted;
             pageRequest = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
             mrAjax.RunWorkerAsync();
-            this.FormClosing += Reader_FormClosing;
+            FormClosing += Reader_FormClosing;
+            Resize += Reader_Resize;
         }
+
+        void Reader_Resize(object sender, EventArgs e)
+        {
+            Location = new Point(0, 0);
+            WindowState = FormWindowState.Maximized;
+        }
+
 
         void Reader_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -94,7 +102,7 @@ namespace Reader_UI
 
             title = new GrowLabel();
             title.Width = REGULAR_PAGE_TITLE_WIDTH;
-            title.TextAlign = ContentAlignment.MiddleCenter;
+            title.TextAlign = HorizontalAlignment.Center;
             title.Font = new System.Drawing.Font("Courier New", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             title.Text = page.meta.title;
             comicPanel.Controls.Add(title);
@@ -130,9 +138,9 @@ namespace Reader_UI
             {
                 narrative = new GrowLabel();
                 narrative.Width = REGULAR_NARRATIVE_WIDTH;
-                narrative.TextAlign = ContentAlignment.MiddleCenter;
+                narrative.TextAlign = HorizontalAlignment.Center;
                 narrative.Font = new System.Drawing.Font("Courier New", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-                narrative.Text = page.meta.narr.text;
+                narrative.Text = page.meta.narr.text.Trim();
                 leftSide = comicPanel.Width / 2 - narrative.Width / 2;
                 narrative.Location = new Point(leftSide, currentHeight);
                 currentHeight += narrative.Height;
@@ -180,12 +188,17 @@ namespace Reader_UI
 
             if (mrAjax.IsBusy)
                 return;
+            numericUpDown1.Value = pg;
             ShowLoadingScreen();
             pageRequest = pg;
             mrAjax.RunWorkerAsync();
         }
         void Reader_Shown(object sender, EventArgs e)
         {
+            Location = new Point(0, 0);
+            WindowState = FormWindowState.Maximized;
+            this.MinimumSize = this.Size;
+            this.MaximumSize = this.Size;
             CurtainsUp();
         }
         void RemoveControl(Control c)
@@ -469,6 +482,12 @@ namespace Reader_UI
         private void mrAjax_DoWork(object sender, DoWorkEventArgs e)
         {
             page = db.WaitPage(pageRequest);
+        }
+
+        private void goBack_Click(object sender, EventArgs e)
+        {
+            if(page.number > (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE)
+                WakeUpMr(page.number - 1);
         }
 
 

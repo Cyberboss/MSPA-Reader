@@ -35,6 +35,7 @@
             this.button3 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
             this.mrAjax = new System.ComponentModel.BackgroundWorker();
+            this.goBack = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -109,6 +110,17 @@
             // 
             this.mrAjax.DoWork += new System.ComponentModel.DoWorkEventHandler(this.mrAjax_DoWork);
             // 
+            // goBack
+            // 
+            this.goBack.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.goBack.Location = new System.Drawing.Point(265, 506);
+            this.goBack.Name = "goBack";
+            this.goBack.Size = new System.Drawing.Size(121, 31);
+            this.goBack.TabIndex = 5;
+            this.goBack.Text = "Go Back";
+            this.goBack.UseVisualStyleBackColor = true;
+            this.goBack.Click += new System.EventHandler(this.goBack_Click);
+            // 
             // Reader
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -116,6 +128,7 @@
             this.AutoScroll = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(752, 549);
+            this.Controls.Add(this.goBack);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.jumpButton);
@@ -125,6 +138,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Reader";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "MS Paint Adventures";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
@@ -140,6 +154,7 @@
         private System.Windows.Forms.Button button4;
         private System.ComponentModel.BackgroundWorker mrAjax;
         private System.Windows.Forms.Button jumpButton;
+        private System.Windows.Forms.Button goBack;
 
     }
 }
