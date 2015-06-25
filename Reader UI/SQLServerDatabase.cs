@@ -231,14 +231,41 @@ namespace Reader_UI
 
                 while (reader.Read())
                 {
-                    
+
                     if (!reader.IsDBNull(2))
-                        res.Add(new Parser.Resource((byte[])reader.GetValue(0),reader.GetString(1),reader.GetString(2)));
+                        res.Add(new Parser.Resource((byte[])reader.GetValue(0), reader.GetString(1), reader.GetString(2)));
                     else
                         res.Add(new Parser.Resource((byte[])reader.GetValue(0), reader.GetString(1)));
 
                 }
+                reader.Close();
 
+                return res.ToArray();
+
+            }
+            catch
+            {
+                reader.Close();
+                throw;
+            }
+        }
+        Parser.Link[] GetLinks(int pageno, bool x2)
+        {
+            DbDataReader reader = null;
+            try
+            {
+                DbCommand selector = sqlsRConn.CreateCommand();
+                selector.CommandText = "SELECT linked_page_id, link_text FROM Links WHERE page_id = " + pageno + " AND x2 = " + (x2 ? 1 : 0);
+
+                reader = selector.ExecuteReader();
+
+                List<Parser.Link> res = new List<Parser.Link>();
+
+                while (reader.Read())
+                {
+                    res.Add(new Parser.Link(reader.GetString(1),reader.GetInt32(0)));
+                }
+                reader.Close();
                 return res.ToArray();
 
             }
@@ -250,18 +277,18 @@ namespace Reader_UI
         }
         public override Page GetPage(int pageno, bool x2)
         {
-            System.Diagnostics.Debugger.Break();
 
             Page page = new Page();
                 
             page.meta = GetMeta(pageno,false);
             page.resources = GetResources(pageno,false);
+            page.links = GetLinks(pageno, false);
 
             if (x2)
             {
-                page.meta2 = GetMeta(pageno, false);
-                page.resources2 = GetResources(pageno, false);
-
+                page.meta2 = GetMeta(pageno, true);
+                page.resources2 = GetResources(pageno, true);
+                page.links = GetLinks(pageno, true);
             }
            
 

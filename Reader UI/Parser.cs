@@ -332,10 +332,10 @@ namespace Reader_UI
                     || link.InnerText == "Delete Game Data"
                     || link.InnerText == "Load Game")
                     continue;
-                var res = Regex.Match(actualLink.Trim(), linkNumberRegex);
+                var res = Regex.Match(actualLink, linkNumberRegex);
                 if (res.Success)
                 {
-                    links.Add(new Link(link.InnerText, Convert.ToInt32(res.Value)));
+                    links.Add(new Link(link.InnerText.Trim(), Convert.ToInt32(res.Value)));
                     linkListForTextParse.Add(link);
                 }
             }
