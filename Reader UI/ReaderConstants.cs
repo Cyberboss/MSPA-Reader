@@ -33,7 +33,6 @@ namespace Reader_UI
         public const int REGULAR_BACK_COLOUR_G = 90;
 
         public const int REGULAR_PANEL_WIDTH = 950;
-        public const int REGULAR_PANEL_HEIGHT = 771;
         public const int REGULAR_PANEL_Y_OFFSET = 19;
 
         public const int REGULAR_PANEL_COLOUR_R = 192;
@@ -69,10 +68,21 @@ namespace Reader_UI
 
         public const int REGULAR_TITLE_Y_OFFSET = 14;
 
-        public const int REGULAR_COMIC_PANEL_WIDTH = 600;
+        public const int REGULAR_COMIC_PANEL_WIDTH = 650;
 
         public const int REGULAR_COMIC_PANEL_COLOUR_R = 238;
         public const int REGULAR_COMIC_PANEL_COLOUR_G = 238;
         public const int REGULAR_COMIC_PANEL_COLOUR_B = 238;
+
+        public const int REGULAR_NARRATIVE_WIDTH = 600;
+        public const int REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT = 31;
+        public const string REGULAR_LINK_PREFIX = ">";
+
+        public const int REGULAR_COMIC_PANEL_Y_OFFSET = 7;
+        public const int REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET = 23;
+        public const int REGULAR_COMIC_PANEL_BOTTOM_PADDING = 97;
+
+        public const int REGULAR_PAGE_TITLE_WIDTH = 590;
+        public const int REGULAR_PAGE_LINK_WIDTH = 600;
     }
 }

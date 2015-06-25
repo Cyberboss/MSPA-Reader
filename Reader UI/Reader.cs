@@ -30,9 +30,10 @@ namespace Reader_UI
         }
 
         //page stuff
-        Label title = null;
+        GrowLabel title = null;
         List<GifStream> gifs = new List<GifStream>();
-        Label narrative = null;
+        GrowLabel narrative = null;
+        Label linkPrefix = null;
         LinkLabel next = null, tereziPassword = null;
 
         public Reader(Database idb)
@@ -43,6 +44,7 @@ namespace Reader_UI
             numericUpDown1.Maximum = db.lastPage;
             numericUpDown1.Minimum = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
             numericUpDown1.Value = numericUpDown1.Minimum;
+            AcceptButton = jumpButton;
             WindowState = FormWindowState.Maximized;
             Shown += Reader_Shown;
             for (int i = 0; i < mspaHeaderLink.Count(); ++i)
@@ -62,7 +64,11 @@ namespace Reader_UI
 
         void mrAjax_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            LoadPage();
+            if (page == null)
+            {
+                MessageBox.Show("An internal error occurred when retrieving the page. Usually this means you are out of memory or some resource on the page on mspa is 404'ing.");
+            }else
+                LoadPage();
         }
 
         void LoadPage()
@@ -81,14 +87,14 @@ namespace Reader_UI
         void LoadRegularPage()
         {
             comicPanel = new Panel();
-            comicPanel.Height = mainPanel.Height;
             comicPanel.Width = REGULAR_COMIC_PANEL_WIDTH;
-            comicPanel.Location = new Point(mainPanel.Width / 2 - comicPanel.Width / 2, 0);
+            comicPanel.Location = new Point(mainPanel.Width / 2 - comicPanel.Width / 2, REGULAR_COMIC_PANEL_Y_OFFSET);
             comicPanel.BackColor = Color.FromArgb(REGULAR_COMIC_PANEL_COLOUR_R, REGULAR_COMIC_PANEL_COLOUR_G, REGULAR_COMIC_PANEL_COLOUR_B);
             mainPanel.Controls.Add(comicPanel);
 
-            title = new Label();
-            title.AutoSize = true;
+            title = new GrowLabel();
+            title.Width = REGULAR_PAGE_TITLE_WIDTH;
+            title.TextAlign = ContentAlignment.MiddleCenter;
             title.Font = new System.Drawing.Font("Courier New", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             title.Text = page.meta.title;
             comicPanel.Controls.Add(title);
@@ -98,7 +104,11 @@ namespace Reader_UI
             for (int i = 0; i < page.resources.Count(); i++)
             {
                 if (!Parser.IsGif(page.resources[i].originalFileName))
+                {
+                    Debugger.Break();
                     continue;
+                }
+                
                 var tempPB = new GifStream();
                 tempPB.loc = new System.IO.MemoryStream(page.resources[i].data);
                 tempPB.gif = new PictureBox();
@@ -108,12 +118,71 @@ namespace Reader_UI
                 tempPB.gif.Location = new Point(comicPanel.Width / 2 - tempPB.gif.Width / 2, currentHeight);
                 comicPanel.Controls.Add(tempPB.gif);
                 currentHeight += tempPB.gif.Height;
+                if (i < page.resources.Count() - 1)
+                    currentHeight += REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET;
                 gifs.Add(tempPB);
             }
 
-                
-            
+            currentHeight+=REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
+
+            int leftSide = 0;
+            if (page.meta.narr != null)
+            {
+                narrative = new GrowLabel();
+                narrative.Width = REGULAR_NARRATIVE_WIDTH;
+                narrative.TextAlign = ContentAlignment.MiddleCenter;
+                narrative.Font = new System.Drawing.Font("Courier New", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                narrative.Text = page.meta.narr.text;
+                leftSide = comicPanel.Width / 2 - narrative.Width / 2;
+                narrative.Location = new Point(leftSide, currentHeight);
+                currentHeight += narrative.Height;
+                comicPanel.Controls.Add(narrative);
+            }
+
+            currentHeight += REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
+
+            if (page.links.Count() > 0)
+            {
+
+                linkPrefix = new Label();
+                linkPrefix.AutoSize = true;
+                linkPrefix.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                linkPrefix.Text = REGULAR_LINK_PREFIX;
+                linkPrefix.Location = new Point(leftSide, currentHeight);
+                comicPanel.Controls.Add(linkPrefix);    
+
+                next = new GrowLinkLabel();
+                next.Width = 600;
+                next.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                next.Text = "    " + page.links[0].originalText;
+                next.Location = new Point(leftSide, currentHeight);
+                next.LinkClicked += next_LinkClicked;
+                comicPanel.Controls.Add(next);
+
+                linkPrefix.BringToFront();
+            }
+
+            comicPanel.Height = currentHeight + REGULAR_COMIC_PANEL_BOTTOM_PADDING;
+
+            mainPanel.Height = comicPanel.Height + REGULAR_COMIC_PANEL_Y_OFFSET + REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET;
+
             RemoveControl(pageLoadingProgress);
+        }
+
+        void next_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+
+            WakeUpMr(page.links[0].pageNumber);
+
+        }
+        void WakeUpMr(int pg)
+        {
+
+            if (mrAjax.IsBusy)
+                return;
+            ShowLoadingScreen();
+            pageRequest = pg;
+            mrAjax.RunWorkerAsync();
         }
         void Reader_Shown(object sender, EventArgs e)
         {
@@ -306,8 +375,7 @@ namespace Reader_UI
             headerPanel.Location = new Point(this.Width / 2 - headerPanel.Width / 2, 0);
             
         }
-
-        void CleanControls()
+        void CleanComic()
         {
 
             RemoveControl(title);
@@ -317,10 +385,15 @@ namespace Reader_UI
                 pic.loc.Dispose();
             }
             gifs.Clear();
+            RemoveControl(linkPrefix);
             RemoveControl(next);
             RemoveControl(tereziPassword);
 
             RemoveControl(comicPanel);
+        }
+        void CleanControls()
+        {
+            CleanComic();
 
             RemoveControl(mainPanel);
             for (int i = 0; i < mspaHeaderLink.Count(); ++i)
@@ -341,57 +414,63 @@ namespace Reader_UI
                     BackColor = Color.FromArgb(REGULAR_BACK_COLOUR_R,REGULAR_BACK_COLOUR_G,REGULAR_BACK_COLOUR_B);
                     
                     mainPanel = new Panel();
+                    mainPanel.AutoSize = true;
+                    mainPanel.MaximumSize = new System.Drawing.Size(REGULAR_PANEL_WIDTH, Int32.MaxValue);
                     mainPanel.Width = REGULAR_PANEL_WIDTH;
-                    mainPanel.Height = REGULAR_PANEL_HEIGHT;
                     mainPanel.Location = new Point(this.Width / 2 - REGULAR_PANEL_WIDTH / 2, REGULAR_PANEL_Y_OFFSET);
                     mainPanel.BackColor = Color.FromArgb(REGULAR_PANEL_COLOUR_R, REGULAR_PANEL_COLOUR_G, REGULAR_PANEL_COLOUR_B);
                     Controls.Add(mainPanel);
 
                     SetupHeader();
 
-                    pageLoadingProgress = new ProgressBar();
-                    pageLoadingProgress.Style = ProgressBarStyle.Marquee;
-                    pageLoadingProgress.MarqueeAnimationSpeed = 32;
-                    pageLoadingProgress.Width = mainPanel.Width / 2;
-                    pageLoadingProgress.Location = new Point(mainPanel.Width / 4, mainPanel.Height/2 - pageLoadingProgress.Height);
-                    mainPanel.Controls.Add(pageLoadingProgress);
+                    ShowLoadingScreen();
 
                     break;
             }
 
+        }
+        void ShowLoadingScreen()
+        {
+
+            CleanComic();
+            pageLoadingProgress = new ProgressBar();
+            pageLoadingProgress.Style = ProgressBarStyle.Marquee;
+            pageLoadingProgress.MarqueeAnimationSpeed = 32;
+            pageLoadingProgress.Width = mainPanel.Width / 2;
+            pageLoadingProgress.Location = new Point(mainPanel.Width / 4, mainPanel.Height / 2 - pageLoadingProgress.Height);
+            mainPanel.Controls.Add(pageLoadingProgress);
+            Update();
         }
         void Reader_Closed(object sender, System.EventArgs e)
         {
             Program.Shutdown(this, db);
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void openArchiver_Click(object sender, EventArgs e)
         {
             Program.Open(db, true);
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void jumpPage_Click(object sender, EventArgs e)
         {
-            if (mrAjax.IsBusy)
-                return;
-            pageRequest = (int)numericUpDown1.Value;
-            mrAjax.RunWorkerAsync();
+            WakeUpMr((int)numericUpDown1.Value);
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void closeButton_Click(object sender, EventArgs e)
         {
             Close();
         }
 
-        private void button4_Click(object sender, EventArgs e)
+        private void minimizeButton_Click(object sender, EventArgs e)
         {
             WindowState = FormWindowState.Minimized;
         }
 
         private void mrAjax_DoWork(object sender, DoWorkEventArgs e)
         {
-            page = db.WaitPage((int)numericUpDown1.Value);
+            page = db.WaitPage(pageRequest);
         }
+
 
 
     }

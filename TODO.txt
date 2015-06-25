@@ -6,8 +6,9 @@ Ideally we could use the built in web client and load a local html. But we'd nee
 without being on mspaintadventures first")
 
 -- Better narrative/dialog parsing
+-- Support purple links
 -- Note side by side longways images so the reader doesn't arrange them turnways (*horizontal, *vertical)
--- Support fonts other than courier
+-- Support fonts via parsing instead of statically
 -- Fix pesterlog system message ordering
 -- Fix pesterlog system message regex
 -- Read through and mark down problem pages
@@ -15,7 +16,7 @@ without being on mspaintadventures first")
 -- Support Sqlite
 -- Support Mysql
 -- Better parsing techniques
--- Support *nix????
+-- Support *nix???? (I won't be the one to do this)
 -- S̶u̶p̶p̶o̶r̶t̶ ̶V̶r̶i̶s̶k̶a̶  Dismissed as Impossible
 while(true)
 	-- More Horses

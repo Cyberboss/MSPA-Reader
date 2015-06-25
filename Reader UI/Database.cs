@@ -127,15 +127,22 @@ namespace Reader_UI
         }
         public Page WaitPage(int pageno)
         {
-            if (!archivedPages.IsPageArchived(pageno))
+            try
             {
-                archivedPages.Request(pageno);
-                do
+                if (!archivedPages.IsPageArchived(pageno))
                 {
-                    System.Threading.Thread.Sleep(1000);
-                } while (!archivedPages.IsPageArchived(pageno));
+                    archivedPages.Request(pageno);
+                    do
+                    {
+                        System.Threading.Thread.Sleep(1000);
+                    } while (!archivedPages.IsPageArchived(pageno));
+                }
+                return GetPage(pageno, parser.Is2x(pageno));
             }
-            return GetPage(pageno,parser.Is2x(pageno));
+            catch
+            {
+                return null;
+            }
         }
 
         void HandleCascade(System.ComponentModel.BackgroundWorker bgw, int progress)
