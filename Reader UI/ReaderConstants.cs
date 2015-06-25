@@ -66,5 +66,13 @@ namespace Reader_UI
 
         public const int REGULAR_NUMBER_OF_HEADER_CANDY_CORNS = 4;
         public const int REGULAR_NUMBER_OF_HEADER_LABELS = 17;
+
+        public const int REGULAR_TITLE_Y_OFFSET = 14;
+
+        public const int REGULAR_COMIC_PANEL_WIDTH = 600;
+
+        public const int REGULAR_COMIC_PANEL_COLOUR_R = 238;
+        public const int REGULAR_COMIC_PANEL_COLOUR_G = 238;
+        public const int REGULAR_COMIC_PANEL_COLOUR_B = 238;
     }
 }

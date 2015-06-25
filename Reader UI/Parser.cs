@@ -95,6 +95,7 @@ namespace Reader_UI
         const string pesterLogRegex = @"-- .*? --";
         //TODO: the above regex is way too vague
         const string chumhandleRegex = @"\[[G|C|A|T]{2}\]|\[EB\]";
+        const string gifFileRegex = @".+\.gif";
 
         public bool x2Flag;
 
@@ -108,6 +109,10 @@ namespace Reader_UI
         Text texts;
         List<HtmlNode> linkListForTextParse = new List<HtmlNode>();
 
+        public static bool IsGif(string file)
+        {
+            return Regex.Match(file, gifFileRegex).Success;
+        }
         public int GetLatestPage()
         {
             var response = client.GetByteArrayAsync(new Uri("http://www.mspaintadventures.com/?viewlog=6")).Result;

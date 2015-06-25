@@ -6,6 +6,7 @@ Ideally we could use the built in web client and load a local html. But we'd nee
 without being on mspaintadventures first")
 
 -- Better narrative/dialog parsing
+-- Note side by side longways images so the reader doesn't arrange them turnways (*horizontal, *vertical)
 -- Support fonts other than courier
 -- Fix pesterlog system message ordering
 -- Fix pesterlog system message regex

@@ -15,12 +15,26 @@ namespace Reader_UI
     {
 
         Database db;
-        Panel mainPanel = null, headerPanel = null;
+        Panel mainPanel = null, headerPanel = null, comicPanel = null;
         Label[] mspaHeaderLink = new Label[REGULAR_NUMBER_OF_HEADER_LABELS];
         PictureBox[] candyCorn = new PictureBox[REGULAR_NUMBER_OF_HEADER_CANDY_CORNS];
         ProgressBar pageLoadingProgress = null;
         int pageRequest;
         Database.Page page = null;
+        Database.Style previousStyle;
+
+        class GifStream
+        {
+            public PictureBox gif;
+            public System.IO.MemoryStream loc;
+        }
+
+        //page stuff
+        Label title = null;
+        List<GifStream> gifs = new List<GifStream>();
+        Label narrative = null;
+        LinkLabel next = null, tereziPassword = null;
+
         public Reader(Database idb)
         {
             db = idb;
@@ -38,14 +52,69 @@ namespace Reader_UI
             mrAjax.RunWorkerCompleted += mrAjax_RunWorkerCompleted;
             pageRequest = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
             mrAjax.RunWorkerAsync();
+            this.FormClosing += Reader_FormClosing;
+        }
+
+        void Reader_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            CleanControls();
         }
 
         void mrAjax_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            RemoveControl(pageLoadingProgress);
-            pageLoadingProgress = null;
+            LoadPage();
         }
 
+        void LoadPage()
+        {
+            var newStyle = db.GetStyle(pageRequest);
+            if(previousStyle != newStyle)
+                CurtainsUp(newStyle);
+            switch (newStyle)
+            {
+                case Database.Style.REGULAR:
+                    LoadRegularPage();
+                    break;
+            }
+        }
+
+        void LoadRegularPage()
+        {
+            comicPanel = new Panel();
+            comicPanel.Height = mainPanel.Height;
+            comicPanel.Width = REGULAR_COMIC_PANEL_WIDTH;
+            comicPanel.Location = new Point(mainPanel.Width / 2 - comicPanel.Width / 2, 0);
+            comicPanel.BackColor = Color.FromArgb(REGULAR_COMIC_PANEL_COLOUR_R, REGULAR_COMIC_PANEL_COLOUR_G, REGULAR_COMIC_PANEL_COLOUR_B);
+            mainPanel.Controls.Add(comicPanel);
+
+            title = new Label();
+            title.AutoSize = true;
+            title.Font = new System.Drawing.Font("Courier New", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            title.Text = page.meta.title;
+            comicPanel.Controls.Add(title);
+            title.Location = new Point(comicPanel.Width / 2 - title.Width / 2, REGULAR_TITLE_Y_OFFSET);
+
+            int currentHeight = title.Location.Y + title.Height + REGULAR_TITLE_Y_OFFSET;
+            for (int i = 0; i < page.resources.Count(); i++)
+            {
+                if (!Parser.IsGif(page.resources[i].originalFileName))
+                    continue;
+                var tempPB = new GifStream();
+                tempPB.loc = new System.IO.MemoryStream(page.resources[i].data);
+                tempPB.gif = new PictureBox();
+                tempPB.gif.Image = Image.FromStream(tempPB.loc);
+                tempPB.gif.Width = tempPB.gif.Image.Width;
+                tempPB.gif.Height = tempPB.gif.Image.Height;
+                tempPB.gif.Location = new Point(comicPanel.Width / 2 - tempPB.gif.Width / 2, currentHeight);
+                comicPanel.Controls.Add(tempPB.gif);
+                currentHeight += tempPB.gif.Height;
+                gifs.Add(tempPB);
+            }
+
+                
+            
+            RemoveControl(pageLoadingProgress);
+        }
         void Reader_Shown(object sender, EventArgs e)
         {
             CurtainsUp();
@@ -237,9 +306,22 @@ namespace Reader_UI
             headerPanel.Location = new Point(this.Width / 2 - headerPanel.Width / 2, 0);
             
         }
-        void CurtainsUp(Database.Style s = Database.Style.REGULAR)
+
+        void CleanControls()
         {
-            Update();
+
+            RemoveControl(title);
+            foreach (var pic in gifs)
+            {
+                RemoveControl(pic.gif);
+                pic.loc.Dispose();
+            }
+            gifs.Clear();
+            RemoveControl(next);
+            RemoveControl(tereziPassword);
+
+            RemoveControl(comicPanel);
+
             RemoveControl(mainPanel);
             for (int i = 0; i < mspaHeaderLink.Count(); ++i)
                 RemoveControl(mspaHeaderLink[i]);
@@ -247,6 +329,13 @@ namespace Reader_UI
                 RemoveControl(candyCorn[i]);
             RemoveControl(headerPanel);
             RemoveControl(pageLoadingProgress);
+        }
+        void CurtainsUp(Database.Style s = Database.Style.REGULAR)
+        {
+            previousStyle = s;
+
+            CleanControls();
+
             switch (s) { 
                 case Database.Style.REGULAR:
                     BackColor = Color.FromArgb(REGULAR_BACK_COLOUR_R,REGULAR_BACK_COLOUR_G,REGULAR_BACK_COLOUR_B);

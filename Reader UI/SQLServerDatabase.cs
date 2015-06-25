@@ -33,7 +33,7 @@ namespace Reader_UI
         {
             try
             {
-                string outputFolder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Application.StartupPath + @"\..\Database");
+                string outputFolder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Application.StartupPath + @"\Database");
                 string mdfFilename = dbName + ".mdf";
                 string dbFileName = Path.Combine(outputFolder, mdfFilename);
                 string logFileName = Path.Combine(outputFolder, String.Format("{0}_log.ldf", dbName));
@@ -364,7 +364,7 @@ namespace Reader_UI
                 {
                     Transact();
                     DbCommand creationCommands = sqlsWConn.CreateCommand();
-                    creationCommands.CommandText = File.ReadAllText(Application.StartupPath + @"\..\DBCreation.sql");
+                    creationCommands.CommandText = File.ReadAllText(Application.StartupPath + @"\DBCreation.sql");
                     creationCommands.Transaction = sqlsTrans;
                     creationCommands.ExecuteNonQuery();
                     Commit();

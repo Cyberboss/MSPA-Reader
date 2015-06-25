@@ -279,7 +279,10 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                     oldPage = currentPage;
                     var req = (archivedPages.GetRequest());
                     if (req != 0)
+                    {
                         currentPage = req;
+                        bgw.ReportProgress(currentProgress, "Responding to User Request for Page " + req);
+                    }
 
 
                     currentProgress = (int)(((float)(currentPage - 1 - startPage) / (float)(pagesToParse)) * 100.0f);
