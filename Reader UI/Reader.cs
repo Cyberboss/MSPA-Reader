@@ -17,6 +17,7 @@ namespace Reader_UI
         Panel mainPanel = null, headerPanel = null;
         Label[] mspaHeaderLink = new Label[REGULAR_NUMBER_OF_HEADER_LABELS];
         PictureBox[] candyCorn = new PictureBox[REGULAR_NUMBER_OF_HEADER_CANDY_CORNS];
+        ProgressBar pageLoadingProgress = null;
         public Reader(Database idb)
         {
             db = idb;
@@ -233,6 +234,7 @@ namespace Reader_UI
             for (int i = 0; i < candyCorn.Count(); ++i)
                 RemoveControl(candyCorn[i]);
             RemoveControl(headerPanel);
+            RemoveControl(pageLoadingProgress);
             switch (s) { 
                 case Database.Style.REGULAR:
                     BackColor = Color.FromArgb(REGULAR_BACK_COLOUR_R,REGULAR_BACK_COLOUR_G,REGULAR_BACK_COLOUR_B);
@@ -245,6 +247,13 @@ namespace Reader_UI
                     Controls.Add(mainPanel);
 
                     SetupHeader();
+
+                    pageLoadingProgress = new ProgressBar();
+                    pageLoadingProgress.Style = ProgressBarStyle.Marquee;
+                    pageLoadingProgress.MarqueeAnimationSpeed = 32;
+                    pageLoadingProgress.Width = mainPanel.Width / 2;
+                    pageLoadingProgress.Location = new Point(mainPanel.Width / 4, mainPanel.Height/2 - pageLoadingProgress.Height);
+                    mainPanel.Controls.Add(pageLoadingProgress);
 
                     break;
             }
