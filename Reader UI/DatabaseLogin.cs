@@ -50,7 +50,7 @@ namespace Reader_UI
             Update();
             try
             {
-                db.Connect(ipInput.Text, usernameInput.Text, passwordInput.Text);
+                db.Connect(ipInput.Text, usernameInput.Text, passwordInput.Text,resetDatabase.Checked);
                 Hide();
                 Program.Open(db, false);
                 Program.Open(db, true);
@@ -87,6 +87,7 @@ namespace Reader_UI
                     MessageBox.Show("How are you managing to screw up a .NET program???");
                     break;
             }
+            resetDatabase.Enabled = true;
         }
 
 

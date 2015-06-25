@@ -65,7 +65,6 @@ namespace Reader_UI
             public ScriptLine narr = null;
             public string promptType = null;
             public ScriptLine[] lines = null;
-            public string linkPrefix = null;
         }
         public class Link
         {
@@ -77,6 +76,7 @@ namespace Reader_UI
                 pageNumber = pN;
             }
         }
+
         const string prepend = "http://www.mspaintadventures.com/?s=6&p=";
         const string gifRegex = @"http:\/\/(?!" + 
             @".*v2_blankstrip"  //stuff to ignore
@@ -96,10 +96,12 @@ namespace Reader_UI
         //TODO: the above regex is way too vague
         const string chumhandleRegex = @"\[[G|C|A|T]{2}\]|\[EB\]";
 
+        public bool x2Flag;
+
         WebClient web = new WebClient();
         HttpClient client = new HttpClient();
 
-        HtmlNode contentTable;
+        HtmlNode contentTable,secondContentTable;
 
         List<Resource> resources = new List<Resource>();
         List<Link> links = new List<Link>();
@@ -220,7 +222,7 @@ namespace Reader_UI
                                 line.Add(new Text.ScriptLine(gifReg.Groups[1].Value));
                                 continue;
                             }
-
+                            //there is no way
                             if (Regex.Match(currentLine.InnerText, chumhandleRegex).Success)
                             {
                                 //TODO: Handle log msg colours
@@ -267,13 +269,6 @@ namespace Reader_UI
                 }
             
 
-            {//link prefix
-                //we find the link to the next page delete it from the contentTable and check the innertext of it's parent
-                var link = linkListForTextParse.Last();
-                var parent = link.ParentNode;
-                link.Remove();
-                texts.linkPrefix = parent.InnerText;
-            }
         }
         void ParseResources(bool clear)
         {
@@ -304,6 +299,15 @@ namespace Reader_UI
         {
             
             return resources.ToArray();
+        }
+        public void Reparse()
+        {
+            if (!x2Flag)
+                throw new Exception();
+            contentTable = secondContentTable;
+            ParseResources(true);
+            ParseLinks();
+            ParseText();
         }
         void ParseLinks()
         {
@@ -345,10 +349,6 @@ namespace Reader_UI
                 return web.DownloadData(file.Replace("cdn.mspaintadventures.com", "www.mspaintadventures.com"));
             }
         }
-        bool IsScratch(int page)
-        {
-            return page >= 5664 && page <= 5981;
-        }
         void ScratchPreParse(HtmlDocument html)
         {
             //grab the header from the top of the page
@@ -362,9 +362,17 @@ namespace Reader_UI
             string oFN = Regex.Match(actualFilePath, scratchHeaderImageFilenameRegex).Groups[1].Value;
             string title = Regex.Match(innerHtml, scratchTitleRegex).Groups[1].Value;
             resources.Add(new Resource(data, oFN, title));
-            
+
 
             resources = resources.Distinct().ToList();  //filter out any double grabs
+        }
+        bool IsScratch(int page)
+        {
+            return page >= 5664 && page <= 5981;
+        }
+        bool Is2x(int page)
+        {
+            return page >= 7688 && page <= 7825;
         }
         bool IsSBAHJ(int pageno)
         {
@@ -374,6 +382,7 @@ namespace Reader_UI
         {
             try
             {
+                x2Flag = false;
                 var response = client.GetByteArrayAsync(new Uri(prepend + pageno.ToString("D6"))).Result;
                 String source = Encoding.GetEncoding("utf-8").GetString(response, 0, response.Length - 1);
                 source = WebUtility.HtmlDecode(source);
@@ -389,6 +398,18 @@ namespace Reader_UI
                 else if (IsSBAHJ(pageno))
                 {
                     contentTable = html.DocumentNode.Descendants("table").First().Descendants("table").ElementAt(1).Descendants("table").First();
+                }
+                else if (Is2x(pageno))
+                {
+                    x2Flag = true;
+                    //i think he looks like a bitch
+
+                    //same place in the html as regulars thankfully but that's about as easy as its's going to be from here
+                    contentTable = html.DocumentNode.SelectSingleNode("//comment()[contains(., 'COMIC ONE')]").ParentNode.SelectSingleNode("table");
+                    secondContentTable = html.DocumentNode.SelectSingleNode("//comment()[contains(., 'COMIC TWO')]").ParentNode.SelectSingleNode("table");
+
+                    //essentially it's two pages of comics right next to each other. Simple enough for the parser. Fucking nightmare for the db and reader
+
                 }
                 else
                 {

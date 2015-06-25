@@ -38,6 +38,7 @@
             this.passwordInput = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.okButton = new System.Windows.Forms.Button();
+            this.resetDatabase = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // dataSourceInput
@@ -118,11 +119,22 @@
             this.okButton.UseVisualStyleBackColor = true;
             this.okButton.Click += new System.EventHandler(this.okButton_Click);
             // 
+            // resetDatabase
+            // 
+            this.resetDatabase.AutoSize = true;
+            this.resetDatabase.Location = new System.Drawing.Point(24, 182);
+            this.resetDatabase.Name = "resetDatabase";
+            this.resetDatabase.Size = new System.Drawing.Size(103, 17);
+            this.resetDatabase.TabIndex = 10;
+            this.resetDatabase.Text = "Reset Database";
+            this.resetDatabase.UseVisualStyleBackColor = true;
+            // 
             // DatabaseLogin
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(499, 213);
+            this.Controls.Add(this.resetDatabase);
             this.Controls.Add(this.okButton);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.passwordInput);
@@ -152,5 +164,6 @@
         private System.Windows.Forms.TextBox passwordInput;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button okButton;
+        private System.Windows.Forms.CheckBox resetDatabase;
     }
 }

@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test Resources", "Test Reso
 	ProjectSection(SolutionItems) = preProject
 		Test Resources\00001.gif = Test Resources\00001.gif
 		Test Resources\02926.swf = Test Resources\02926.swf
+		Test Resources\2xExample.html = Test Resources\2xExample.html
 		Test Resources\cascade_loaderExt.swf = Test Resources\cascade_loaderExt.swf
 		Test Resources\cascade_segment1.swf = Test Resources\cascade_segment1.swf
 		Test Resources\cascade_segment2.swf = Test Resources\cascade_segment2.swf

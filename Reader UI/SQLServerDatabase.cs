@@ -19,6 +19,8 @@ namespace Reader_UI
         string connectionString = null;
 
         readonly bool compact;
+        bool resetFlag = false;
+
         public SQLServerDatabase(bool com)
         {
             compact = com;
@@ -109,11 +111,16 @@ namespace Reader_UI
             }
         }
 
-        override public void Connect(string serverName, string username, string password)
+        override public void Connect(string serverName, string username, string password,bool reset)
         {
+            resetFlag = reset;
             if (!compact)
             {
-                connectionString = "Data Source=" + serverName + ";Initial Catalog=MSPAArchive;User ID=" + username + ";Password=" + password;
+                connectionString = "Server=" + serverName + ";Initial Catalog=MSPAArchive;";
+                if (username != "")
+                    connectionString += "User ID=" + username + ";Password=" + password;
+                else
+                    connectionString += "Integrated Security=True;";
             }
             else
             {
@@ -130,8 +137,10 @@ namespace Reader_UI
             DbDataReader myReader = null;
             try
             {
+                if (resetFlag)
+                    throw new Exception();
                 DbCommand myCommand = sqlsWConn.CreateCommand();
-                myCommand.CommandText = "SELECT * FROM PagesArchived";
+                myCommand.CommandText = "SELECT DISTINCT page_id FROM PagesArchived";
                 myReader = myCommand.ExecuteReader();
                 while (myReader.Read())
                 {
@@ -190,13 +199,16 @@ namespace Reader_UI
                 catch { }
                 try
                 {
+                    Transact();
                     DbCommand creationCommands = sqlsWConn.CreateCommand();
-
                     creationCommands.CommandText = File.ReadAllText(Application.StartupPath + @"\..\DBCreation.sql");
+                    creationCommands.Transaction = sqlsTrans;
                     creationCommands.ExecuteNonQuery();
+                    Commit();
                 }
                 catch
                 {
+                    Rollback();
                     if(compact)
                         MessageBox.Show("Error creating database, make sure the application has read/write permissions in the working directory.");
                     else
@@ -243,13 +255,13 @@ namespace Reader_UI
                 resourceWrite.ExecuteNonQuery();
             }
         }
-        override public void WriteText(Parser.Text tex, int page)
+        override public void WriteText(Parser.Text tex, int page, bool x2)
         {
             DbCommand textWrite = sqlsWConn.CreateCommand();
-            textWrite.CommandText = "INSERT INTO PageMeta VALUES ("+page+",@tit,@pttt,@lp)";
+            textWrite.CommandText = "INSERT INTO PageMeta VALUES (" + page + ",@xt,@tit,@pttt)";
+            AddParameterWithValue(textWrite, "@xt", x2);
             AddParameterWithValue(textWrite, "@tit", tex.title != null ? (object)tex.title : (object)DBNull.Value);
             AddParameterWithValue(textWrite, "@pttt", tex.promptType != null ? (object)tex.promptType : (object)DBNull.Value);
-            AddParameterWithValue(textWrite, "@lp", tex.linkPrefix != null ? (object)tex.linkPrefix : (object)DBNull.Value);
             textWrite.Transaction = sqlsTrans;
             textWrite.ExecuteNonQuery();
 
@@ -291,11 +303,12 @@ namespace Reader_UI
                 }
             }
         }
-        public override void ArchivePageNumber(int page)
+        public override void ArchivePageNumber(int page, bool x2)
         {
             DbCommand pageWrite = sqlsWConn.CreateCommand();
             pageWrite.Transaction = sqlsTrans;
-            pageWrite.CommandText = "INSERT INTO PagesArchived VALUES (" + page + ")";
+            pageWrite.CommandText = "INSERT INTO PagesArchived VALUES (" + page + ", @xt)";
+            AddParameterWithValue(pageWrite, "@xt", x2);
             pageWrite.ExecuteNonQuery();
             archivedPages.Add(page);
         }
