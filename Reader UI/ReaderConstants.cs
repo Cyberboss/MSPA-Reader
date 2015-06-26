@@ -84,7 +84,11 @@ namespace Reader_UI
 
         public const int REGULAR_PAGE_TITLE_WIDTH = 590;
         public const int REGULAR_PAGE_LINK_WIDTH = 600;
-        public const int FLASH_MOVIE_WIDTH = 650;
-        public const int FLASH_MOVIE_HEIGHT = 450;
+        public const int REGULAR_FLASH_MOVIE_WIDTH = 650;
+        public const int REGULAR_FLASH_MOVIE_HEIGHT = 450;
+
+        public const int REGULAR_PESTERLOG_WIDTH = 600;
+        public const int REGULAR_PESTERLOG_HEIGHT = 25;
+
     }
 }

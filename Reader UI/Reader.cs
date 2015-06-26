@@ -37,6 +37,7 @@ namespace Reader_UI
         GrowLabel narrative = null;
         Label linkPrefix = null;
         LinkLabel next = null, tereziPassword = null;
+        Panel pesterlog = null;
 
         public Reader(Database idb)
         {
@@ -113,8 +114,6 @@ namespace Reader_UI
             }
 
             //dump the garbage
-            page.links = null;
-            page.links2 = null;
             page.meta = null;
             page.meta2 = null;
             page.resources2 = null;
@@ -154,8 +153,8 @@ namespace Reader_UI
                     flash.Height = 650;
                     break;
                 default:
-                    flash.Width = FLASH_MOVIE_WIDTH;
-                    flash.Height = FLASH_MOVIE_HEIGHT;
+                    flash.Width = REGULAR_FLASH_MOVIE_WIDTH;
+                    flash.Height = REGULAR_FLASH_MOVIE_HEIGHT;
                     break;
             }
         }
@@ -176,9 +175,10 @@ namespace Reader_UI
             title.Location = new Point(comicPanel.Width / 2 - title.Width / 2, REGULAR_TITLE_Y_OFFSET);
 
             int currentHeight = title.Location.Y + title.Height + REGULAR_TITLE_Y_OFFSET;
+            bool flashflag= false;
             for (int i = 0; i < page.resources.Count(); i++)
             {
-                if (!Parser.IsGif(page.resources[i].originalFileName))
+                if (!flashflag && !Parser.IsGif(page.resources[i].originalFileName))
                 {
                     flash = new AxShockwaveFlashObjects.AxShockwaveFlash();
                     comicPanel.Controls.Add(flash);
@@ -194,8 +194,9 @@ namespace Reader_UI
                     flash.Location = new Point(comicPanel.Width / 2 - flash.Width / 2, currentHeight);
                     currentHeight += flash.Height;
                     flash.Play();
+                    flashflag = true;
                 }
-                else
+                else if (Parser.IsGif(page.resources[i].originalFileName))
                 {
 
                     var tempPB = new GifStream();
@@ -215,18 +216,33 @@ namespace Reader_UI
 
             currentHeight+=REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
 
-            int leftSide = 0;
+            int leftSide;
             if (page.meta.narr != null)
             {
-                narrative = new GrowLabel();
-                narrative.Width = REGULAR_NARRATIVE_WIDTH;
-                narrative.TextAlign = HorizontalAlignment.Center;
-                narrative.Font = new System.Drawing.Font("Courier New", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-                narrative.Text = page.meta.narr.text.Trim();
-                leftSide = comicPanel.Width / 2 - narrative.Width / 2;
-                narrative.Location = new Point(leftSide, currentHeight);
-                currentHeight += narrative.Height;
-                comicPanel.Controls.Add(narrative);
+                    narrative = new GrowLabel();
+                    narrative.Width = REGULAR_NARRATIVE_WIDTH;
+                    narrative.TextAlign = HorizontalAlignment.Center;
+                    narrative.Font = new System.Drawing.Font("Courier New", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                    narrative.Text = page.meta.narr.text.Trim();
+                    leftSide = comicPanel.Width / 2 - narrative.Width / 2;
+                    narrative.Location = new Point(leftSide, currentHeight);
+                    currentHeight += narrative.Height;
+                    comicPanel.Controls.Add(narrative);
+                
+            }
+            else
+            {
+                pesterlog = new Panel();
+                pesterlog.AutoSize = true;
+                pesterlog.Width = REGULAR_PESTERLOG_WIDTH;
+
+                pesterlog.MaximumSize = new Size(REGULAR_PESTERLOG_WIDTH, Int32.MaxValue);
+                pesterlog.BorderStyle = BorderStyle.FixedSingle;
+                leftSide = comicPanel.Width / 2 - pesterlog.Width / 2;
+                pesterlog.Location = new Point(leftSide, currentHeight);
+                comicPanel.Controls.Add(pesterlog);
+
+                currentHeight += pesterlog.Height;
             }
 
             currentHeight += REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
@@ -486,6 +502,7 @@ namespace Reader_UI
             RemoveControl(next);
             RemoveControl(tereziPassword);
             RemoveControl(flash);
+            RemoveControl(pesterlog);
 
             RemoveControl(comicPanel);
         }
