@@ -24,6 +24,9 @@ namespace Reader_UI
         Database.Page page = null;
         Database.Style previousStyle;
         AxShockwaveFlashObjects.AxShockwaveFlash flash = null;
+        Button pesterHideShow = null;
+        List<GrowLabel> conversations = new List<GrowLabel>();
+        bool pesterLogVisible;
 
         class GifStream
         {
@@ -114,8 +117,6 @@ namespace Reader_UI
             }
 
             //dump the garbage
-            page.meta = null;
-            page.meta2 = null;
             page.resources2 = null;
             page.resources = null;
 
@@ -160,12 +161,14 @@ namespace Reader_UI
         }
         void LoadRegularPage()
         {
+            //panel
             comicPanel = new Panel();
             comicPanel.Width = REGULAR_COMIC_PANEL_WIDTH;
             comicPanel.Location = new Point(mainPanel.Width / 2 - comicPanel.Width / 2, REGULAR_COMIC_PANEL_Y_OFFSET);
             comicPanel.BackColor = Color.FromArgb(REGULAR_COMIC_PANEL_COLOUR_R, REGULAR_COMIC_PANEL_COLOUR_G, REGULAR_COMIC_PANEL_COLOUR_B);
             mainPanel.Controls.Add(comicPanel);
 
+            //title
             title = new GrowLabel();
             title.Width = REGULAR_PAGE_TITLE_WIDTH;
             title.TextAlign = HorizontalAlignment.Center;
@@ -174,6 +177,7 @@ namespace Reader_UI
             comicPanel.Controls.Add(title);
             title.Location = new Point(comicPanel.Width / 2 - title.Width / 2, REGULAR_TITLE_Y_OFFSET);
 
+            //content
             int currentHeight = title.Location.Y + title.Height + REGULAR_TITLE_Y_OFFSET;
             bool flashflag= false;
             for (int i = 0; i < page.resources.Count(); i++)
@@ -216,6 +220,7 @@ namespace Reader_UI
 
             currentHeight+=REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
 
+            //words
             int leftSide;
             if (page.meta.narr != null)
             {
@@ -235,18 +240,36 @@ namespace Reader_UI
                 pesterlog = new Panel();
                 pesterlog.AutoSize = true;
                 pesterlog.Width = REGULAR_PESTERLOG_WIDTH;
-
+                pesterlog.Height = REGULAR_PESTERLOG_HEIGHT;
                 pesterlog.MaximumSize = new Size(REGULAR_PESTERLOG_WIDTH, Int32.MaxValue);
                 pesterlog.BorderStyle = BorderStyle.FixedSingle;
                 leftSide = comicPanel.Width / 2 - pesterlog.Width / 2;
                 pesterlog.Location = new Point(leftSide, currentHeight);
                 comicPanel.Controls.Add(pesterlog);
 
+                pesterHideShow = new Button();
+                pesterHideShow.AutoSize = true;
+                pesterHideShow.Font = new System.Drawing.Font("Arial", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                pesterHideShow.Text = "Show " + page.meta.promptType;
+                pesterHideShow.Location = new Point(pesterlog.Width / 2 - pesterHideShow.Width / 2, 0);
+                pesterHideShow.Click += pesterHideShow_Click;
+                pesterLogVisible = false;
+                pesterlog.Controls.Add(pesterHideShow);
+
+                //log lines
+                for (int i = 0; i < page.meta.lines.Count(); ++i)
+                {
+                    GrowLabel tmpl = new GrowLabel();
+                    tmpl.MaximumSize = new Size(pesterlog.ClientSize.Width, Int32.MaxValue);
+                    tmpl.Font.
+                }
+
                 currentHeight += pesterlog.Height;
             }
 
             currentHeight += REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
 
+            //next page
             if (page.links.Count() > 0)
             {
 
@@ -273,6 +296,23 @@ namespace Reader_UI
             mainPanel.Height = comicPanel.Height + REGULAR_COMIC_PANEL_Y_OFFSET + REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET;
 
             RemoveControl(pageLoadingProgress);
+        }
+
+        void pesterHideShow_Click(object sender, EventArgs e)
+        {
+            if (!pesterLogVisible)
+            {
+                pesterHideShow.Text = "Hide " + page.meta.promptType;
+                foreach (var line in conversations)
+                    pesterlog.Controls.Add(line);
+            }
+            else
+            {
+                pesterHideShow.Text = "Show " + page.meta.promptType;
+                foreach (var line in conversations)
+                    pesterlog.Controls.Remove(line);
+            }
+            pesterLogVisible = !pesterLogVisible;
         }
 
         void next_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -502,6 +542,10 @@ namespace Reader_UI
             RemoveControl(next);
             RemoveControl(tereziPassword);
             RemoveControl(flash);
+            RemoveControl(pesterHideShow);
+            foreach (var line in conversations)
+                RemoveControl(line);
+            conversations.Clear();
             RemoveControl(pesterlog);
 
             RemoveControl(comicPanel);
