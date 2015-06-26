@@ -262,13 +262,22 @@ namespace Reader_UI
                 {
                     if (!page.meta.lines[i].isImg)
                     {
-                        GrowLabel tmpl = new GrowLabel();
+                        var tmpl = new GrowRich();
                         tmpl.Width = REGULAR_PESTERLOG_LINE_WIDTH;
                         tmpl.MaximumSize = new Size(tmpl.Width, Int32.MaxValue);
                         tmpl.Font = new System.Drawing.Font("Courier New", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
                         tmpl.BackColor = pesterlog.BackColor;   //can't change forecolour otherwise
                         tmpl.ForeColor = System.Drawing.ColorTranslator.FromHtml(page.meta.lines[i].hexColour);
                         tmpl.Text = page.meta.lines[i].text;
+
+                        if (page.meta.lines[i].subTexts.Count() != 0)
+                            for (int j = 0; j < page.meta.lines[i].subTexts.Count(); ++j)
+                            {
+                                tmpl.Select(page.meta.lines[i].subTexts[j].begin, page.meta.lines[i].subTexts[j].length);
+                                if (page.meta.lines[i].subTexts[j].underlined)
+                                    tmpl.SelectionFont = new System.Drawing.Font("Courier New", 10.5F, System.Drawing.FontStyle.Regular | System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                                tmpl.SelectionColor = System.Drawing.ColorTranslator.FromHtml(page.meta.lines[i].subTexts[j].colour);
+                            }
                         tmpl.Location = new Point(pesterlog.ClientSize.Width / 2 - tmpl.Width / 2, pLMaxHeight - currentHeight);
                         pLMaxHeight += tmpl.Height;
                         conversations.Add(tmpl);

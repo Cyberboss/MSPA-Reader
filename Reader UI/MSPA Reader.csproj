@@ -75,6 +75,9 @@
     <Compile Include="GrowLinkLabel.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="GrowRich.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="MSPAForm.cs">
       <SubType>Form</SubType>
     </Compile>
