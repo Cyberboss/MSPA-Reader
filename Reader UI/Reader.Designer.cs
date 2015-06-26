@@ -39,13 +39,17 @@
             this.autoSave = new System.Windows.Forms.CheckBox();
             this.exitButton = new System.Windows.Forms.Button();
             this.minimizeButton = new System.Windows.Forms.Button();
+            this.flashWarning = new System.Windows.Forms.Label();
+            this.helpButton = new System.Windows.Forms.Button();
+            this.startOverButton = new System.Windows.Forms.Button();
+            this.deleteButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.SuspendLayout();
             // 
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(323, 286);
+            this.button1.Location = new System.Drawing.Point(709, 286);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(117, 31);
             this.button1.TabIndex = 0;
@@ -68,7 +72,7 @@
             0,
             0});
             this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(67, 20);
+            this.numericUpDown1.Size = new System.Drawing.Size(110, 20);
             this.numericUpDown1.TabIndex = 1;
             this.numericUpDown1.Value = new decimal(new int[] {
             1901,
@@ -79,9 +83,9 @@
             // jumpButton
             // 
             this.jumpButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.jumpButton.Location = new System.Drawing.Point(85, 297);
+            this.jumpButton.Location = new System.Drawing.Point(128, 301);
             this.jumpButton.Name = "jumpButton";
-            this.jumpButton.Size = new System.Drawing.Size(67, 25);
+            this.jumpButton.Size = new System.Drawing.Size(109, 25);
             this.jumpButton.TabIndex = 2;
             this.jumpButton.Text = "Jump";
             this.jumpButton.UseVisualStyleBackColor = true;
@@ -94,9 +98,9 @@
             // goBack
             // 
             this.goBack.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.goBack.Location = new System.Drawing.Point(158, 297);
+            this.goBack.Location = new System.Drawing.Point(243, 301);
             this.goBack.Name = "goBack";
-            this.goBack.Size = new System.Drawing.Size(67, 25);
+            this.goBack.Size = new System.Drawing.Size(90, 25);
             this.goBack.TabIndex = 5;
             this.goBack.Text = "Go Back";
             this.goBack.UseVisualStyleBackColor = true;
@@ -105,11 +109,11 @@
             // loadButton
             // 
             this.loadButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.loadButton.Location = new System.Drawing.Point(85, 270);
+            this.loadButton.Location = new System.Drawing.Point(128, 270);
             this.loadButton.Name = "loadButton";
-            this.loadButton.Size = new System.Drawing.Size(67, 25);
+            this.loadButton.Size = new System.Drawing.Size(109, 25);
             this.loadButton.TabIndex = 6;
-            this.loadButton.Text = "Load";
+            this.loadButton.Text = "Load Game";
             this.loadButton.UseVisualStyleBackColor = true;
             this.loadButton.Click += new System.EventHandler(this.loadButton_Click);
             // 
@@ -118,9 +122,9 @@
             this.saveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.saveButton.Location = new System.Drawing.Point(12, 270);
             this.saveButton.Name = "saveButton";
-            this.saveButton.Size = new System.Drawing.Size(67, 25);
+            this.saveButton.Size = new System.Drawing.Size(110, 25);
             this.saveButton.TabIndex = 7;
-            this.saveButton.Text = "Save";
+            this.saveButton.Text = "Save Game";
             this.saveButton.UseVisualStyleBackColor = true;
             this.saveButton.Click += new System.EventHandler(this.saveButton_Click);
             // 
@@ -128,7 +132,7 @@
             // 
             this.autoSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.autoSave.AutoSize = true;
-            this.autoSave.Location = new System.Drawing.Point(158, 275);
+            this.autoSave.Location = new System.Drawing.Point(352, 306);
             this.autoSave.Name = "autoSave";
             this.autoSave.Size = new System.Drawing.Size(76, 17);
             this.autoSave.TabIndex = 8;
@@ -139,7 +143,7 @@
             // exitButton
             // 
             this.exitButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.exitButton.Location = new System.Drawing.Point(413, 11);
+            this.exitButton.Location = new System.Drawing.Point(799, 11);
             this.exitButton.Name = "exitButton";
             this.exitButton.Size = new System.Drawing.Size(27, 21);
             this.exitButton.TabIndex = 9;
@@ -150,7 +154,7 @@
             // minimizeButton
             // 
             this.minimizeButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.minimizeButton.Location = new System.Drawing.Point(380, 11);
+            this.minimizeButton.Location = new System.Drawing.Point(766, 11);
             this.minimizeButton.Name = "minimizeButton";
             this.minimizeButton.Size = new System.Drawing.Size(27, 21);
             this.minimizeButton.TabIndex = 10;
@@ -158,13 +162,62 @@
             this.minimizeButton.UseVisualStyleBackColor = true;
             this.minimizeButton.Click += new System.EventHandler(this.minimizeButton_Click_1);
             // 
+            // flashWarning
+            // 
+            this.flashWarning.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.flashWarning.AutoSize = true;
+            this.flashWarning.ForeColor = System.Drawing.Color.Red;
+            this.flashWarning.Location = new System.Drawing.Point(56, 254);
+            this.flashWarning.Name = "flashWarning";
+            this.flashWarning.Size = new System.Drawing.Size(321, 13);
+            this.flashWarning.TabIndex = 11;
+            this.flashWarning.Text = "PAGE CONTAINS FLASH. KEYBOARD NAVIGATION DISABLED";
+            this.flashWarning.Visible = false;
+            // 
+            // helpButton
+            // 
+            this.helpButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.helpButton.Location = new System.Drawing.Point(586, 286);
+            this.helpButton.Name = "helpButton";
+            this.helpButton.Size = new System.Drawing.Size(117, 31);
+            this.helpButton.TabIndex = 12;
+            this.helpButton.Text = "Help and About";
+            this.helpButton.UseVisualStyleBackColor = true;
+            this.helpButton.Click += new System.EventHandler(this.helpButton_Click);
+            // 
+            // startOverButton
+            // 
+            this.startOverButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.startOverButton.Location = new System.Drawing.Point(243, 270);
+            this.startOverButton.Name = "startOverButton";
+            this.startOverButton.Size = new System.Drawing.Size(90, 25);
+            this.startOverButton.TabIndex = 13;
+            this.startOverButton.Text = "Start Over";
+            this.startOverButton.UseVisualStyleBackColor = true;
+            this.startOverButton.Click += new System.EventHandler(this.startOverButton_Click);
+            // 
+            // deleteButton
+            // 
+            this.deleteButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.deleteButton.Location = new System.Drawing.Point(339, 270);
+            this.deleteButton.Name = "deleteButton";
+            this.deleteButton.Size = new System.Drawing.Size(89, 25);
+            this.deleteButton.TabIndex = 14;
+            this.deleteButton.Text = "Delete Game";
+            this.deleteButton.UseVisualStyleBackColor = true;
+            this.deleteButton.Click += new System.EventHandler(this.deleteButton_Click);
+            // 
             // Reader
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(452, 329);
+            this.ClientSize = new System.Drawing.Size(838, 329);
+            this.Controls.Add(this.deleteButton);
+            this.Controls.Add(this.startOverButton);
+            this.Controls.Add(this.helpButton);
+            this.Controls.Add(this.flashWarning);
             this.Controls.Add(this.minimizeButton);
             this.Controls.Add(this.exitButton);
             this.Controls.Add(this.autoSave);
@@ -198,6 +251,10 @@
         private System.Windows.Forms.CheckBox autoSave;
         private System.Windows.Forms.Button exitButton;
         private System.Windows.Forms.Button minimizeButton;
+        private System.Windows.Forms.Label flashWarning;
+        private System.Windows.Forms.Button helpButton;
+        private System.Windows.Forms.Button startOverButton;
+        private System.Windows.Forms.Button deleteButton;
 
     }
 }

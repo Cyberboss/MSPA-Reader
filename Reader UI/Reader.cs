@@ -29,6 +29,9 @@ namespace Reader_UI
         Label errorLabel = null;
         bool pesterLogVisible;
         int pLMaxHeight, pLMinHeight;
+        bool pageContainsFlash = false;
+
+        Stack<int> pageQueue = new Stack<int>();
 
         class GifStream
         {
@@ -67,31 +70,34 @@ namespace Reader_UI
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            if(page != null)
-            switch (keyData)
+            if (!pageContainsFlash&& page != null)
             {
-                case Keys.F5:
-                    WakeUpMr(page.number);
-                    return true;
-                case Keys.Left:
-                    if (page.number > (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE)
-                        WakeUpMr(page.number - 1);
-                    return true;
-                case Keys.Right:
-                    if (page.number < db.lastPage)
-                        WakeUpMr(page.number + 1);
-                    return true;
-                case Keys.Space:
-                    if (page != null && (page.meta.lines != null && page.meta.lines.Count() != 0)
-                        || (page.meta2 != null && page.meta2.lines != null && page.meta2.lines.Count() != 0))
-                        pesterHideShow_Click(null, null);
-                    return true;
-                case Keys.Down:
-                    VerticalScroll.Value = Math.Min(VerticalScroll.Value + 50,VerticalScroll.Maximum);
-                    return true;
-                case Keys.Up:
-                    VerticalScroll.Value = Math.Max(VerticalScroll.Value - 50, VerticalScroll.Minimum);
-                    return true;
+
+                switch (keyData)
+                {
+                    case Keys.F5:
+                        WakeUpMr(page.number);
+                        return true;
+                    case Keys.Left:
+                        if (page.number > (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE)
+                            WakeUpMr(page.number - 1);
+                        return true;
+                    case Keys.Right:
+                        if (page.number < db.lastPage)
+                            WakeUpMr(page.number + 1);
+                        return true;
+                    case Keys.Space:
+                        if (page != null && (page.meta.lines != null && page.meta.lines.Count() != 0)
+                            || (page.meta2 != null && page.meta2.lines != null && page.meta2.lines.Count() != 0))
+                            pesterHideShow_Click(null, null);
+                        return true;
+                    case Keys.Down:
+                        VerticalScroll.Value = Math.Min(VerticalScroll.Value + 50, VerticalScroll.Maximum);
+                        return true;
+                    case Keys.Up:
+                        VerticalScroll.Value = Math.Max(VerticalScroll.Value - 50, VerticalScroll.Minimum);
+                        return true;
+                }
             }
             // Call the base class
             return base.ProcessCmdKey(ref msg, keyData);
@@ -125,6 +131,8 @@ namespace Reader_UI
                 errorLabel.Location = new Point(mainPanel.Width / 2 - errorLabel.Width / 2, mainPanel.Height / 2 - errorLabel.Height / 2);
             }else
                 LoadPage();
+
+            flashWarning.Visible = pageContainsFlash;
         }
 
         void LoadPage()
@@ -134,6 +142,7 @@ namespace Reader_UI
                 Properties.Settings.Default.lastPage = page.number;
                 Properties.Settings.Default.Save();
             }
+            pageQueue.Push(page.number);
             saveButton.Enabled = true;
             var newStyle = db.GetStyle(pageRequest);
             if(previousStyle != newStyle)
@@ -209,10 +218,9 @@ namespace Reader_UI
 
             //content
             int currentHeight = title.Location.Y + title.Height + REGULAR_TITLE_Y_OFFSET;
-            bool flashflag= false;
             for (int i = 0; i < page.resources.Count(); i++)
             {
-                if (!flashflag && !Parser.IsGif(page.resources[i].originalFileName))
+                if (!pageContainsFlash && !Parser.IsGif(page.resources[i].originalFileName))
                 {
                     flash = new AxShockwaveFlashObjects.AxShockwaveFlash();
                     comicPanel.Controls.Add(flash);
@@ -225,7 +233,7 @@ namespace Reader_UI
                     flash.Location = new Point(comicPanel.Width / 2 - flash.Width / 2, currentHeight);
                     currentHeight += flash.Height;
                     flash.Play();
-                    flashflag = true;
+                    pageContainsFlash = true;
                 }
                 else if (Parser.IsGif(page.resources[i].originalFileName))
                 {
@@ -366,7 +374,6 @@ namespace Reader_UI
             next.Location = new Point(next.Location.X, currentHeight);
             comicPanel.Height = currentHeight + REGULAR_COMIC_PANEL_BOTTOM_PADDING;
 
-            mainPanel.Height = comicPanel.Height + REGULAR_COMIC_PANEL_Y_OFFSET + REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET;
         }
         void pesterHideShow_Click(object sender, EventArgs e)
         {
@@ -385,6 +392,7 @@ namespace Reader_UI
                     pesterlog.Controls.Remove(line);
                 pesterlog.MinimumSize = new Size(REGULAR_PESTERLOG_WIDTH, REGULAR_PESTERLOG_HEIGHT);
             }
+            mainPanel.Height = comicPanel.Height + REGULAR_COMIC_PANEL_Y_OFFSET + REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET;
             pesterLogVisible = !pesterLogVisible;
         }
 
@@ -400,6 +408,7 @@ namespace Reader_UI
             if (mrAjax.IsBusy)
                 return;
             saveButton.Enabled = false;
+            pageContainsFlash = false;
             numericUpDown1.Value = pg;
             ShowLoadingScreen();
             pageRequest = pg;
@@ -412,7 +421,11 @@ namespace Reader_UI
             this.MinimumSize = this.Size;
             this.MaximumSize = this.Size;
             CurtainsUp();
-            pageRequest = Properties.Settings.Default.lastPage;
+            if (Properties.Settings.Default.lastPage >= (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE &&
+                Properties.Settings.Default.lastPage <= db.lastPage)
+                pageRequest = Properties.Settings.Default.lastPage;
+            else
+                pageRequest = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
             mrAjax.RunWorkerAsync();
         }
         void RemoveControl(Control c)
@@ -707,8 +720,10 @@ namespace Reader_UI
 
         private void goBack_Click(object sender, EventArgs e)
         {
-            if(page.number > (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE)
-                WakeUpMr(page.number - 1);
+            if (pageQueue.Count < 2)
+                return;
+            pageQueue.Pop();
+            WakeUpMr(pageQueue.Pop());
         }
 
         private void autoSave_CheckedChanged(object sender, EventArgs e)
@@ -738,6 +753,22 @@ namespace Reader_UI
         private void minimizeButton_Click_1(object sender, EventArgs e)
         {
             WindowState = FormWindowState.Minimized;
+        }
+
+        private void helpButton_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("You can use the arrow keys to navigate! Left and right change pages, Up and down scroll, spacebar toggles pesterlogs. The Go Back button has the functional equivalent of the browser back button. Use the archiver for mass downloading (Try not to though, it hurts Hussie's horses). Made by Cyberboss (/u/Cyberboss_JHCB). E-mail cyberbossMSPAReader@gmail.com with bugs (Pics/steps to reproduce or it didn't happen). MSPA belongs to Hussie not me, don't take credit for or sell this. Source code coming sometime next week.");
+        }
+
+        private void startOverButton_Click(object sender, EventArgs e)
+        {
+            WakeUpMr((int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE);
+        }
+
+        private void deleteButton_Click(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.lastPage = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
+            Properties.Settings.Default.Save();
         }
     }
 }

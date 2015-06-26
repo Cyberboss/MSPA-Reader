@@ -13,7 +13,8 @@ namespace Reader_UI
         
         void Dispose(bool mgd)
         {
-            parser.Dispose();
+            if(parser != null)
+                parser.Dispose();
         }
         public void Dispose()
         {
