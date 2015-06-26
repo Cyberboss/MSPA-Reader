@@ -56,6 +56,27 @@ namespace Reader_UI
             Resize += Reader_Resize;
         }
 
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if(page != null)
+            switch (keyData)
+            {
+                case Keys.F5:
+                    WakeUpMr(page.number);
+                    return true;
+                case Keys.Left:
+                    if (page.number > (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE)
+                        WakeUpMr(page.number - 1);
+                    return true;
+                case Keys.Right:
+                    if (page.number < db.lastPage)
+                        WakeUpMr(page.number + 1);
+                    return true;
+            }
+            // Call the base class
+            return base.ProcessCmdKey(ref msg, keyData);
+         }
+
         void Reader_Resize(object sender, EventArgs e)
         {
             Location = new Point(0, 0);
