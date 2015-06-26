@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using System.Configuration;
 
 namespace Reader_UI
 {
@@ -34,6 +35,7 @@ namespace Reader_UI
             {
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
+                var lastPage = Properties.Settings.Default.lastPage;
                 new DatabaseLogin().Show();
                 Application.Run();       
                 mutex.ReleaseMutex();

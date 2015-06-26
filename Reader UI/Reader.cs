@@ -62,6 +62,7 @@ namespace Reader_UI
             mrAjax.RunWorkerCompleted += mrAjax_RunWorkerCompleted;
             FormClosing += Reader_FormClosing;
             Resize += Reader_Resize;
+            autoSave.Checked = Properties.Settings.Default.autoSave;
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -128,6 +129,12 @@ namespace Reader_UI
 
         void LoadPage()
         {
+            if (Properties.Settings.Default.autoSave)
+            {
+                Properties.Settings.Default.lastPage = page.number;
+                Properties.Settings.Default.Save();
+            }
+            saveButton.Enabled = true;
             var newStyle = db.GetStyle(pageRequest);
             if(previousStyle != newStyle)
                 CurtainsUp(newStyle);
@@ -392,6 +399,7 @@ namespace Reader_UI
 
             if (mrAjax.IsBusy)
                 return;
+            saveButton.Enabled = false;
             numericUpDown1.Value = pg;
             ShowLoadingScreen();
             pageRequest = pg;
@@ -404,7 +412,7 @@ namespace Reader_UI
             this.MinimumSize = this.Size;
             this.MaximumSize = this.Size;
             CurtainsUp();
-            pageRequest = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
+            pageRequest = Properties.Settings.Default.lastPage;
             mrAjax.RunWorkerAsync();
         }
         void RemoveControl(Control c)
@@ -703,7 +711,33 @@ namespace Reader_UI
                 WakeUpMr(page.number - 1);
         }
 
+        private void autoSave_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.autoSave = autoSave.Checked;
+            Properties.Settings.Default.Save();
+        }
 
+        private void saveButton_Click(object sender, EventArgs e)
+        {
+            if (page == null)
+                return;
+            Properties.Settings.Default.lastPage = page.number;
+            Properties.Settings.Default.Save();
+        }
 
+        private void loadButton_Click(object sender, EventArgs e)
+        {
+            WakeUpMr(Properties.Settings.Default.lastPage);
+        }
+
+        private void exitButton_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void minimizeButton_Click_1(object sender, EventArgs e)
+        {
+            WindowState = FormWindowState.Minimized;
+        }
     }
 }

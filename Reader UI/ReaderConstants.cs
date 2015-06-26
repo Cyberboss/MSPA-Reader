@@ -9,6 +9,7 @@ namespace Reader_UI
     public class ReaderConstants : MSPAForm
     {
         // not using enums because i don't feel like dealing with the conversions every time
+        public const int WINDOW_BUTTON_ABSOLUTE_HEIGHT = 12;
 
         public const string REGULAR_LABEL_TEXT_1 = "MS PAINT ADVENTURES";
         public const string REGULAR_LABEL_TEXT_2 = "ARCHIVE";
