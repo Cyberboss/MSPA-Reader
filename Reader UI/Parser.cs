@@ -11,7 +11,7 @@ using System.Diagnostics;
 
 namespace Reader_UI
 {
-    public class Parser
+    public class Parser : IDisposable
     {
         
         public class Resource
@@ -24,6 +24,20 @@ namespace Reader_UI
                 originalFileName = ioFN;
                 titleText = tt;
             }
+        }
+        void Dispose(bool mgd)
+        {
+            web.Dispose();
+            client.Dispose();
+        }
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        ~Parser()
+        {
+            Dispose(false);
         }
         public class Text
         {

@@ -9,14 +9,17 @@ namespace Reader_UI
 {
     static class Program
     {
-        internal class NativeMethods
+        public class NativeMethods
         {
+            //MSDN said to use intptr and the anaylzer is still complaining :\
             public const int HWND_BROADCAST = 0xffff;
-            public static readonly int WM_SHOWME = RegisterWindowMessage("WM_SHOWME");
-            [DllImport("user32")]
-            public static extern bool PostMessage(IntPtr hwnd, int msg, IntPtr wparam, IntPtr lparam);
-            [DllImport("user32")]
-            public static extern int RegisterWindowMessage(string message);
+            public static readonly int WM_SHOWME = (int)RegisterWindowMessage("WM_SHOWME");
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Portability", "CA1901:PInvokeDeclarationsShouldBePortable", MessageId = "1"), DllImport("user32", CharSet = CharSet.Unicode)]
+            public static extern bool PostMessage(IntPtr hwnd, IntPtr msg, IntPtr wparam, IntPtr lparam);
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Portability", "CA1901:PInvokeDeclarationsShouldBePortable", MessageId = "return"), DllImport("user32", CharSet = CharSet.Unicode)]
+            public static extern IntPtr RegisterWindowMessage(string message);
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Portability", "CA1901:PInvokeDeclarationsShouldBePortable", MessageId = "1"), DllImport("user32", CharSet = CharSet.Unicode)]
+            public static extern IntPtr SendMessage(IntPtr hwnd, IntPtr wMsg, IntPtr wParam, IntPtr lParam);
         }
         public static DatabaseWriter dbw = null;
         public static Reader dbr = null;
@@ -41,7 +44,7 @@ namespace Reader_UI
                 // jump on top of all the other windows
                 NativeMethods.PostMessage(
                     (IntPtr)NativeMethods.HWND_BROADCAST,
-                    NativeMethods.WM_SHOWME,
+                    (IntPtr)NativeMethods.WM_SHOWME,
                     IntPtr.Zero,
                     IntPtr.Zero);
             }     

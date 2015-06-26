@@ -6,11 +6,10 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
+
 public class GrowRich : RichTextBox
 {
     private const int EM_GETLINECOUNT = 0xba;
-    [DllImport("user32", EntryPoint = "SendMessageA", CharSet = CharSet.Ansi, SetLastError = true, ExactSpelling = true)]
-    private static extern int SendMessage(int hwnd, int wMsg, int wParam, int lParam);
     private bool mGrowing;
     public GrowRich()
     {
@@ -28,7 +27,7 @@ public class GrowRich : RichTextBox
         try
         {
             mGrowing = true;
-            var numberOfLines = SendMessage(Handle.ToInt32(), EM_GETLINECOUNT, 0, 0);
+            var numberOfLines = (int)Reader_UI.Program.NativeMethods.SendMessage((IntPtr)Handle.ToInt32(), (IntPtr)EM_GETLINECOUNT, (IntPtr)0, (IntPtr)0);
             this.Height = (Font.Height + 2) * numberOfLines;
         }
         finally

@@ -78,7 +78,10 @@ namespace Reader_UI
 
                     DetachDatabase(dbName);
 
-                    cmd.CommandText = String.Format("CREATE DATABASE {0} ON (NAME = N'{0}', FILENAME = '{1}')", dbName, dbFileName);
+                    cmd.CommandText = "CREATE DATABASE @dbname1 ON (NAME = @dbname2, FILENAME = @filename)";
+                    AddParameterWithValue(cmd, "@dbname1", dbName);
+                    AddParameterWithValue(cmd, "@dbname2", dbName);
+                    AddParameterWithValue(cmd, "@filename", dbFileName);
                     cmd.ExecuteNonQuery();
                 }
 
@@ -99,7 +102,8 @@ namespace Reader_UI
                 {
                     connection.Open();
                     SqlCommand cmd = connection.CreateCommand();
-                    cmd.CommandText = String.Format("exec sp_detach_db '{0}'", dbName);
+                    cmd.CommandText = String.Format("exec sp_detach_db @dbname");
+                    AddParameterWithValue(cmd, "@dbname", dbName);
                     cmd.ExecuteNonQuery();
 
                     return true;
@@ -142,14 +146,15 @@ namespace Reader_UI
             }
             return list.ToArray();
         }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         Parser.Text GetMeta(int pageno, bool x2)
         {
             DbDataReader reader = null;
             try
             {
                 DbCommand selector = sqlsRConn.CreateCommand();
-                selector.CommandText = "SELECT title,promptType FROM PageMeta WHERE page_id = " + pageno + " AND x2 = " + (x2 ? 1 : 0);
-            
+                selector.CommandText = "SELECT title,promptType FROM PageMeta WHERE page_id = @pno AND x2 = " + (x2 ? 1 : 0);
+                AddParameterWithValue(selector, "@pno", pageno);
                 reader = selector.ExecuteReader();
 
                 var meta = new Parser.Text();
@@ -163,7 +168,7 @@ namespace Reader_UI
 
                 reader.Close();
 
-                selector.CommandText = "SELECT id,isNarrative,isImg,text,colour FROM Dialog WHERE page_id = " + pageno + " AND x2 = " + (x2 ? 1 : 0);
+                selector.CommandText = "SELECT id,isNarrative,isImg,text,colour FROM Dialog WHERE page_id = @pno AND x2 = " + (x2 ? 1 : 0);
 
                 reader = selector.ExecuteReader();
                 if (!reader.HasRows || !reader.Read())
@@ -176,6 +181,7 @@ namespace Reader_UI
                         meta.narr = new Parser.Text.ScriptLine(reader.GetString(3));
                     else
                         meta.narr = new Parser.Text.ScriptLine(reader.GetString(4), reader.GetString(3));
+                    selector.Parameters.Clear();
                     selector.CommandText = "SELECT underline,colour,sbegin,length FROM SpecialText WHERE dialog_id = " + reader.GetInt32(0);
                     reader.Close();
                     reader = selector.ExecuteReader();
@@ -200,11 +206,14 @@ namespace Reader_UI
                             specReader = selector2.ExecuteReader();
 
                             currentLine.subTexts = GetSpecialText(specReader);
-                            specReader.Close();
                             lines.Add(currentLine);
                         }catch{
-                            specReader.Close();
                             throw;
+                        }
+                        finally
+                        {
+
+                            specReader.Close();
                         }
 
                     } while (reader.Read());
@@ -223,8 +232,8 @@ namespace Reader_UI
             try
             {
                 DbCommand selector = sqlsRConn.CreateCommand();
-                selector.CommandText = "SELECT data,original_filename,title_text FROM Resources WHERE page_id = " + pageno + " AND x2 = " + (x2 ? 1 : 0);
-
+                selector.CommandText = "SELECT data,original_filename,title_text FROM Resources WHERE page_id = @pno AND x2 = " + (x2 ? 1 : 0);
+                AddParameterWithValue(selector, "@pno", pageno);
                 reader = selector.ExecuteReader();
 
                 List<Parser.Resource> res = new List<Parser.Resource>();
@@ -238,15 +247,17 @@ namespace Reader_UI
                         res.Add(new Parser.Resource((byte[])reader.GetValue(0), reader.GetString(1)));
 
                 }
-                reader.Close();
 
                 return res.ToArray();
 
             }
             catch
             {
-                reader.Close();
                 throw;
+            }
+            finally
+            {
+                reader.Close();
             }
         }
         Parser.Link[] GetLinks(int pageno, bool x2)
@@ -255,7 +266,8 @@ namespace Reader_UI
             try
             {
                 DbCommand selector = sqlsRConn.CreateCommand();
-                selector.CommandText = "SELECT linked_page_id, link_text FROM Links WHERE page_id = " + pageno + " AND x2 = " + (x2 ? 1 : 0);
+                selector.CommandText = "SELECT linked_page_id, link_text FROM Links WHERE page_id = @pno AND x2 = " + (x2 ? 1 : 0);
+                AddParameterWithValue(selector, "@pno", pageno);
 
                 reader = selector.ExecuteReader();
 
@@ -265,14 +277,17 @@ namespace Reader_UI
                 {
                     res.Add(new Parser.Link(reader.GetString(1),reader.GetInt32(0)));
                 }
-                reader.Close();
                 return res.ToArray();
 
             }
             catch
             {
-                reader.Close();
                 throw;
+            }
+            finally
+            {
+
+                reader.Close();
             }
         }
         public override Page GetPage(int pageno, bool x2)
@@ -295,6 +310,7 @@ namespace Reader_UI
 
             return page;
         }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities")]
         override public bool ReadLastIndexedOrCreateDatabase()
         {
             DbDataReader myReader = null;
@@ -364,6 +380,7 @@ namespace Reader_UI
                 {
                     Transact();
                     DbCommand creationCommands = sqlsWConn.CreateCommand();
+
                     creationCommands.CommandText = Properties.Resources.SQLSDBCreationScript;
                     creationCommands.Transaction = sqlsTrans;
                     creationCommands.ExecuteNonQuery();

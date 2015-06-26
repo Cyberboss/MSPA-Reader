@@ -8,9 +8,22 @@ using System.Diagnostics;
 using System.Collections.Concurrent;
 namespace Reader_UI
 {
-    public abstract class Database
+    public abstract class Database : IDisposable
     {
-
+        
+        void Dispose(bool mgd)
+        {
+            parser.Dispose();
+        }
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        ~Database()
+        {
+            Dispose(false);
+        }
         public enum Style
         {
             REGULAR,

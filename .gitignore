@@ -7,3 +7,5 @@
 *.suo
 packages*/
 /Reader UI/bin/Database
+/Reader UI/bin/Release
+/Reader UI/obj/Release

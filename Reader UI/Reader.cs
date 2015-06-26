@@ -149,8 +149,8 @@ namespace Reader_UI
         //https://stackoverflow.com/questions/1874077/loading-a-flash-movie-from-a-memory-stream-or-a-byte-array
         private void InitFlashMovie(AxShockwaveFlashObjects.AxShockwaveFlash flashObj, byte[] swfFile)
         {
-            using (System.IO.MemoryStream stm = new System.IO.MemoryStream())
-            {
+                System.IO.MemoryStream stm = new MemoryStream();
+            
                 using (System.IO.BinaryWriter writer = new System.IO.BinaryWriter(stm))
                 {
                     /* Write length of stream for AxHost.State */
@@ -166,7 +166,6 @@ namespace Reader_UI
                     
                     
                 }
-            }
         }
         void SetFlashDimensions()
         {
