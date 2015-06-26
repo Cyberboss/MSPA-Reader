@@ -49,10 +49,12 @@ namespace Reader_UI
             {
                 running = false;
                 Cursor.Current = Cursors.Default;
-                cancelButton.Enabled = false;
-                updateButton.Enabled = true;
                 if (!closeRequested)
+                {
+                    cancelButton.Enabled = false;
+                    updateButton.Enabled = true;
                     return;
+                }
                 System.Threading.Thread.Sleep(1000);
                 Close();
             }

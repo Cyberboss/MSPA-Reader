@@ -221,7 +221,8 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             }
             var fileSize = cascadeSegments[0].data.Count();
             totalMegabytesDownloaded += (float)fileSize / (1024.0f * 1024.0f);
-            bgw.ReportProgress(progress, cascadeSegments[0].originalFileName + ": " + fileSize / 1024 + "KB");
+            if (bgw != null)
+                bgw.ReportProgress(progress, cascadeSegments[0].originalFileName + ": " + fileSize / 1024 + "KB");
             for(int i = 1; i <= 5; ++i){
             
                 

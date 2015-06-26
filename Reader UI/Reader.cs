@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.IO;
 
 namespace Reader_UI
 {
@@ -22,6 +23,7 @@ namespace Reader_UI
         int pageRequest;
         Database.Page page = null;
         Database.Style previousStyle;
+        AxShockwaveFlashObjects.AxShockwaveFlash flash = null;
 
         class GifStream
         {
@@ -109,8 +111,54 @@ namespace Reader_UI
                     LoadRegularPage();
                     break;
             }
-        }
 
+            //dump the garbage
+            page.links = null;
+            page.links2 = null;
+            page.meta = null;
+            page.meta2 = null;
+            page.resources2 = null;
+            page.resources = null;
+
+            //fix scroll bar
+            Update();
+            AutoScrollPosition = new Point(0, 0);
+        }
+        //https://stackoverflow.com/questions/1874077/loading-a-flash-movie-from-a-memory-stream-or-a-byte-array
+        private void InitFlashMovie(AxShockwaveFlashObjects.AxShockwaveFlash flashObj, byte[] swfFile)
+        {
+            using (System.IO.MemoryStream stm = new System.IO.MemoryStream())
+            {
+                using (System.IO.BinaryWriter writer = new System.IO.BinaryWriter(stm))
+                {
+                    /* Write length of stream for AxHost.State */
+                    writer.Write(8 + swfFile.Length);
+                    /* Write Flash magic 'fUfU' */
+                    writer.Write(0x55665566);
+                    /* Length of swf file */
+                    writer.Write(swfFile.Length);
+                    writer.Write(swfFile);
+                    stm.Seek(0, System.IO.SeekOrigin.Begin);
+                    /* 1 == IPeristStreamInit */
+                    flashObj.OcxState = new AxHost.State(stm, 1, false, null);
+                    
+                    
+                }
+            }
+        }
+        void SetFlashDimensions()
+        {
+            switch (page.number) { 
+                case (int)Database.PagesOfImportance.CASCADE:
+                    flash.Width = 950;
+                    flash.Height = 650;
+                    break;
+                default:
+                    flash.Width = FLASH_MOVIE_WIDTH;
+                    flash.Height = FLASH_MOVIE_HEIGHT;
+                    break;
+            }
+        }
         void LoadRegularPage()
         {
             comicPanel = new Panel();
@@ -132,22 +180,37 @@ namespace Reader_UI
             {
                 if (!Parser.IsGif(page.resources[i].originalFileName))
                 {
-                    Debugger.Break();
-                    continue;
+                    flash = new AxShockwaveFlashObjects.AxShockwaveFlash();
+                    comicPanel.Controls.Add(flash);
+                    flash.Enabled = true;
+                    //flash.AutoSize = true;
+                    flash.ScaleMode = 1;
+                    flash.AlignMode = 0;
+                    InitFlashMovie(flash, page.resources[i].data);
+                    //FlashHeaderReader swfreader = new FlashHeaderReader(page.resources[i].data);
+                    SetFlashDimensions();
+
+
+                    flash.Location = new Point(comicPanel.Width / 2 - flash.Width / 2, currentHeight);
+                    currentHeight += flash.Height;
+                    flash.Play();
                 }
-                
-                var tempPB = new GifStream();
-                tempPB.loc = new System.IO.MemoryStream(page.resources[i].data);
-                tempPB.gif = new PictureBox();
-                tempPB.gif.Image = Image.FromStream(tempPB.loc);
-                tempPB.gif.Width = tempPB.gif.Image.Width;
-                tempPB.gif.Height = tempPB.gif.Image.Height;
-                tempPB.gif.Location = new Point(comicPanel.Width / 2 - tempPB.gif.Width / 2, currentHeight);
-                comicPanel.Controls.Add(tempPB.gif);
-                currentHeight += tempPB.gif.Height;
-                if (i < page.resources.Count() - 1)
-                    currentHeight += REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET;
-                gifs.Add(tempPB);
+                else
+                {
+
+                    var tempPB = new GifStream();
+                    tempPB.loc = new System.IO.MemoryStream(page.resources[i].data);
+                    tempPB.gif = new PictureBox();
+                    tempPB.gif.Image = Image.FromStream(tempPB.loc);
+                    tempPB.gif.Width = tempPB.gif.Image.Width;
+                    tempPB.gif.Height = tempPB.gif.Image.Height;
+                    tempPB.gif.Location = new Point(comicPanel.Width / 2 - tempPB.gif.Width / 2, currentHeight);
+                    comicPanel.Controls.Add(tempPB.gif);
+                    currentHeight += tempPB.gif.Height;
+                    if (i < page.resources.Count() - 1)
+                        currentHeight += REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET;
+                    gifs.Add(tempPB);
+                }
             }
 
             currentHeight+=REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
@@ -422,6 +485,7 @@ namespace Reader_UI
             RemoveControl(linkPrefix);
             RemoveControl(next);
             RemoveControl(tereziPassword);
+            RemoveControl(flash);
 
             RemoveControl(comicPanel);
         }
