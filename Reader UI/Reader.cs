@@ -26,6 +26,7 @@ namespace Reader_UI
         AxShockwaveFlashObjects.AxShockwaveFlash flash = null;
         Button pesterHideShow = null;
         List<Control> conversations = new List<Control>();
+        Label errorLabel = null;
         bool pesterLogVisible;
         int pLMaxHeight, pLMinHeight;
 
@@ -79,6 +80,17 @@ namespace Reader_UI
                     if (page.number < db.lastPage)
                         WakeUpMr(page.number + 1);
                     return true;
+                case Keys.Space:
+                    if (page != null && (page.meta.lines != null && page.meta.lines.Count() != 0)
+                        || (page.meta2 != null && page.meta2.lines != null && page.meta2.lines.Count() != 0))
+                        pesterHideShow_Click(null, null);
+                    return true;
+                case Keys.Down:
+                    VerticalScroll.Value = Math.Min(VerticalScroll.Value + 50,VerticalScroll.Maximum);
+                    return true;
+                case Keys.Up:
+                    VerticalScroll.Value = Math.Max(VerticalScroll.Value - 50, VerticalScroll.Minimum);
+                    return true;
             }
             // Call the base class
             return base.ProcessCmdKey(ref msg, keyData);
@@ -86,6 +98,8 @@ namespace Reader_UI
 
         void Reader_Resize(object sender, EventArgs e)
         {
+            if (WindowState == FormWindowState.Minimized)
+                return;
             Location = new Point(0, 0);
             WindowState = FormWindowState.Maximized;
         }
@@ -100,7 +114,14 @@ namespace Reader_UI
         {
             if (page == null)
             {
-                MessageBox.Show("An internal error occurred when retrieving the page. Usually this means you are out of memory or some resource on the page on mspa is 404'ing.");
+                page = new Database.Page(pageRequest);
+                MessageBox.Show("An internal error occurred when retrieving the page. Usually this means you are out of memory or some resource on the page on mspa is 404'ing during the archive operation. (Yes, I checked both the cdn and www).");
+                RemoveControl(pageLoadingProgress);
+                errorLabel = new Label();
+                errorLabel.AutoSize = true;
+                errorLabel.Text = "Press F5 to try again.";
+                mainPanel.Controls.Add(errorLabel);
+                errorLabel.Location = new Point(mainPanel.Width / 2 - errorLabel.Width / 2, mainPanel.Height / 2 - errorLabel.Height / 2);
             }else
                 LoadPage();
         }
@@ -241,8 +262,11 @@ namespace Reader_UI
                 pesterlog.AutoSize = true;
                 pesterlog.Width = REGULAR_PESTERLOG_WIDTH;
                 pesterlog.Height = REGULAR_PESTERLOG_HEIGHT;
+                pesterlog.MinimumSize = new Size(REGULAR_PESTERLOG_WIDTH, REGULAR_PESTERLOG_HEIGHT);
                 pesterlog.MaximumSize = new Size(REGULAR_PESTERLOG_WIDTH, Int32.MaxValue);
                 pesterlog.BorderStyle = BorderStyle.FixedSingle;
+                pesterlog.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+
                 leftSide = comicPanel.Width / 2 - pesterlog.Width / 2;
                 pesterlog.Location = new Point(leftSide, currentHeight);
                 comicPanel.Controls.Add(pesterlog);
@@ -251,10 +275,10 @@ namespace Reader_UI
                 pesterHideShow.AutoSize = true;
                 pesterHideShow.Font = new System.Drawing.Font("Arial", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
                 pesterHideShow.Text = "Show " + page.meta.promptType;
-                pesterHideShow.Location = new Point(pesterlog.Width / 2 - pesterHideShow.Width / 2, 0);
                 pesterHideShow.Click += pesterHideShow_Click;
                 pesterLogVisible = false;
                 pesterlog.Controls.Add(pesterHideShow);
+                pesterHideShow.Location = new Point(pesterlog.Width / 2 - pesterHideShow.Width / 2, 0);
 
                 pLMaxHeight = currentHeight + REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
                 //log lines
@@ -297,7 +321,7 @@ namespace Reader_UI
             currentHeight += REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
 
             //next page
-            if (page.links.Count() > 0)
+            if (page.links.Count() > 0 && page.number < numericUpDown1.Maximum)
             {
 
                 linkPrefix = new Label();
@@ -346,13 +370,14 @@ namespace Reader_UI
                 pesterHideShow.Text = "Hide " + page.meta.promptType;
                 foreach (var line in conversations)
                     pesterlog.Controls.Add(line);
-                pesterlog.Height += REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
+                pesterlog.MinimumSize = new Size(REGULAR_PESTERLOG_WIDTH, pesterlog.Height + REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT);
             }
             else
             {
                 pesterHideShow.Text = "Show " + page.meta.promptType;
                 foreach (var line in conversations)
                     pesterlog.Controls.Remove(line);
+                pesterlog.MinimumSize = new Size(REGULAR_PESTERLOG_WIDTH, REGULAR_PESTERLOG_HEIGHT);
             }
             pesterLogVisible = !pesterLogVisible;
         }
@@ -381,7 +406,6 @@ namespace Reader_UI
             this.MaximumSize = this.Size;
             CurtainsUp();
             pageRequest = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
-            pageRequest = 1935;
             mrAjax.RunWorkerAsync();
         }
         void RemoveControl(Control c)
@@ -573,7 +597,7 @@ namespace Reader_UI
         }
         void CleanComic()
         {
-
+            RemoveControl(errorLabel);
             RemoveControl(title);
             foreach (var pic in gifs)
             {
@@ -670,6 +694,7 @@ namespace Reader_UI
 
         private void mrAjax_DoWork(object sender, DoWorkEventArgs e)
         {
+            page = null;
             page = db.WaitPage(pageRequest);
         }
 

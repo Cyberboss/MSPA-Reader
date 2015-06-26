@@ -77,6 +77,17 @@ namespace Reader_UI
                 }
                 return ret;
             }
+            public int FindHighestPage(){
+                int ret;
+                lock (_sync)
+                {
+                    if (archivedPages.Count() == 0)
+                        ret = 0;
+                    else
+                        ret = archivedPages.Max();
+                }
+                return ret;
+            }
             public int FindLowestPage(int start, int end)
             {
                 int ret;
@@ -136,9 +147,20 @@ namespace Reader_UI
         public abstract void Connect(string serverName, string username, string password, bool resetDatabase);
         public bool Initialize()
         {
-            parser = new Parser();
-            lastPage = parser.GetLatestPage();
-            return ReadLastIndexedOrCreateDatabase();
+            if (ReadLastIndexedOrCreateDatabase())
+            {
+                parser = new Parser();
+                lastPage = parser.GetLatestPage();
+                if (lastPage == 0)
+                    if (archivedPages.FindHighestPage() == 0)
+                    {
+                        MessageBox.Show("The database is empty. Cannot read MSPA.");
+                        return false;
+                    }
+                return true;
+            }
+            MessageBox.Show("Error creating the database!");
+            return false;
         }
         public abstract bool ReadLastIndexedOrCreateDatabase();
         public abstract void WriteResource(Parser.Resource[] res, int page, bool x2);
@@ -406,8 +428,11 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 }
                 return 0;
             }
+            if (archivedPages.IsPageArchived(currentPage) || (bgw != null && !bgw.CancellationPending))
+                return 0;
 
-            if (!archivedPages.IsPageArchived(currentPage) && parser.LoadPage(currentPage) && ( bgw == null ||!bgw.CancellationPending))
+
+            if (parser.LoadPage(currentPage))
             {
                 int missedPages = 0;
                 if (!parser.x2Flag)
@@ -423,7 +448,11 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 //simple enough, leave it to the reader to decode the multiple pages
                 return missedPages;
             }
-            return 0;
+            else if (!parser.x2Flag)
+                return 1;
+            else
+                return 2;
+            
         }
         bool WritePage(System.ComponentModel.BackgroundWorker bgw, int currentPage, int currentProgress, int x2phase)
         {

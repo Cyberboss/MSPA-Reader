@@ -5,6 +5,7 @@ Ideally we could use the built in web client and load a local html. But we'd nee
 without being on mspaintadventures first")
 
 -- Better narrative/dialog parsing
+-- Support line breaks in pesterlogs
 -- Support purple links
 -- Note side by side longways images so the reader doesn't arrange them turnways (*horizontal, *vertical)
 -- Support fonts via parsing instead of statically

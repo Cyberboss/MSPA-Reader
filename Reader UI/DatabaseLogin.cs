@@ -55,7 +55,6 @@ namespace Reader_UI
                 {
                     db.Close();
                     Cursor.Current = Cursors.Default;
-                    MessageBox.Show("Error creating the database!");
                     dataSourceInput_SelectedIndexChanged(null, null);
                     return;
                 }

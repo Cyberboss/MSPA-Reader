@@ -76,7 +76,69 @@ namespace Reader_UI
                 pageNumber = pN;
             }
         }
+        //http://stackoverflow.com/questions/1585985/how-to-use-the-webclient-downloaddataasync-method-in-this-context
+        class WebDownload : WebClient
+        {
+            /// <summary>
+            /// Time in milliseconds
+            /// </summary>
 
+            bool isDownloading;
+            byte[] res;
+            object _sync = new object(); 
+
+            public int Timeout { get; set; }
+
+            public WebDownload() : this(10000) { }
+
+            public WebDownload(int timeout)
+            {
+                this.Timeout = timeout;
+                DownloadDataCompleted += WebDownload_DownloadDataCompleted;
+            }
+
+            void WebDownload_DownloadDataCompleted(object sender, DownloadDataCompletedEventArgs e)
+            {
+                if (e.Cancelled)
+                    return;
+                
+                lock (_sync)
+                {
+                    isDownloading = false;
+                    if(e.Error == null)
+                        res = e.Result;
+                }
+            }
+
+            public new byte[] DownloadData(string address) 
+            {
+                res = null;
+                isDownloading = true;
+                DownloadDataAsync(new Uri(address));
+                int count = 0;
+
+                while (true)
+                {
+                    System.Threading.Thread.Sleep(10);
+                    count+= 10;
+                    lock (_sync)
+                    {
+                        if (!isDownloading)
+                            if (res != null)
+                                break;
+                            else
+                                throw new Exception("Download failed");
+                        
+                    }
+                    if (count > Timeout)
+                    {
+                        CancelAsync();
+                        throw new Exception("Download timed out");
+                    }
+                }
+                return res;
+            }
+        }
         const string prepend = "http://www.mspaintadventures.com/?s=6&p=";
         const string gifRegex = @"http:\/\/(?!" + 
             @".*v2_blankstrip"  //stuff to ignore
@@ -99,7 +161,7 @@ namespace Reader_UI
 
         public bool x2Flag;
 
-        WebClient web = new WebClient();
+        WebDownload web = new WebDownload();
         HttpClient client = new HttpClient();
 
         HtmlNode contentTable,secondContentTable;
@@ -115,21 +177,30 @@ namespace Reader_UI
         }
         public int GetLatestPage()
         {
-            var response = client.GetByteArrayAsync(new Uri("http://www.mspaintadventures.com/?viewlog=6")).Result;
-            String source = Encoding.GetEncoding("utf-8").GetString(response, 0, response.Length - 1);
-            source = WebUtility.HtmlDecode(source);
-            var html = new HtmlDocument();
-            html.LoadHtml(source);
+            //if this fails we need to check the database
+            try
+            {
+                var response = client.GetByteArrayAsync(new Uri("http://www.mspaintadventures.com/?viewlog=6")).Result;
+                String source = Encoding.GetEncoding("utf-8").GetString(response, 0, response.Length - 1);
+                source = WebUtility.HtmlDecode(source);
+                var html = new HtmlDocument();
+                html.LoadHtml(source);
 
-            //look for view oldest to newest key phrase
-            //magic from http://stackoverflow.com/questions/8948895/using-xpath-and-htmlagilitypack-to-find-all-elements-with-innertext-containing-a
-            var labelHref = html.DocumentNode.SelectNodes("//*[text()[contains(., 'View oldest to newest')]]").First();
-            var firstEntry = labelHref.ParentNode.ParentNode.SelectNodes("a").First();
-            var linkText = firstEntry.Attributes["href"].Value;
+                //look for view oldest to newest key phrase
+                //magic from http://stackoverflow.com/questions/8948895/using-xpath-and-htmlagilitypack-to-find-all-elements-with-innertext-containing-a
+                var labelHref = html.DocumentNode.SelectNodes("//*[text()[contains(., 'View oldest to newest')]]").First();
+                var firstEntry = labelHref.ParentNode.ParentNode.SelectNodes("a").First();
+                var linkText = firstEntry.Attributes["href"].Value;
 
-            string pageNumberAsString = Regex.Match(linkText, linkNumberRegex).Value;
+                string pageNumberAsString = Regex.Match(linkText, linkNumberRegex).Value;
 
-            return Convert.ToInt32(pageNumberAsString);
+                return Convert.ToInt32(pageNumberAsString);
+            }
+            catch
+            {
+                System.Windows.Forms.MessageBox.Show("Error retrieving lastest MSPA page. Range locked to currently archived pages");
+                return 0;
+            }
         }
         public Text GetText()
         {
