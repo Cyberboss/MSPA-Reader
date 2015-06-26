@@ -1,4 +1,6 @@
-﻿
+﻿Primary: Style sheet support.
+Doesn't need to be dynamic, just needs to work
+
 Primary: Openbound solution	 <-- pls halp
 ("Open bound is written entirely in html5 using an xml data structure that I can't seem to find on the server.
 Ideally we could use the built in web client and load a local html. But we'd need to figure out how to run it

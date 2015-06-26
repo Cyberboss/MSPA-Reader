@@ -226,16 +226,6 @@ namespace Reader_UI
             if (lineSpecialSubtext == null)
                 return;
 
-            bool stay = false;
-            for (int i = 0; i < lineSpecialSubtext.Count; ++i)
-            {
-                if (!Regex.Match(lineSpecialSubtext.ElementAt(i).InnerText, chumhandleRegex).Success)
-                {
-                    stay = true;
-                }
-            }
-            if(!stay)
-                return;
             //special subtext alert
             Text.ScriptLine.SpecialSubText[] sTs = new Text.ScriptLine.SpecialSubText[lineSpecialSubtext.Count()];
             for (int j = 0; j < lineSpecialSubtext.Count(); ++j)
@@ -288,15 +278,28 @@ namespace Reader_UI
                     if (conversationLines != null)
                     {
                         List<Text.ScriptLine> line = new List<Text.ScriptLine>();
+                        List<Text.ScriptLine> logs = new List<Text.ScriptLine>();
                         
+                        //conversation lines go in order, no stopping them.
+                        //What we can do is insert them where they belong.
+                        // by doing a once over once we've done everything
+                        //inserting them appropriately
 
                         var logMessages = Regex.Matches(logBox.InnerText.Trim(), pesterLogRegex);
+                        var logMessagesHtml = Regex.Matches(logBox.InnerHtml.Trim(), pesterLogRegex);
                         //the hard part is finding out where these go
                         if(logMessages != null)
                             for (int i = 0; i < logMessages.Count; i++ )
                             {
                                 //TODO: figure out where these actually go
-                                line.Add(new Text.ScriptLine("#000000", logMessages[i].Value));
+                                var tmp = new Text.ScriptLine("#000000", logMessages[i].Value);
+
+                                ///OH WE CAN DO THIS TO GET THE NODES!!
+                                HtmlDocument tempDoc = new HtmlDocument();
+                                tempDoc.LoadHtml(logMessagesHtml[i].Value);
+                                CheckLineForSpecialSubText(tempDoc.DocumentNode, tmp);
+
+                                logs.Add(tmp);
                             }
 
                         //now for each line we need the colour and the text
@@ -327,6 +330,36 @@ namespace Reader_UI
 
                             line.Add(scriptLine);
                         }
+
+                        //now look through the lines adding whats expected
+                        int linePositionCount = 0;
+                        int logPositionCount = 0;
+
+                        for (int i = 0; i < logBox.ChildNodes.Count && logPositionCount < logs.Count; ++i)
+                        {
+                            var currentNode = logBox.ChildNodes.ElementAt(i);
+                            if (currentNode.Name == "span")
+                            {
+                                if (currentNode.InnerText == line[linePositionCount].text)
+                                {
+                                    linePositionCount++;
+                                }
+                            }
+                            else if (currentNode.Name == "img")
+                            {
+                                linePositionCount++;
+                            }
+                            else if(logs[logPositionCount].text.Contains(currentNode.InnerText.Trim()) && currentNode.InnerText.Trim() != "")
+                            {
+                                //at this point we need to keep incrementing i until we stop matching this one
+                                //we can expect EXACTLY this many matches
+                                i += 1 + logs[logPositionCount].subTexts.Count() * 2;
+                                line.Insert(linePositionCount, logs[logPositionCount]);
+                                logPositionCount++;
+                                linePositionCount++;
+                            }
+                        }
+
                         texts.lines = line.ToArray();
                     }
                     else
