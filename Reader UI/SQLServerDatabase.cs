@@ -65,6 +65,7 @@ namespace Reader_UI
                 throw;
             }
         }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities")]
         public static bool CreateDatabase(string dbName, string dbFileName)
         {
             try
@@ -77,11 +78,7 @@ namespace Reader_UI
 
 
                     DetachDatabase(dbName);
-
-                    cmd.CommandText = "CREATE DATABASE @dbname1 ON (NAME = @dbname2, FILENAME = @filename)";
-                    AddParameterWithValue(cmd, "@dbname1", dbName);
-                    AddParameterWithValue(cmd, "@dbname2", dbName);
-                    AddParameterWithValue(cmd, "@filename", dbFileName);
+                    cmd.CommandText = String.Format("CREATE DATABASE {0} ON (NAME = N'{0}', FILENAME = '{1}')", dbName, dbFileName);
                     cmd.ExecuteNonQuery();
                 }
 
@@ -93,6 +90,7 @@ namespace Reader_UI
                 throw;
             }
         }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities")]
         public static bool DetachDatabase(string dbName)
         {
             try
@@ -101,9 +99,8 @@ namespace Reader_UI
                 using (var connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
-                    SqlCommand cmd = connection.CreateCommand();
-                    cmd.CommandText = String.Format("exec sp_detach_db @dbname");
-                    AddParameterWithValue(cmd, "@dbname", dbName);
+                    SqlCommand cmd = connection.CreateCommand(); 
+                    cmd.CommandText = String.Format("exec sp_detach_db '{0}'", dbName);
                     cmd.ExecuteNonQuery();
 
                     return true;

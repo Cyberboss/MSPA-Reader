@@ -92,6 +92,7 @@
     <Compile Include="DatabaseWriter.Designer.cs">
       <DependentUpon>DatabaseWriter.cs</DependentUpon>
     </Compile>
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="GrowLabel.cs">
       <SubType>Component</SubType>
     </Compile>

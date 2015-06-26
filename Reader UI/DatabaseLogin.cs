@@ -59,7 +59,10 @@ namespace Reader_UI
                     return;
                 }
                 Hide();
-                Program.Open(db, false);
+                if(checkBox1.Checked)
+                    Program.Open(db, false);
+                if (checkBox2.Checked)
+                    Program.Open(db, true);
                 Close();
             }
             catch
@@ -94,8 +97,22 @@ namespace Reader_UI
                     break;
             }
             resetDatabase.Enabled = true;
-            label5.Enabled = true;
+            checkBox1.Enabled = true;
+            checkBox2.Enabled = true;
         }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!checkBox2.Checked && !checkBox1.Checked)
+                checkBox1.Checked = true;
+        }
+
+        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!checkBox2.Checked && !checkBox1.Checked)
+                checkBox2.Checked = true;
+        }
+
 
 
     }

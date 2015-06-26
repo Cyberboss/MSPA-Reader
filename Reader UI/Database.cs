@@ -441,7 +441,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 }
                 return 0;
             }
-            if (archivedPages.IsPageArchived(currentPage) || (bgw != null && !bgw.CancellationPending))
+            if (archivedPages.IsPageArchived(currentPage) || (bgw != null && bgw.CancellationPending))
                 return 0;
 
 
