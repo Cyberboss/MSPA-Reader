@@ -71,11 +71,25 @@ namespace Reader_UI.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to SET ANSI_NULLS ON;
+        ///SET QUOTED_IDENTIFIER ON;
+        ///CREATE TABLE [dbo].[Dialog](
+        ///	[id] [int] IDENTITY(1,1) NOT NULL,
+        ///	[page_id] [int] NOT NULL,
+        ///	[x2] [bit] NOT NULL,
+        ///	[isNarrative] [bit] NOT NULL,
+        ///	[isImg] [bit] NOT NULL,
+        ///	[text] [nvarchar](max) NULL,
+        ///	[colour] [nchar](7) NULL,
+        /// CONSTRAINT [PK_Dialog] PRIMARY KEY CLUSTERED 
+        ///(
+        ///	[id] ASC
+        ///)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+        ///) ON [PRIMARY] TEXTIMAGE_ON [PRIM [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string String1 {
+        internal static string SQLSDBCreationScript {
             get {
-                return ResourceManager.GetString("String1", resourceCulture);
+                return ResourceManager.GetString("SQLSDBCreationScript", resourceCulture);
             }
         }
     }

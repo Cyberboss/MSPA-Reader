@@ -115,7 +115,7 @@ namespace Reader_UI
             if (page == null)
             {
                 page = new Database.Page(pageRequest);
-                MessageBox.Show("An internal error occurred when retrieving the page. Usually this means you are out of memory or some resource on the page on mspa is 404'ing during the archive operation. (Yes, I checked both the cdn and www).");
+                MessageBox.Show("An internal error occurred when retrieving the page. Usually this means you are out of memory or some resource on the page cannot be downloaded. (Yes, I checked both the cdn and www).");
                 RemoveControl(pageLoadingProgress);
                 errorLabel = new Label();
                 errorLabel.AutoSize = true;

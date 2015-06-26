@@ -27,8 +27,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test Resources", "Test Reso
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SQL Scripts", "SQL Scripts", "{4E3AF806-31F8-4AC8-A46C-E70352F422DB}"
 	ProjectSection(SolutionItems) = preProject
-		Reader UI\bin\Debug\DBCreation.sql = Reader UI\bin\Debug\DBCreation.sql
-		Reader UI\bin\Release\DBCreation.sql = Reader UI\bin\Release\DBCreation.sql
+		DBCreation Scripts\SQLSDBCreation.sql = DBCreation Scripts\SQLSDBCreation.sql
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{694961AC-263C-435B-9BAA-46CB1026EC39}"

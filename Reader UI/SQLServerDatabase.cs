@@ -364,7 +364,7 @@ namespace Reader_UI
                 {
                     Transact();
                     DbCommand creationCommands = sqlsWConn.CreateCommand();
-                    creationCommands.CommandText = File.ReadAllText(Application.StartupPath + @"\DBCreation.sql");
+                    creationCommands.CommandText = Properties.Resources.SQLSDBCreationScript;
                     creationCommands.Transaction = sqlsTrans;
                     creationCommands.ExecuteNonQuery();
                     Commit();
