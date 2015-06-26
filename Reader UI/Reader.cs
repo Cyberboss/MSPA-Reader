@@ -25,8 +25,9 @@ namespace Reader_UI
         Database.Style previousStyle;
         AxShockwaveFlashObjects.AxShockwaveFlash flash = null;
         Button pesterHideShow = null;
-        List<GrowLabel> conversations = new List<GrowLabel>();
+        List<Control> conversations = new List<Control>();
         bool pesterLogVisible;
+        int pLMaxHeight, pLMinHeight;
 
         class GifStream
         {
@@ -163,7 +164,9 @@ namespace Reader_UI
         {
             //panel
             comicPanel = new Panel();
+            comicPanel.AutoSize = true;
             comicPanel.Width = REGULAR_COMIC_PANEL_WIDTH;
+            comicPanel.MaximumSize = new Size(REGULAR_COMIC_PANEL_WIDTH,Int32.MaxValue);
             comicPanel.Location = new Point(mainPanel.Width / 2 - comicPanel.Width / 2, REGULAR_COMIC_PANEL_Y_OFFSET);
             comicPanel.BackColor = Color.FromArgb(REGULAR_COMIC_PANEL_COLOUR_R, REGULAR_COMIC_PANEL_COLOUR_G, REGULAR_COMIC_PANEL_COLOUR_B);
             mainPanel.Controls.Add(comicPanel);
@@ -187,13 +190,10 @@ namespace Reader_UI
                     flash = new AxShockwaveFlashObjects.AxShockwaveFlash();
                     comicPanel.Controls.Add(flash);
                     flash.Enabled = true;
-                    //flash.AutoSize = true;
                     flash.ScaleMode = 1;
                     flash.AlignMode = 0;
                     InitFlashMovie(flash, page.resources[i].data);
-                    //FlashHeaderReader swfreader = new FlashHeaderReader(page.resources[i].data);
                     SetFlashDimensions();
-
 
                     flash.Location = new Point(comicPanel.Width / 2 - flash.Width / 2, currentHeight);
                     currentHeight += flash.Height;
@@ -256,15 +256,33 @@ namespace Reader_UI
                 pesterLogVisible = false;
                 pesterlog.Controls.Add(pesterHideShow);
 
+                pLMaxHeight = currentHeight + REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
                 //log lines
                 for (int i = 0; i < page.meta.lines.Count(); ++i)
                 {
-                    GrowLabel tmpl = new GrowLabel();
-                    tmpl.MaximumSize = new Size(pesterlog.ClientSize.Width, Int32.MaxValue);
-                    tmpl.Font.
+                    if (!page.meta.lines[i].isImg)
+                    {
+                        GrowLabel tmpl = new GrowLabel();
+                        tmpl.Width = REGULAR_PESTERLOG_LINE_WIDTH;
+                        tmpl.MaximumSize = new Size(tmpl.Width, Int32.MaxValue);
+                        tmpl.Font = new System.Drawing.Font("Courier New", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                        tmpl.BackColor = pesterlog.BackColor;   //can't change forecolour otherwise
+                        tmpl.ForeColor = System.Drawing.ColorTranslator.FromHtml(page.meta.lines[i].hexColour);
+                        tmpl.Text = page.meta.lines[i].text;
+                        tmpl.Location = new Point(pesterlog.ClientSize.Width / 2 - tmpl.Width / 2, pLMaxHeight - currentHeight);
+                        pLMaxHeight += tmpl.Height;
+                        conversations.Add(tmpl);
+                    }
+                    else
+                    {
+                        //TODO: Handle image lines ("SHE HAS WHAT????")
+                    }
                 }
 
+
                 currentHeight += pesterlog.Height;
+                pLMinHeight = currentHeight;
+                pLMaxHeight += REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
             }
 
             currentHeight += REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
@@ -297,14 +315,29 @@ namespace Reader_UI
 
             RemoveControl(pageLoadingProgress);
         }
+        void RelocateLinks()
+        {
+            int currentHeight = REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
+            if (pesterLogVisible)
+                currentHeight += pLMinHeight;
+            else
+                currentHeight += pLMaxHeight;
 
+            linkPrefix.Location = new Point(linkPrefix.Location.X, currentHeight);
+            next.Location = new Point(next.Location.X, currentHeight);
+            comicPanel.Height = currentHeight + REGULAR_COMIC_PANEL_BOTTOM_PADDING;
+
+            mainPanel.Height = comicPanel.Height + REGULAR_COMIC_PANEL_Y_OFFSET + REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET;
+        }
         void pesterHideShow_Click(object sender, EventArgs e)
         {
+            RelocateLinks();
             if (!pesterLogVisible)
             {
                 pesterHideShow.Text = "Hide " + page.meta.promptType;
                 foreach (var line in conversations)
                     pesterlog.Controls.Add(line);
+                pesterlog.Height += REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
             }
             else
             {
@@ -339,6 +372,7 @@ namespace Reader_UI
             this.MaximumSize = this.Size;
             CurtainsUp();
             pageRequest = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
+            pageRequest = 1935;
             mrAjax.RunWorkerAsync();
         }
         void RemoveControl(Control c)

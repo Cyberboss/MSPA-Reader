@@ -11,6 +11,7 @@ without being on mspaintadventures first")
 -- Support fonts via parsing instead of statically
 -- Fix pesterlog system message ordering
 -- Fix pesterlog system message regex
+-- Add funtionality to the header (direct to mspa)
 -- Read through and mark down problem pages
 -- Fix problem pages
 -- Support Sqlite

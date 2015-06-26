@@ -90,5 +90,7 @@ namespace Reader_UI
         public const int REGULAR_PESTERLOG_WIDTH = 600;
         public const int REGULAR_PESTERLOG_HEIGHT = 25;
 
+        public const int REGULAR_PESTERLOG_LINE_WIDTH = 530;
+
     }
 }
