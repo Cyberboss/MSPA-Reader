@@ -61,7 +61,6 @@ namespace Reader_UI
                 }
                 Hide();
                 Program.Open(db, false);
-                Program.Open(db, true);
                 Close();
             }
             catch

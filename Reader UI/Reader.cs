@@ -52,8 +52,6 @@ namespace Reader_UI
             for (int i = 0; i < candyCorn.Count(); ++i)
                 candyCorn[i] = null;
             mrAjax.RunWorkerCompleted += mrAjax_RunWorkerCompleted;
-            pageRequest = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
-            mrAjax.RunWorkerAsync();
             FormClosing += Reader_FormClosing;
             Resize += Reader_Resize;
         }
@@ -200,6 +198,8 @@ namespace Reader_UI
             this.MinimumSize = this.Size;
             this.MaximumSize = this.Size;
             CurtainsUp();
+            pageRequest = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
+            mrAjax.RunWorkerAsync();
         }
         void RemoveControl(Control c)
         {

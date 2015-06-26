@@ -20,11 +20,11 @@ namespace Reader_UI
             db = idb;
             InitializeComponent();
             updateButton.Enabled = false;
-            running = true;
             worker.ProgressChanged += worker_progress;
-            worker.RunWorkerAsync();
             FormClosing += Writer_Closing;
             FormClosed += Writer_Closed;
+            cancelButton.Enabled = false;
+            updateButton.Enabled = true;
         }
         void Writer_Closed(object sender, System.EventArgs e)
         {

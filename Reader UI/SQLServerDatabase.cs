@@ -138,7 +138,7 @@ namespace Reader_UI
             while (reader.Read())
             {
                 // underline,colour,sbegin,length 
-                list.Add(new Parser.Text.ScriptLine.SpecialSubText(reader.GetInt32(2),reader.GetInt32(3),reader.GetBoolean(0),reader.GetString(2)));
+                list.Add(new Parser.Text.ScriptLine.SpecialSubText(reader.GetInt32(2),reader.GetInt32(3),reader.GetBoolean(0),reader.GetString(1)));
             }
             return list.ToArray();
         }
@@ -199,7 +199,7 @@ namespace Reader_UI
                             selector2.CommandText = "SELECT underline,colour,sbegin,length FROM SpecialText WHERE dialog_id = " + reader.GetInt32(0);
                             specReader = selector2.ExecuteReader();
 
-                            currentLine.subTexts = GetSpecialText(reader);
+                            currentLine.subTexts = GetSpecialText(specReader);
                             specReader.Close();
                             lines.Add(currentLine);
                         }catch{

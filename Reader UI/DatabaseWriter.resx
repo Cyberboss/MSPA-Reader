@@ -217,7 +217,7 @@
     <value>3</value>
   </data>
   <data name="updateButton.Text" xml:space="preserve">
-    <value>Check For Updates</value>
+    <value>Begin Archiving</value>
   </data>
   <data name="&gt;&gt;updateButton.Name" xml:space="preserve">
     <value>updateButton</value>
@@ -244,7 +244,7 @@
     <value>4</value>
   </data>
   <data name="cancelButton.Text" xml:space="preserve">
-    <value>Cancel</value>
+    <value>Stop</value>
   </data>
   <data name="&gt;&gt;cancelButton.Name" xml:space="preserve">
     <value>cancelButton</value>
