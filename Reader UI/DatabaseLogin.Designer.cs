@@ -150,9 +150,9 @@
             this.checkBox2.AutoSize = true;
             this.checkBox2.Location = new System.Drawing.Point(382, 182);
             this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(94, 17);
+            this.checkBox2.Size = new System.Drawing.Size(90, 17);
             this.checkBox2.TabIndex = 12;
-            this.checkBox2.Text = "Open Archiver";
+            this.checkBox2.Text = "Start Archiver";
             this.checkBox2.UseVisualStyleBackColor = true;
             this.checkBox2.CheckedChanged += new System.EventHandler(this.checkBox2_CheckedChanged);
             // 

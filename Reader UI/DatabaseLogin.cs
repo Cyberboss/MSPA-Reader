@@ -65,9 +65,9 @@ namespace Reader_UI
                     Properties.Settings.Default.Save();
                 }
                 if(checkBox1.Checked)
-                    Program.Open(db, false);
+                    Program.Open(db, false,true);
                 if (checkBox2.Checked)
-                    Program.Open(db, true);
+                    Program.Open(db, true,true);
                 Close();
             }
             catch

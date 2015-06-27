@@ -15,8 +15,10 @@ namespace Reader_UI
         Database db = null;
         bool running = false;
         bool closeRequested = false;
-        public DatabaseWriter(Database idb)
+        readonly bool startImmediate;
+        public DatabaseWriter(Database idb,bool start)
         {
+            startImmediate = start;
             db = idb;
             InitializeComponent();
             updateButton.Enabled = false;
@@ -25,6 +27,13 @@ namespace Reader_UI
             FormClosed += Writer_Closed;
             cancelButton.Enabled = false;
             updateButton.Enabled = true;
+            this.Shown += DatabaseWriter_Shown;
+        }
+
+        void DatabaseWriter_Shown(object sender, EventArgs e)
+        {
+            if (startImmediate)
+                updateButton_Click(null, null);
         }
         void Writer_Closed(object sender, System.EventArgs e)
         {
