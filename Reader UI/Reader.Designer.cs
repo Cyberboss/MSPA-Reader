@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Reader));
-            this.button1 = new System.Windows.Forms.Button();
+            this.openArchiver = new System.Windows.Forms.Button();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.jumpButton = new System.Windows.Forms.Button();
             this.mrAjax = new System.ComponentModel.BackgroundWorker();
@@ -44,19 +44,20 @@
             this.startOverButton = new System.Windows.Forms.Button();
             this.deleteButton = new System.Windows.Forms.Button();
             this.unMaxButton = new System.Windows.Forms.Button();
+            this.uiToggleButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.SuspendLayout();
             // 
-            // button1
+            // openArchiver
             // 
-            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(709, 286);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(117, 31);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "Open Archiver";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.openArchiver_Click);
+            this.openArchiver.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.openArchiver.Location = new System.Drawing.Point(709, 249);
+            this.openArchiver.Name = "openArchiver";
+            this.openArchiver.Size = new System.Drawing.Size(117, 31);
+            this.openArchiver.TabIndex = 0;
+            this.openArchiver.Text = "Open Archiver";
+            this.openArchiver.UseVisualStyleBackColor = true;
+            this.openArchiver.Click += new System.EventHandler(this.openArchiver_Click);
             // 
             // numericUpDown1
             // 
@@ -165,20 +166,22 @@
             // 
             // flashWarning
             // 
-            this.flashWarning.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.flashWarning.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.flashWarning.AutoSize = true;
             this.flashWarning.ForeColor = System.Drawing.Color.Red;
-            this.flashWarning.Location = new System.Drawing.Point(12, 194);
+            this.flashWarning.Location = new System.Drawing.Point(606, 252);
+            this.flashWarning.MaximumSize = new System.Drawing.Size(100, 0);
             this.flashWarning.Name = "flashWarning";
-            this.flashWarning.Size = new System.Drawing.Size(321, 13);
+            this.flashWarning.Size = new System.Drawing.Size(97, 65);
             this.flashWarning.TabIndex = 11;
             this.flashWarning.Text = "PAGE CONTAINS FLASH. KEYBOARD NAVIGATION DISABLED";
+            this.flashWarning.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.flashWarning.Visible = false;
             // 
             // helpButton
             // 
             this.helpButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.helpButton.Location = new System.Drawing.Point(586, 286);
+            this.helpButton.Location = new System.Drawing.Point(709, 212);
             this.helpButton.Name = "helpButton";
             this.helpButton.Size = new System.Drawing.Size(117, 31);
             this.helpButton.TabIndex = 12;
@@ -219,12 +222,24 @@
             this.unMaxButton.UseVisualStyleBackColor = true;
             this.unMaxButton.Click += new System.EventHandler(this.unMaxButton_Click);
             // 
+            // uiToggleButton
+            // 
+            this.uiToggleButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.uiToggleButton.Location = new System.Drawing.Point(709, 286);
+            this.uiToggleButton.Name = "uiToggleButton";
+            this.uiToggleButton.Size = new System.Drawing.Size(117, 31);
+            this.uiToggleButton.TabIndex = 16;
+            this.uiToggleButton.Text = "Hide UI";
+            this.uiToggleButton.UseVisualStyleBackColor = true;
+            this.uiToggleButton.Click += new System.EventHandler(this.uiToggleButton_Click);
+            // 
             // Reader
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(838, 329);
+            this.Controls.Add(this.uiToggleButton);
             this.Controls.Add(this.unMaxButton);
             this.Controls.Add(this.deleteButton);
             this.Controls.Add(this.startOverButton);
@@ -238,7 +253,7 @@
             this.Controls.Add(this.goBack);
             this.Controls.Add(this.jumpButton);
             this.Controls.Add(this.numericUpDown1);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.openArchiver);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
@@ -253,7 +268,7 @@
 
         #endregion
 
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button openArchiver;
         private System.Windows.Forms.NumericUpDown numericUpDown1;
         private System.ComponentModel.BackgroundWorker mrAjax;
         private System.Windows.Forms.Button jumpButton;
@@ -268,6 +283,7 @@
         private System.Windows.Forms.Button startOverButton;
         private System.Windows.Forms.Button deleteButton;
         private System.Windows.Forms.Button unMaxButton;
+        private System.Windows.Forms.Button uiToggleButton;
 
     }
 }

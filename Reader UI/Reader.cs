@@ -120,6 +120,9 @@ namespace Reader_UI
 
                 switch (keyData)
                 {
+                    case Keys.H:
+                        uiToggleButton_Click(null, null);
+                        return true;
                     case Keys.F5:
                         WakeUpMr(page.number);
                         return true;
@@ -501,12 +504,13 @@ namespace Reader_UI
             WindowState = FormWindowState.Maximized;
             Reader_Resize(null, null);
             CurtainsUp();
+            int pr;
             if (Properties.Settings.Default.lastPage >= (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE &&
                 Properties.Settings.Default.lastPage <= db.lastPage)
-                pageRequest = Properties.Settings.Default.lastPage;
+                pr = Properties.Settings.Default.lastPage;
             else
-                pageRequest = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
-            mrAjax.RunWorkerAsync();
+                pr = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
+            WakeUpMr(pr);
         }
         void RemoveControl(Control c)
         {
@@ -835,7 +839,7 @@ namespace Reader_UI
 
         private void helpButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("You can use the arrow keys to navigate! Left and right change pages, Up and down scroll, spacebar toggles pesterlogs. The Go Back button has the functional equivalent of the browser back button. Use the archiver for mass downloading (Try not to though, it hurts Hussie's horses). Made by Cyberboss (/u/Cyberboss_JHCB). E-mail cyberbossMSPAReader@gmail.com with bugs (Pics/steps to reproduce or it didn't happen). MSPA belongs to Hussie not me, don't take credit for or sell this. Source code coming sometime next week.");
+            MessageBox.Show("You can use the arrow keys to navigate! Left and right change pages, Up and down scroll, spacebar toggles pesterlogs. The Go Back button has the functional equivalent of the browser back button. 'H' hides and shows the UI. Use the archiver for mass downloading (Try not to though, it hurts Hussie's horses). Made by Cyberboss (/u/Cyberboss_JHCB). E-mail cyberbossMSPAReader@gmail.com with bugs (Pics/steps to reproduce or it didn't happen). MSPA belongs to Hussie not me, don't take credit for or sell this. Source code coming sometime next week.");
         }
 
         private void startOverButton_Click(object sender, EventArgs e)
@@ -852,6 +856,41 @@ namespace Reader_UI
         private void unMaxButton_Click(object sender, EventArgs e)
         {
             this.WindowState = FormWindowState.Normal;
+        }
+
+        private void uiToggleButton_Click(object sender, EventArgs e)
+        {
+            if (uiToggleButton.Text == "Hide UI")
+            {
+                uiToggleButton.Text = "Show UI";
+                goBack.Visible = false;
+                jumpButton.Visible = false;
+                numericUpDown1.Visible = false;
+                saveButton.Visible = false;
+                autoSave.Visible = false;
+                deleteButton.Visible = false;
+                helpButton.Visible = false;
+                openArchiver.Visible = false;
+                loadButton.Visible = false;
+                startOverButton.Visible = false;
+                AcceptButton = null;
+            }
+            else
+            {
+                uiToggleButton.Text = "Hide UI";
+                goBack.Visible = true;
+                jumpButton.Visible = true;
+                numericUpDown1.Visible = true;
+                saveButton.Visible = true;
+                autoSave.Visible = true;
+                deleteButton.Visible = true;
+                helpButton.Visible = true;
+                openArchiver.Visible = true;
+                loadButton.Visible = true;
+                startOverButton.Visible = true;
+                AcceptButton = jumpButton;
+
+            }
         }
     }
 }
