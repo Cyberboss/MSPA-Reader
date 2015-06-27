@@ -102,6 +102,15 @@ namespace Reader_UI
             FormClosing += Reader_FormClosing;
             Resize += Reader_Resize;
             autoSave.Checked = Properties.Settings.Default.autoSave;
+            ResizeEnd += Reader_ResizeEnd;
+        }
+
+        void Reader_ResizeEnd(object sender, EventArgs e)
+        {
+            CurtainsUp();
+            Update();
+            if(page != null)
+                WakeUpMr(page.number);
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -143,8 +152,21 @@ namespace Reader_UI
         {
             if (WindowState == FormWindowState.Minimized)
                 return;
-            Location = new Point(0, 0);
-            WindowState = FormWindowState.Maximized;
+            if (WindowState == FormWindowState.Maximized)
+            {
+                FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+
+                Program.NativeMethods.RECT Rect = new Program.NativeMethods.RECT();
+                var id = Program.NativeMethods.GetForegroundWindow();
+                Program.NativeMethods.GetWindowRect(id, ref Rect);
+                Program.NativeMethods.MoveWindow(id,0,0, Rect.right - Rect.left, Rect.bottom - Rect.top, true);
+            }
+            else
+            {
+
+                FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
+                SizeGripStyle = System.Windows.Forms.SizeGripStyle.Auto;
+            }
         }
 
 
@@ -477,8 +499,7 @@ namespace Reader_UI
         {
             Location = new Point(0, 0);
             WindowState = FormWindowState.Maximized;
-            this.MinimumSize = this.Size;
-            this.MaximumSize = this.Size;
+            Reader_Resize(null, null);
             CurtainsUp();
             if (Properties.Settings.Default.lastPage >= (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE &&
                 Properties.Settings.Default.lastPage <= db.lastPage)
@@ -728,8 +749,6 @@ namespace Reader_UI
 
                     SetupHeader();
 
-                    ShowLoadingScreen();
-
                     break;
             }
 
@@ -828,6 +847,11 @@ namespace Reader_UI
         {
             Properties.Settings.Default.lastPage = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
             Properties.Settings.Default.Save();
+        }
+
+        private void unMaxButton_Click(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Normal;
         }
     }
 }

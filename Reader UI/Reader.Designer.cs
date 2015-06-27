@@ -43,6 +43,7 @@
             this.helpButton = new System.Windows.Forms.Button();
             this.startOverButton = new System.Windows.Forms.Button();
             this.deleteButton = new System.Windows.Forms.Button();
+            this.unMaxButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -154,7 +155,7 @@
             // minimizeButton
             // 
             this.minimizeButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.minimizeButton.Location = new System.Drawing.Point(766, 11);
+            this.minimizeButton.Location = new System.Drawing.Point(733, 11);
             this.minimizeButton.Name = "minimizeButton";
             this.minimizeButton.Size = new System.Drawing.Size(27, 21);
             this.minimizeButton.TabIndex = 10;
@@ -207,13 +208,24 @@
             this.deleteButton.UseVisualStyleBackColor = true;
             this.deleteButton.Click += new System.EventHandler(this.deleteButton_Click);
             // 
+            // unMaxButton
+            // 
+            this.unMaxButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.unMaxButton.Location = new System.Drawing.Point(766, 11);
+            this.unMaxButton.Name = "unMaxButton";
+            this.unMaxButton.Size = new System.Drawing.Size(27, 21);
+            this.unMaxButton.TabIndex = 15;
+            this.unMaxButton.Text = "M";
+            this.unMaxButton.UseVisualStyleBackColor = true;
+            this.unMaxButton.Click += new System.EventHandler(this.unMaxButton_Click);
+            // 
             // Reader
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
-            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(838, 329);
+            this.Controls.Add(this.unMaxButton);
             this.Controls.Add(this.deleteButton);
             this.Controls.Add(this.startOverButton);
             this.Controls.Add(this.helpButton);
@@ -255,6 +267,7 @@
         private System.Windows.Forms.Button helpButton;
         private System.Windows.Forms.Button startOverButton;
         private System.Windows.Forms.Button deleteButton;
+        private System.Windows.Forms.Button unMaxButton;
 
     }
 }
