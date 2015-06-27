@@ -83,7 +83,7 @@
             // jumpButton
             // 
             this.jumpButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.jumpButton.Location = new System.Drawing.Point(128, 301);
+            this.jumpButton.Location = new System.Drawing.Point(12, 270);
             this.jumpButton.Name = "jumpButton";
             this.jumpButton.Size = new System.Drawing.Size(109, 25);
             this.jumpButton.TabIndex = 2;
@@ -98,9 +98,9 @@
             // goBack
             // 
             this.goBack.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.goBack.Location = new System.Drawing.Point(243, 301);
+            this.goBack.Location = new System.Drawing.Point(128, 270);
             this.goBack.Name = "goBack";
-            this.goBack.Size = new System.Drawing.Size(90, 25);
+            this.goBack.Size = new System.Drawing.Size(109, 25);
             this.goBack.TabIndex = 5;
             this.goBack.Text = "Go Back";
             this.goBack.UseVisualStyleBackColor = true;
@@ -109,7 +109,7 @@
             // loadButton
             // 
             this.loadButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.loadButton.Location = new System.Drawing.Point(128, 270);
+            this.loadButton.Location = new System.Drawing.Point(128, 241);
             this.loadButton.Name = "loadButton";
             this.loadButton.Size = new System.Drawing.Size(109, 25);
             this.loadButton.TabIndex = 6;
@@ -120,7 +120,7 @@
             // saveButton
             // 
             this.saveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.saveButton.Location = new System.Drawing.Point(12, 270);
+            this.saveButton.Location = new System.Drawing.Point(12, 241);
             this.saveButton.Name = "saveButton";
             this.saveButton.Size = new System.Drawing.Size(110, 25);
             this.saveButton.TabIndex = 7;
@@ -132,7 +132,7 @@
             // 
             this.autoSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.autoSave.AutoSize = true;
-            this.autoSave.Location = new System.Drawing.Point(352, 306);
+            this.autoSave.Location = new System.Drawing.Point(144, 302);
             this.autoSave.Name = "autoSave";
             this.autoSave.Size = new System.Drawing.Size(76, 17);
             this.autoSave.TabIndex = 8;
@@ -167,7 +167,7 @@
             this.flashWarning.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.flashWarning.AutoSize = true;
             this.flashWarning.ForeColor = System.Drawing.Color.Red;
-            this.flashWarning.Location = new System.Drawing.Point(56, 254);
+            this.flashWarning.Location = new System.Drawing.Point(12, 194);
             this.flashWarning.Name = "flashWarning";
             this.flashWarning.Size = new System.Drawing.Size(321, 13);
             this.flashWarning.TabIndex = 11;
@@ -188,9 +188,9 @@
             // startOverButton
             // 
             this.startOverButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.startOverButton.Location = new System.Drawing.Point(243, 270);
+            this.startOverButton.Location = new System.Drawing.Point(12, 210);
             this.startOverButton.Name = "startOverButton";
-            this.startOverButton.Size = new System.Drawing.Size(90, 25);
+            this.startOverButton.Size = new System.Drawing.Size(110, 25);
             this.startOverButton.TabIndex = 13;
             this.startOverButton.Text = "Start Over";
             this.startOverButton.UseVisualStyleBackColor = true;
@@ -199,9 +199,9 @@
             // deleteButton
             // 
             this.deleteButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.deleteButton.Location = new System.Drawing.Point(339, 270);
+            this.deleteButton.Location = new System.Drawing.Point(128, 210);
             this.deleteButton.Name = "deleteButton";
-            this.deleteButton.Size = new System.Drawing.Size(89, 25);
+            this.deleteButton.Size = new System.Drawing.Size(109, 25);
             this.deleteButton.TabIndex = 14;
             this.deleteButton.Text = "Delete Game";
             this.deleteButton.UseVisualStyleBackColor = true;

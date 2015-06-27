@@ -16,7 +16,7 @@ namespace Reader_UI
         {
             InitializeComponent();
             dataSourceInput.Items.Add("SQL Server");
-            dataSourceInput.Items.Add("SQL LocalDB: Database/MSPAArchive.mdf");
+            dataSourceInput.Items.Add("SQL LocalDB");
             dataSourceInput.SelectedIndex = 1;
             AcceptButton = okButton;
             FormClosed += DatabaseLogin_Closed;
@@ -59,6 +59,11 @@ namespace Reader_UI
                     return;
                 }
                 Hide();
+                if (resetDatabase.Checked)
+                {
+                    Properties.Settings.Default.lastPage = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
+                    Properties.Settings.Default.Save();
+                }
                 if(checkBox1.Checked)
                     Program.Open(db, false);
                 if (checkBox2.Checked)
@@ -75,6 +80,8 @@ namespace Reader_UI
 
         private void dataSourceInput_SelectedIndexChanged(object sender, EventArgs e)
         {
+            dbPathSelect.Visible = false;
+            ipPathLabel.Text = "IP Address";
             switch (dataSourceInput.SelectedIndex)
             {
                 case 0:
@@ -82,6 +89,8 @@ namespace Reader_UI
                     {
                         c.Enabled = true;
                     }
+                    ipInput.Text = "";
+                    ipInput.ReadOnly = false;
                     break;
                 case 1:
                     foreach (Control c in Controls)
@@ -90,6 +99,13 @@ namespace Reader_UI
                     }
                     dataSourceInput.Enabled = true;
                     okButton.Enabled = true;
+                    dbPathSelect.Visible = true;
+                    dbPathSelect.Enabled = true;
+                    ipPathLabel.Enabled = true;
+                    ipPathLabel.Text = "Database Folder";
+                    ipInput.Text = Application.StartupPath;
+                    ipInput.ReadOnly = true;
+                    ipInput.Enabled = true;
                     label1.Enabled = true;
                     break;
                 default:
@@ -109,6 +125,15 @@ namespace Reader_UI
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
             okButton.Enabled = (!(!checkBox2.Checked && !checkBox1.Checked));
+        }
+
+        private void dbPathSelect_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog oFD = new FolderBrowserDialog();
+            if (oFD.ShowDialog() == DialogResult.OK)
+            {
+                ipInput.Text = oFD.SelectedPath;
+            }
         }
 
 

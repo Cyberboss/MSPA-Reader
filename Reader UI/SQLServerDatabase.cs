@@ -29,11 +29,11 @@ namespace Reader_UI
         //local db handlers
         //we thank you base-ed god for this code
         //https://social.msdn.microsoft.com/Forums/sqlserver/en-US/268c3411-102a-4272-b305-b14e29604313/localdb-create-connect-to-database-programmatically-?forum=sqlsetupandupgrade
-        public static string GetLocalDB(string dbName, bool deleteIfExists = false)
+        public static string GetLocalDB(string dbName, bool deleteIfExists, string folder)
         {
             try
             {
-                string outputFolder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Application.StartupPath + @"\Database");
+                string outputFolder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), folder);
                 string mdfFilename = dbName + ".mdf";
                 string dbFileName = Path.Combine(outputFolder, mdfFilename);
                 string logFileName = Path.Combine(outputFolder, String.Format("{0}_log.ldf", dbName));
@@ -125,7 +125,7 @@ namespace Reader_UI
             }
             else
             {
-                connectionString = GetLocalDB("MSPAArchive");
+                connectionString = GetLocalDB("MSPAArchive", false, serverName);
             }
 
             sqlsRConn = new SqlConnection(connectionString + "MultipleActiveResultSets=True;");
