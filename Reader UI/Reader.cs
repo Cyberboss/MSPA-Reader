@@ -369,13 +369,17 @@ namespace Reader_UI
                         tmpl.Font = new System.Drawing.Font("Courier New", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
                         tmpl.BackColor = pesterlog.BackColor;   //can't change forecolour otherwise
                         tmpl.ForeColor = System.Drawing.ColorTranslator.FromHtml(page.meta.lines[i].hexColour);
-                        tmpl.Text = page.meta.lines[i].text;
+                        tmpl.Text = "";
+
+                        tmpl.Text += page.meta.lines[i].text;
 
                         if (page.meta.lines[i].subTexts.Count() != 0)
                             for (int j = 0; j < page.meta.lines[i].subTexts.Count(); ++j)
                             {
                                 if (!page.meta.lines[i].subTexts[j].isImg)
                                 {
+
+                                    //font change
                                     tmpl.Select(page.meta.lines[i].subTexts[j].begin, page.meta.lines[i].subTexts[j].length);
                                     if (page.meta.lines[i].subTexts[j].underlined)
                                         tmpl.SelectionFont = new System.Drawing.Font("Courier New", 10.5F, System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -383,7 +387,27 @@ namespace Reader_UI
                                 }
                                 else
                                 {
-                                    Debugger.Break();
+                                    //inline image
+
+                                    //what needs to happen here is we need to advance the text so that the image can fit in which should just be " " times some factor of the width of the image
+                                    //for now assume 1space = 10.5 pt = 14px
+                                    Parser.Resource inlineImg = Array.Find(page.resources, x => x.isInPesterLog == true && x.originalFileName == page.meta.lines[i].subTexts[j].colour);
+                                    var tmpPB = new GifStream();
+                                    tmpPB.loc = new MemoryStream(inlineImg.data);
+                                    tmpPB.gif = new PictureBox();
+                                    tmpPB.gif.Image = Image.FromStream(tmpPB.loc);
+
+                                    string spaces = "";
+                                    int needed = tmpPB.gif.Image.Width / 14;
+                                    for(int k= 0; k  < needed; ++k)
+                                        spaces += " ";
+
+                                    tmpl.Text = tmpl.Text.Substring(0, page.meta.lines[i].subTexts[j].begin) + spaces + tmpl.Text.Substring(page.meta.lines[i].subTexts[j].begin);
+
+                                    //just dispose the picture while we are testing this
+                                    tmpPB.gif.Dispose();
+                                    tmpPB.loc.Dispose();
+
                                 }
                             }
                         tmpl.Location = new Point(pesterlog.ClientSize.Width / 2 - tmpl.Width / 2, pLMaxHeight - currentHeight);
