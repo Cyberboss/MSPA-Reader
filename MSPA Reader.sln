@@ -25,7 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test Resources", "Test Reso
 		Test Resources\typicalNarrative2.html = Test Resources\typicalNarrative2.html
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SQL Scripts", "SQL Scripts", "{4E3AF806-31F8-4AC8-A46C-E70352F422DB}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SQL Scripts (Requires update of string resource)", "SQL Scripts (Requires update of string resource)", "{4E3AF806-31F8-4AC8-A46C-E70352F422DB}"
 	ProjectSection(SolutionItems) = preProject
 		DBCreation Scripts\SQLSDBCreation.sql = DBCreation Scripts\SQLSDBCreation.sql
 	EndProjectSection

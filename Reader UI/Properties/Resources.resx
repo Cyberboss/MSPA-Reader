@@ -179,6 +179,7 @@ CREATE TABLE [dbo].[Resources](
 	[data] [varbinary](max) NULL,
 	[original_filename] [nvarchar](max) NULL,
 	[title_text] [nvarchar](max) NULL,
+	[isInPesterLog] [bit] NOT NULL,
  CONSTRAINT [PK_Resources] PRIMARY KEY CLUSTERED 
 (
 	[id] ASC

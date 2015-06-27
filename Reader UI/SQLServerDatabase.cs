@@ -229,7 +229,7 @@ namespace Reader_UI
             try
             {
                 DbCommand selector = sqlsRConn.CreateCommand();
-                selector.CommandText = "SELECT data,original_filename,title_text FROM Resources WHERE page_id = @pno AND x2 = " + (x2 ? 1 : 0);
+                selector.CommandText = "SELECT data,original_filename,title_text,isInPesterLog FROM Resources WHERE page_id = @pno AND x2 = " + (x2 ? 1 : 0);
                 AddParameterWithValue(selector, "@pno", pageno);
                 reader = selector.ExecuteReader();
 
@@ -237,12 +237,13 @@ namespace Reader_UI
 
                 while (reader.Read())
                 {
-
+                    Parser.Resource tmp; 
                     if (!reader.IsDBNull(2))
-                        res.Add(new Parser.Resource((byte[])reader.GetValue(0), reader.GetString(1), reader.GetString(2)));
+                        tmp = (new Parser.Resource((byte[])reader.GetValue(0), reader.GetString(1), reader.GetString(2)));
                     else
-                        res.Add(new Parser.Resource((byte[])reader.GetValue(0), reader.GetString(1)));
-
+                        tmp =(new Parser.Resource((byte[])reader.GetValue(0), reader.GetString(1)));
+                    tmp.isInPesterLog = reader.GetBoolean(3);
+                    res.Add(tmp);
                 }
 
                 return res.ToArray();
@@ -407,7 +408,7 @@ namespace Reader_UI
         {
             DbCommand resourceWrite = sqlsWConn.CreateCommand();
             resourceWrite.Transaction = sqlsTrans;
-            resourceWrite.CommandText = "INSERT INTO Resources (page_id,x2,data,original_filename,title_text) VALUES (@page_id,@xt,@data,@originalFN,@title)";
+            resourceWrite.CommandText = "INSERT INTO Resources (page_id,x2,data,original_filename,title_text,isInPesterLog) VALUES (@page_id,@xt,@data,@originalFN,@title,@iip)";
             for (int i = 0; i < res.Count(); ++i)
             {
                 resourceWrite.Parameters.Clear();
@@ -416,6 +417,7 @@ namespace Reader_UI
                 AddParameterWithValue(resourceWrite, "@data", res[i].data);
                 AddParameterWithValue(resourceWrite, "@originalFN", res[i].originalFileName);
                 AddParameterWithValue(resourceWrite, "@title", res[i].titleText != null ? (object)res[i].titleText : (object)DBNull.Value);
+                AddParameterWithValue(resourceWrite, "@iip", res[i].isInPesterLog);
                 resourceWrite.ExecuteNonQuery();
             }
         }

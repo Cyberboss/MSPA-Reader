@@ -18,6 +18,7 @@ namespace Reader_UI
         {
             readonly public byte[] data;
             readonly public string originalFileName, titleText;
+            public bool isInPesterLog = false;
             public Resource(byte[] idata, string ioFN, string tt = null)
             {
                 data = idata;
@@ -312,7 +313,12 @@ namespace Reader_UI
                                 //just add the image
                                 var pathReg = Regex.Match(currentLine.OuterHtml,gifRegex);
                                 var gifReg = Regex.Match(pathReg.Value, scratchHeaderImageFilenameRegex);
-                                line.Add(new Text.ScriptLine(gifReg.Groups[1].Value));
+                                var tmp = new Text.ScriptLine(gifReg.Groups[1].Value);
+
+                                //find the resource that matches this image and mark it as pesterlogged
+                                resources.Find(x => x.originalFileName == tmp.text).isInPesterLog = true;
+                                line.Add(tmp);
+
                                 continue;
                             }
                             //there is no way

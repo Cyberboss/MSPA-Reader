@@ -25,7 +25,43 @@ namespace Reader_UI
         Database.Style previousStyle;
         AxShockwaveFlashObjects.AxShockwaveFlash flash = null;
         Button pesterHideShow = null;
-        List<Control> conversations = new List<Control>();
+
+        class LineOrPB 
+        {
+            readonly bool isImg;
+            GifStream strm = null;
+            Control other = null;
+            public void Dispose()
+            {
+                if (isImg)
+                {
+                    strm.gif.Dispose();
+                    strm.loc.Dispose();
+                }
+                else
+                {
+                    other.Dispose();
+                }
+            }
+            public LineOrPB(GifStream g)
+            {
+                isImg = true;
+                strm = g;
+            }
+            public LineOrPB(Control o)
+            {
+                isImg = false;
+                other = o;
+            }
+            public Control GetControl()
+            {
+                if (isImg)
+                    return strm.gif;
+                return other;
+            }
+        }
+
+        List<LineOrPB> conversations = new List<LineOrPB>();
         Label errorLabel = null;
         bool pesterLogVisible;
         int pLMaxHeight, pLMinHeight;
@@ -220,6 +256,8 @@ namespace Reader_UI
             int currentHeight = title.Location.Y + title.Height + REGULAR_TITLE_Y_OFFSET;
             for (int i = 0; i < page.resources.Count(); i++)
             {
+                if (page.resources[i].isInPesterLog)
+                    continue;
                 if (!pageContainsFlash && !Parser.IsGif(page.resources[i].originalFileName))
                 {
                     flash = new AxShockwaveFlashObjects.AxShockwaveFlash();
@@ -318,11 +356,32 @@ namespace Reader_UI
                             }
                         tmpl.Location = new Point(pesterlog.ClientSize.Width / 2 - tmpl.Width / 2, pLMaxHeight - currentHeight);
                         pLMaxHeight += tmpl.Height;
-                        conversations.Add(tmpl);
+                        conversations.Add(new LineOrPB(tmpl));
                     }
                     else
                     {
+                        //find the resource
+                        var tmpI = Array.Find(page.resources, x => x.isInPesterLog == true && x.originalFileName == page.meta.lines[i].text);
                         //TODO: Handle image lines ("SHE HAS WHAT????")
+                        if (Parser.IsGif(page.resources[i].originalFileName))
+                        {
+
+                            var tempPB = new GifStream();
+                            tempPB.loc = new System.IO.MemoryStream(tmpI.data);
+                            tempPB.gif = new PictureBox();
+                            tempPB.gif.Image = Image.FromStream(tempPB.loc);
+                            tempPB.gif.Width = tempPB.gif.Image.Width;
+                            tempPB.gif.Height = tempPB.gif.Image.Height;
+                            tempPB.gif.Location = new Point(pesterlog.ClientSize.Width / 2 - REGULAR_PESTERLOG_LINE_WIDTH / 2, pLMaxHeight - currentHeight);
+                            pLMaxHeight += tempPB.gif.Height;
+
+                            conversations.Add(new LineOrPB(tempPB));
+                        }
+                        else
+                        {
+                            //there's problems
+                            Debugger.Break(); //then let us bounce
+                        }
                     }
                 }
 
@@ -382,14 +441,14 @@ namespace Reader_UI
             {
                 pesterHideShow.Text = "Hide " + page.meta.promptType;
                 foreach (var line in conversations)
-                    pesterlog.Controls.Add(line);
+                    pesterlog.Controls.Add(line.GetControl());
                 pesterlog.MinimumSize = new Size(REGULAR_PESTERLOG_WIDTH, pesterlog.Height + REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT);
             }
             else
             {
                 pesterHideShow.Text = "Show " + page.meta.promptType;
                 foreach (var line in conversations)
-                    pesterlog.Controls.Remove(line);
+                    pesterlog.Controls.Remove(line.GetControl());
                 pesterlog.MinimumSize = new Size(REGULAR_PESTERLOG_WIDTH, REGULAR_PESTERLOG_HEIGHT);
             }
             mainPanel.Height = comicPanel.Height + REGULAR_COMIC_PANEL_Y_OFFSET + REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET;
@@ -631,7 +690,7 @@ namespace Reader_UI
             RemoveControl(flash);
             RemoveControl(pesterHideShow);
             foreach (var line in conversations)
-                RemoveControl(line);
+                line.Dispose();
             conversations.Clear();
             RemoveControl(pesterlog);
 
