@@ -15,10 +15,8 @@ namespace Reader_UI
         Database db = null;
         bool running = false;
         bool closeRequested = false;
-        readonly bool startImmediate;
-        public DatabaseWriter(Database idb, bool start)
+        public DatabaseWriter(Database idb)
         {
-            startImmediate = start;
             db = idb;
             InitializeComponent();
             updateButton.Enabled = false;
@@ -27,14 +25,6 @@ namespace Reader_UI
             FormClosed += Writer_Closed;
             cancelButton.Enabled = false;
             updateButton.Enabled = true;
-            Shown += DatabaseWriter_Shown;
-        }
-
-        void DatabaseWriter_Shown(object sender, EventArgs e)
-        {
-            MessageBox.Show("ARCHIVING LIMITED TO ACT 1 FOR PREVIEW!");
-            if (startImmediate)
-                updateButton_Click(null, null);
         }
         void Writer_Closed(object sender, System.EventArgs e)
         {
