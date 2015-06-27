@@ -138,8 +138,8 @@ namespace Reader_UI
             List<Parser.Text.ScriptLine.SpecialSubText> list = new List<Parser.Text.ScriptLine.SpecialSubText>();
             while (reader.Read())
             {
-                // underline,colour,sbegin,length 
-                list.Add(new Parser.Text.ScriptLine.SpecialSubText(reader.GetInt32(2),reader.GetInt32(3),reader.GetBoolean(0),reader.GetString(1)));
+                // underline,colour,sbegin,length,isImg 
+                list.Add(new Parser.Text.ScriptLine.SpecialSubText(reader.GetInt32(2),reader.GetInt32(3),reader.GetBoolean(0),reader.GetString(1),reader.GetBoolean(4)));
             }
             return list.ToArray();
         }
@@ -179,7 +179,7 @@ namespace Reader_UI
                     else
                         meta.narr = new Parser.Text.ScriptLine(reader.GetString(4), reader.GetString(3));
                     selector.Parameters.Clear();
-                    selector.CommandText = "SELECT underline,colour,sbegin,length FROM SpecialText WHERE dialog_id = " + reader.GetInt32(0);
+                    selector.CommandText = "SELECT underline,colour,sbegin,length,isImg FROM SpecialText WHERE dialog_id = " + reader.GetInt32(0);
                     reader.Close();
                     reader = selector.ExecuteReader();
                     meta.narr.subTexts = GetSpecialText(reader);
@@ -199,7 +199,7 @@ namespace Reader_UI
                             else
                                 currentLine = new Parser.Text.ScriptLine(reader.GetString(4), reader.GetString(3));
                             var selector2 = sqlsRConn.CreateCommand();
-                            selector2.CommandText = "SELECT underline,colour,sbegin,length FROM SpecialText WHERE dialog_id = " + reader.GetInt32(0);
+                            selector2.CommandText = "SELECT underline,colour,sbegin,length,isImg FROM SpecialText WHERE dialog_id = " + reader.GetInt32(0);
                             specReader = selector2.ExecuteReader();
 
                             currentLine.subTexts = GetSpecialText(specReader);
@@ -462,7 +462,7 @@ namespace Reader_UI
             {
                 DbCommand specWrite = sqlsWConn.CreateCommand();
                 specWrite.Transaction = sqlsTrans;
-                specWrite.CommandText = "INSERT INTO SpecialText (dialog_id,underline,colour,sbegin,length) VALUES (@did,@ul,@col,@sbeg,@len)";
+                specWrite.CommandText = "INSERT INTO SpecialText (dialog_id,underline,colour,sbegin,length,isImg) VALUES (@did,@ul,@col,@sbeg,@len,@isIm)";
                 for (int i = 0; i < tex.lines.Count(); ++i)
                 {
                     textWrite.Parameters.Clear();
@@ -481,6 +481,7 @@ namespace Reader_UI
                             AddParameterWithValue(specWrite, "@col", tex.lines[i].subTexts[j].colour);
                             AddParameterWithValue(specWrite, "@sbeg", tex.lines[i].subTexts[j].begin);
                             AddParameterWithValue(specWrite, "@len", tex.lines[i].subTexts[j].length);
+                            AddParameterWithValue(specWrite, "@isIm", tex.lines[i].subTexts[j].isImg);
                             specWrite.ExecuteNonQuery();
                         }
                 }

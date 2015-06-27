@@ -48,10 +48,29 @@ namespace Reader_UI
                 public class SpecialSubText
                 {
                     public readonly int begin, length;
+                    public readonly bool isImg;
                     public readonly bool underlined;
                     public readonly string colour;
                     public SpecialSubText(int beg, int len, bool under, string col)
                     {
+                        isImg = false;
+                        begin = beg;
+                        length = len;
+                        underlined = under;
+                        colour = col;
+                    }
+                    public SpecialSubText(int beg, int len, string imageName)
+                    {
+                        isImg = true;
+                        begin = beg;
+                        length = len;
+                        underlined = false;
+                        colour = imageName;
+                    }
+                    public SpecialSubText(int beg, int len, bool under, string col, bool i)
+                    {
+
+                        isImg = i;
                         begin = beg;
                         length = len;
                         underlined = under;
@@ -224,23 +243,41 @@ namespace Reader_UI
         void CheckLineForSpecialSubText(HtmlNode currentLine, Text.ScriptLine scriptLine)
         {
             var lineSpecialSubtext = currentLine.SelectNodes("span");
-            if (lineSpecialSubtext == null)
+            var lineImages = currentLine.SelectNodes("img");
+            if (lineImages == null && lineSpecialSubtext == null)
                 return;
 
-            //special subtext alert
-            Text.ScriptLine.SpecialSubText[] sTs = new Text.ScriptLine.SpecialSubText[lineSpecialSubtext.Count()];
-            for (int j = 0; j < lineSpecialSubtext.Count(); ++j)
+            List<Text.ScriptLine.SpecialSubText> sTs = new List<Text.ScriptLine.SpecialSubText>();
+            if (lineSpecialSubtext != null)
             {
-                var currentSpecialSubtext = lineSpecialSubtext.ElementAt(j);
-                bool underlined = Regex.Match(currentSpecialSubtext.OuterHtml, underlineRegex).Success;
-                var colourReg = Regex.Match(currentSpecialSubtext.OuterHtml, hexColourRegex);
-                string colour = colourReg.Success ? colourReg.Value : scriptLine.hexColour;
-                int begin = currentLine.InnerHtml.IndexOf(currentSpecialSubtext.OuterHtml);
-                int length = currentSpecialSubtext.InnerText.Length;
-                sTs[j] = new Text.ScriptLine.SpecialSubText(begin, length, underlined, colour);
+                //special subtext alert
+                for (int j = 0; j < lineSpecialSubtext.Count(); ++j)
+                {
+                    var currentSpecialSubtext = lineSpecialSubtext.ElementAt(j);
+                    bool underlined = Regex.Match(currentSpecialSubtext.OuterHtml, underlineRegex).Success;
+                    var colourReg = Regex.Match(currentSpecialSubtext.OuterHtml, hexColourRegex);
+                    string colour = colourReg.Success ? colourReg.Value : scriptLine.hexColour;
+                    int begin = currentLine.InnerHtml.IndexOf(currentSpecialSubtext.OuterHtml);
+                    int length = currentSpecialSubtext.InnerText.Length;
+                    sTs.Add(new Text.ScriptLine.SpecialSubText(begin, length, underlined, colour));
+                }
             }
-            scriptLine.subTexts = sTs;
-            
+
+            if (lineImages != null)
+            {
+                for (int j = 0; j < lineImages.Count(); ++j)
+                {
+                    var currentSpecialSubtext = lineImages.ElementAt(j);
+                    var reg = Regex.Match(currentSpecialSubtext.OuterHtml, gifRegex);
+                    string img = System.IO.Path.GetFileName(new Uri(reg.Value).LocalPath);
+                    int begin = currentLine.InnerHtml.IndexOf(currentSpecialSubtext.OuterHtml);
+                    int length = currentSpecialSubtext.InnerText.Length;
+                    resources.Find(x => x.originalFileName == img).isInPesterLog = true;
+                    sTs.Add(new Text.ScriptLine.SpecialSubText(begin, length, img));
+                }
+            }
+            scriptLine.subTexts = sTs.ToArray();
+
         }
         void ParseText()
         {

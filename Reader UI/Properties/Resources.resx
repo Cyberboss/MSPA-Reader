@@ -190,9 +190,10 @@ CREATE TABLE [dbo].[SpecialText](
 	[id] [int] IDENTITY(1,1) NOT NULL,
 	[dialog_id] [int] NOT NULL,
 	[underline] [bit] NOT NULL,
-	[colour] [nchar](7) NOT NULL,
+	[colour] [nvarchar](100) NOT NULL,
 	[sbegin] [int] NOT NULL,
 	[length] [int] NOT NULL,
+	[isImg] [bit] NOT NULL,
  CONSTRAINT [PK_SpecialText] PRIMARY KEY CLUSTERED 
 (
 	[id] ASC

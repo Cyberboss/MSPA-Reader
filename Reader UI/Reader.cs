@@ -310,7 +310,7 @@ namespace Reader_UI
                     tempPB.gif.Location = new Point(comicPanel.Width / 2 - tempPB.gif.Width / 2, currentHeight);
                     comicPanel.Controls.Add(tempPB.gif);
                     currentHeight += tempPB.gif.Height;
-                    if (i < page.resources.Count() - 1)
+                    if (i < page.resources.Count() - 1 || (page.resources[page.resources.Count() - 1].isInPesterLog && i == page.resources.Count() - 1))
                         currentHeight += REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET;
                     gifs.Add(tempPB);
                 }
@@ -374,10 +374,17 @@ namespace Reader_UI
                         if (page.meta.lines[i].subTexts.Count() != 0)
                             for (int j = 0; j < page.meta.lines[i].subTexts.Count(); ++j)
                             {
-                                tmpl.Select(page.meta.lines[i].subTexts[j].begin, page.meta.lines[i].subTexts[j].length);
-                                if (page.meta.lines[i].subTexts[j].underlined)
-                                    tmpl.SelectionFont = new System.Drawing.Font("Courier New", 10.5F, System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-                                tmpl.SelectionColor = System.Drawing.ColorTranslator.FromHtml(page.meta.lines[i].subTexts[j].colour);
+                                if (!page.meta.lines[i].subTexts[j].isImg)
+                                {
+                                    tmpl.Select(page.meta.lines[i].subTexts[j].begin, page.meta.lines[i].subTexts[j].length);
+                                    if (page.meta.lines[i].subTexts[j].underlined)
+                                        tmpl.SelectionFont = new System.Drawing.Font("Courier New", 10.5F, System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                                    tmpl.SelectionColor = System.Drawing.ColorTranslator.FromHtml(page.meta.lines[i].subTexts[j].colour);
+                                }
+                                else
+                                {
+                                    Debugger.Break();
+                                }
                             }
                         tmpl.Location = new Point(pesterlog.ClientSize.Width / 2 - tmpl.Width / 2, pLMaxHeight - currentHeight);
                         pLMaxHeight += tmpl.Height;
