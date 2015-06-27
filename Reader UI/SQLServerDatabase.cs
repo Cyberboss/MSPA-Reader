@@ -165,7 +165,7 @@ namespace Reader_UI
 
                 reader.Close();
 
-                selector.CommandText = "SELECT id,isNarrative,isImg,text,colour FROM Dialog WHERE page_id = @pno AND x2 = " + (x2 ? 1 : 0);
+                selector.CommandText = "SELECT id,isNarrative,isImg,text,colour,precedingLineBreaks FROM Dialog WHERE page_id = @pno AND x2 = " + (x2 ? 1 : 0);
 
                 reader = selector.ExecuteReader();
                 if (!reader.HasRows || !reader.Read())
@@ -175,9 +175,9 @@ namespace Reader_UI
                 if (reader.GetBoolean(1))
                 {//isNarrative
                     if (reader.GetBoolean(2))//isImg
-                        meta.narr = new Parser.Text.ScriptLine(reader.GetString(3));
+                        meta.narr = new Parser.Text.ScriptLine(reader.GetString(3),reader.GetInt32(5));
                     else
-                        meta.narr = new Parser.Text.ScriptLine(reader.GetString(4), reader.GetString(3));
+                        meta.narr = new Parser.Text.ScriptLine(reader.GetString(4), reader.GetString(3), reader.GetInt32(5));
                     selector.Parameters.Clear();
                     selector.CommandText = "SELECT underline,colour,sbegin,length,isImg FROM SpecialText WHERE dialog_id = " + reader.GetInt32(0);
                     reader.Close();
@@ -195,9 +195,9 @@ namespace Reader_UI
                         {
                             Parser.Text.ScriptLine currentLine;
                             if (reader.GetBoolean(2))//isImg
-                                currentLine = new Parser.Text.ScriptLine(reader.GetString(3));
+                                currentLine = new Parser.Text.ScriptLine(reader.GetString(3), reader.GetInt32(5));
                             else
-                                currentLine = new Parser.Text.ScriptLine(reader.GetString(4), reader.GetString(3));
+                                currentLine = new Parser.Text.ScriptLine(reader.GetString(4), reader.GetString(3), reader.GetInt32(5));
                             var selector2 = sqlsRConn.CreateCommand();
                             selector2.CommandText = "SELECT underline,colour,sbegin,length,isImg FROM SpecialText WHERE dialog_id = " + reader.GetInt32(0);
                             specReader = selector2.ExecuteReader();
@@ -446,7 +446,7 @@ namespace Reader_UI
             textWrite.Transaction = sqlsTrans;
             textWrite.ExecuteNonQuery();
 
-            textWrite.CommandText = "INSERT INTO Dialog (page_id,x2,isNarrative,isImg,text,colour) VALUES (" + page + ",@xt, @narr,@isIm, @tex,@colour) SELECT SCOPE_IDENTITY()";
+            textWrite.CommandText = "INSERT INTO Dialog (page_id,x2,isNarrative,isImg,text,colour,precedingLineBreaks) VALUES (" + page + ",@xt, @narr,@isIm, @tex,@colour,@prb) SELECT SCOPE_IDENTITY()";
 
             if (tex.narr != null)
             {
@@ -456,6 +456,7 @@ namespace Reader_UI
                 AddParameterWithValue(textWrite, "@isIm", tex.narr.isImg);
                 AddParameterWithValue(textWrite, "@tex", tex.narr.text);
                 AddParameterWithValue(textWrite, "@colour", tex.narr.hexColour);
+                AddParameterWithValue(textWrite, "@prb", tex.narr.precedingLineBreaks);
                 textWrite.ExecuteNonQuery();
             }
             else
@@ -471,6 +472,7 @@ namespace Reader_UI
                     AddParameterWithValue(textWrite, "@isIm", tex.lines[i].isImg);
                     AddParameterWithValue(textWrite, "@tex", tex.lines[i].text);
                     AddParameterWithValue(textWrite, "@colour", tex.lines[i].hexColour != null ? (object)tex.lines[i].hexColour : (object)DBNull.Value);
+                    AddParameterWithValue(textWrite, "@prb", tex.lines[i].precedingLineBreaks);
                     var diaId = (int)(decimal)textWrite.ExecuteScalar();
                     if(tex.lines[i].subTexts != null)
                         for (int j = 0; j < tex.lines[i].subTexts.Count(); ++j)

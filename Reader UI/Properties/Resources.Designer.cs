@@ -81,11 +81,11 @@ namespace Reader_UI.Properties {
         ///	[isImg] [bit] NOT NULL,
         ///	[text] [nvarchar](max) NULL,
         ///	[colour] [nchar](7) NULL,
+        ///	[precedingLineBreaks] [int] NOT NULL,
         /// CONSTRAINT [PK_Dialog] PRIMARY KEY CLUSTERED 
         ///(
         ///	[id] ASC
-        ///)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-        ///) ON [PRIMARY] TEXTIMAGE_ON [PRIM [rest of string was truncated]&quot;;.
+        ///)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRI [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLSDBCreationScript {
             get {

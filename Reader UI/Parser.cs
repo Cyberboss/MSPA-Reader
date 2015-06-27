@@ -81,17 +81,20 @@ namespace Reader_UI
                 public string hexColour;
                 public readonly string text;
                 public SpecialSubText[] subTexts = null;
-                public ScriptLine(string hx, string tx)
+                public readonly int precedingLineBreaks;
+                public ScriptLine(string hx, string tx, int prb)
                 {
                     hexColour = hx;
+                    precedingLineBreaks = prb;
                     text = tx;
                     isImg = false;
                 }
-                public ScriptLine(string resName)
+                public ScriptLine(string resName, int prb)
                 {
                     isImg = true;
                     hexColour = null;
                     text = resName;
+                    precedingLineBreaks = prb;
                 }
             }
 
@@ -311,7 +314,7 @@ namespace Reader_UI
                     texts.promptType = reg.Value;
                     var convParent = contentTable.SelectSingleNode(".//*[text()[contains(., '" + reg.Value + "')]]").ParentNode.ParentNode;
                     var logBox = convParent.SelectSingleNode(".//p");
-                    var conversationLines = logBox.SelectNodes("span|img");   //this will grab lines 
+                    var conversationLines = logBox.SelectNodes("span|img|br");   //this will grab lines 
 
                     if (conversationLines != null)
                     {
@@ -330,7 +333,7 @@ namespace Reader_UI
                             for (int i = 0; i < logMessages.Count; i++ )
                             {
                                 //TODO: figure out where these actually go
-                                var tmp = new Text.ScriptLine("#000000", logMessages[i].Value);
+                                var tmp = new Text.ScriptLine("#000000", logMessages[i].Value,1);       //Assume 1 line break before a log msg
 
                                 ///OH WE CAN DO THIS TO GET THE NODES!!
                                 HtmlDocument tempDoc = new HtmlDocument();
@@ -340,38 +343,52 @@ namespace Reader_UI
                                 logs.Add(tmp);
                             }
 
+                        
+                        int j = 0;
+                        for (; j < conversationLines.Count() && conversationLines.ElementAt(j).Name == "br"; j++) { }
+                        int precedingLineBreaks = j;
                         //now for each line we need the colour and the text
-                        for (int i = 0; i < conversationLines.Count(); ++i)
+                        while (j < conversationLines.Count())
                         {
-                            var currentLine = conversationLines.ElementAt(i);
-
+                            var currentLine = conversationLines.ElementAt(j);
+                            Text.ScriptLine scriptLine;
                             if (currentLine.Name == "img")
                             {
                                 //just add the image
                                 var pathReg = Regex.Match(currentLine.OuterHtml,gifRegex);
                                 var gifReg = Regex.Match(pathReg.Value, scratchHeaderImageFilenameRegex);
-                                var tmp = new Text.ScriptLine(gifReg.Groups[1].Value);
+                                scriptLine = new Text.ScriptLine(gifReg.Groups[1].Value,precedingLineBreaks);
 
                                 //find the resource that matches this image and mark it as pesterlogged
-                                resources.Find(x => x.originalFileName == tmp.text).isInPesterLog = true;
-                                line.Add(tmp);
+                                resources.Find(x => x.originalFileName == scriptLine.text).isInPesterLog = true;
+                                
 
                                 continue;
+                            }else{
+                                //there is no way
+                                if (Regex.Match(currentLine.InnerText, chumhandleRegex).Success)
+                                {
+                                    ++j;
+                                    continue;
+                                }
+
+                                var hexReg = Regex.Match(currentLine.OuterHtml, hexColourRegex);
+
+                                scriptLine = new Text.ScriptLine(hexReg.Success ? hexReg.Value : "#000000", currentLine.InnerText,precedingLineBreaks);
+
+                                CheckLineForSpecialSubText(currentLine, scriptLine);
                             }
-                            //there is no way
-                            if (Regex.Match(currentLine.InnerText, chumhandleRegex).Success)
-                            {
-                                //TODO: Handle log msg colours
-                                continue;
-                            }
-
-                            var hexReg = Regex.Match(currentLine.OuterHtml, hexColourRegex);
-
-                            var scriptLine = new Text.ScriptLine(hexReg.Success ? hexReg.Value : "#000000", currentLine.InnerText);
-
-                            CheckLineForSpecialSubText(currentLine, scriptLine);
 
                             line.Add(scriptLine);
+                            //increment i to find the breaks;
+                            int jBegin = j + 1;
+                            do
+                            {
+                                j++;
+                            } while (j < conversationLines.Count() && conversationLines.ElementAt(j).Name == "br");
+
+                            precedingLineBreaks = j - jBegin;
+
                         }
 
                         //now look through the lines adding whats expected
@@ -407,10 +424,10 @@ namespace Reader_UI
                     }
                     else
                     {
-                        //Assume text in a box
+                        //Assume simple text in a box
                         texts.lines = new Text.ScriptLine[1];
                         var hexReg = Regex.Match(logBox.OuterHtml, hexColourRegex);
-                        texts.lines[0] = new Text.ScriptLine(hexReg.Success ? hexReg.Value : "#000000", logBox.InnerText.Trim());
+                        texts.lines[0] = new Text.ScriptLine(hexReg.Success ? hexReg.Value : "#000000", logBox.InnerText.Trim(),0);
                         CheckLineForSpecialSubText(logBox, texts.lines[0]);
 
                     }
@@ -429,14 +446,14 @@ namespace Reader_UI
                         if (narrative != null)
                         {
                             var hexReg = Regex.Match(narrative.OuterHtml, hexColourRegex);
-                            Text.ScriptLine narr = new Text.ScriptLine(hexReg.Success ? hexReg.Value : "#000000", narrative.InnerText.Trim());
+                            Text.ScriptLine narr = new Text.ScriptLine(hexReg.Success ? hexReg.Value : "#000000", narrative.InnerText.Trim(),0);
                             CheckLineForSpecialSubText(narrative, narr);
                             texts.narr = narr;
                         }
                     }
                     catch
                     {
-                        texts.narr = new Text.ScriptLine("#000000","");
+                        texts.narr = new Text.ScriptLine("#000000","",0);
                     }
                     
                 }

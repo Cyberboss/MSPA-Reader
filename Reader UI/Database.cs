@@ -280,7 +280,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             WriteResource(cascadeSegments, 6009,false);
             WriteLinks(next, 6009,false);
             Parser.Text asdf = new Parser.Text();
-            asdf.narr = new Parser.Text.ScriptLine("#000000","");
+            asdf.narr = new Parser.Text.ScriptLine("#000000","",0);
             asdf.title = "[S] Cascade.";
             WriteText(asdf, 6009, false);
 
@@ -309,7 +309,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             lnk[0] = new Parser.Link("", 7396);
             WriteLinks(lnk, 7395, false);
             Parser.Text asdf = new Parser.Text();
-            asdf.narr = new Parser.Text.ScriptLine("#000000", "");
+            asdf.narr = new Parser.Text.ScriptLine("#000000", "",0);
             asdf.title = "[S] Cascade.";
             WriteText(asdf, 7395, false);
             ArchivePageNumber(7395,false);
@@ -331,7 +331,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             Transact();
             WriteResource(FUCKYOU, 6715, false);
             Parser.Text asdf = new Parser.Text();
-            asdf.narr = new Parser.Text.ScriptLine("#000000", "");
+            asdf.narr = new Parser.Text.ScriptLine("#000000", "",0);
             asdf.title = "";
             Parser.Link[] lnk = new Parser.Link[1];
             lnk[0] = new Parser.Link("", 6716);

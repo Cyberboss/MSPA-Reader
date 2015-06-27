@@ -132,6 +132,7 @@ CREATE TABLE [dbo].[Dialog](
 	[isImg] [bit] NOT NULL,
 	[text] [nvarchar](max) NULL,
 	[colour] [nchar](7) NULL,
+	[precedingLineBreaks] [int] NOT NULL,
  CONSTRAINT [PK_Dialog] PRIMARY KEY CLUSTERED 
 (
 	[id] ASC
