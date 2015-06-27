@@ -71,12 +71,12 @@ namespace Reader_UI
             else
                 dbw = null;
         }
-        public static void Open(Database db, bool writer)
+        public static void Open(Database db, bool writer, bool immdiate = false)
         {
             if (writer)
             {
                 if (dbw == null)
-                    dbw = new DatabaseWriter(db);
+                    dbw = new DatabaseWriter(db, immdiate);
                 dbw.Show();
                 dbw.Focus();
             }

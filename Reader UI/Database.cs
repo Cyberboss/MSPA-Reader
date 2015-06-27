@@ -165,6 +165,7 @@ namespace Reader_UI
             {
                 parser = new Parser();
                 lastPage = parser.GetLatestPage();
+                lastPage = 2147;
                 if (lastPage == 0)
                     if (archivedPages.FindHighestPage() == 0)
                     {

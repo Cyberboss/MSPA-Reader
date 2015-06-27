@@ -426,6 +426,7 @@ namespace Reader_UI
                 pageRequest = Properties.Settings.Default.lastPage;
             else
                 pageRequest = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
+            helpButton_Click(null, null);
             mrAjax.RunWorkerAsync();
         }
         void RemoveControl(Control c)
