@@ -14,7 +14,7 @@ Trickster
 Cascade (DONE)
 DOTA,
 SHESBACK
-Caliborn's page smash (DONE, y offset is borked though)
+Caliborn's page smash (DONE)
 
 Primary: Openbound solution
 Main problem is figuring out where all the configuration xmls are and fixing them so that we can load resources locally

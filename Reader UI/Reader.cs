@@ -205,16 +205,17 @@ namespace Reader_UI
             //for some reason the y offset is wrong
 
             flash = new AxShockwaveFlashObjects.AxShockwaveFlash();
-            Controls.Add(flash);
+            mainPanel.Controls.Add(flash);
             flash.Enabled = true;
             flash.ScaleMode = 1;
             flash.AlignMode = 0;
             InitFlashMovie(flash, page.resources[0].data);
             SetFlashDimensions();
-            flash.Location = new Point(Width / 2 - flash.Width / 2, 0);
+            flash.Location = new Point(0, 0);
             flash.Play();
             pageContainsFlash = true;
 
+            RemoveControl(pageLoadingProgress);
         }
         void LoadScratchPage()
         {
@@ -394,9 +395,6 @@ namespace Reader_UI
             comicPanel.Controls.Add(tempPB.gif);
             gifs.Add(tempPB);
 
-            var oldWidth = headerPanel.Width;
-            headerPanel.Width = comicPanel.Width;
-            headerPanel.Location = new Point(headerPanel.Location.X, CASCADE_PANEL_Y_OFFSET);
 
             flash = new AxShockwaveFlashObjects.AxShockwaveFlash();
             comicPanel.Controls.Add(flash);
@@ -981,10 +979,20 @@ namespace Reader_UI
                     Controls.Add(mainPanel);
 
                     SetupHeader();
+                       headerPanel.Location = new Point(headerPanel.Location.X, CASCADE_PANEL_Y_OFFSET);
 
                     break;
                 case Database.Style.SMASH:
                     BackColor = Color.FromArgb(REGULAR_BACK_COLOUR_R, REGULAR_BACK_COLOUR_G, REGULAR_BACK_COLOUR_B);
+
+                    
+                    mainPanel = new Panel();
+                    mainPanel.AutoSize = true;
+                    mainPanel.MaximumSize = new System.Drawing.Size(REGULAR_PANEL_WIDTH, Int32.MaxValue);
+                    mainPanel.Width = CASCADE_PANEL_WIDTH;
+                    mainPanel.Location = new Point(this.Width / 2 - mainPanel.Width / 2, 0);
+                    mainPanel.BackColor = Color.FromArgb(CASCADE_PANEL_COLOUR_R, CASCADE_PANEL_COLOUR_G, CASCADE_PANEL_COLOUR_B);
+                    Controls.Add(mainPanel);
                     break;
                 case Database.Style.SCRATCH:
                     BackColor = Color.FromArgb(SCRATCH_BACK_COLOUR_R, SCRATCH_BACK_COLOUR_G, SCRATCH_BACK_COLOUR_B);
