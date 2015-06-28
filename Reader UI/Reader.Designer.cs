@@ -172,7 +172,7 @@
             this.flashWarning.Location = new System.Drawing.Point(606, 252);
             this.flashWarning.MaximumSize = new System.Drawing.Size(100, 0);
             this.flashWarning.Name = "flashWarning";
-            this.flashWarning.Size = new System.Drawing.Size(97, 65);
+            this.flashWarning.Size = new System.Drawing.Size(94, 65);
             this.flashWarning.TabIndex = 11;
             this.flashWarning.Text = "PAGE CONTAINS FLASH. KEYBOARD NAVIGATION DISABLED";
             this.flashWarning.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -256,7 +256,6 @@
             this.Controls.Add(this.openArchiver);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MaximizeBox = false;
             this.Name = "Reader";
             this.Text = "MS Paint Adventures";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;

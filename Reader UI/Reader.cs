@@ -229,7 +229,8 @@ namespace Reader_UI
             tempPB.gif.Height = tempPB.gif.Image.Height;
 
             //increase Y of all mainPanelItems and header by height
-            mainPanel.Location = new Point(mainPanel.Location.X, mainPanel.Location.Y + tempPB.gif.Height);
+            foreach(Control con in mainPanel.Controls)
+                con.Location = new Point(con.Location.X, con.Location.Y + tempPB.gif.Height);
             headerPanel.Location = new Point(headerPanel.Location.X, headerPanel.Location.Y + tempPB.gif.Height);
 
             //color header approprately
@@ -248,9 +249,9 @@ namespace Reader_UI
 
 
             Controls.Add(tempPB.gif);
-            tempPB.gif.Location = new Point(Width/2 - tempPB.gif.Width/2, headerPanel.Location.Y - tempPB.gif.Height);
+            tempPB.gif.Location = new Point(Width / 2 - tempPB.gif.Width / 2, headerPanel.Location.Y - tempPB.gif.Height);
+            tempPB.gif.BringToFront();
             gifs.Add(tempPB);
-            //therefore also Remove the first
 
             var hoverText = new ToolTip();
             hoverText.AutoPopDelay = 5000;
@@ -260,6 +261,7 @@ namespace Reader_UI
             hoverText.ShowAlways = true;
             hoverText.SetToolTip(tempPB.gif, "TODO Parse Scratch text");
 
+            //therefore also Remove the first
 
             var shiftHeight = gifs[0].gif.Height;
             gifs[0].gif.Dispose();
@@ -267,6 +269,18 @@ namespace Reader_UI
 
 
             gifs.RemoveAt(0);
+
+            //decrease Y of all comicPanel Items and header by height except title
+            foreach (Control con in comicPanel.Controls)
+                if(con != title)
+                    con.Location = new Point(con.Location.X, con.Location.Y - shiftHeight);
+
+            //recalculate bottoms
+
+            comicPanel.Height -= shiftHeight;
+            mainPanel.Height -= shiftHeight;
+
+            //set colours
 
             comicPanel.BackColor = Color.FromArgb(SCRATCH_COMIC_PANEL_COLOUR_R, SCRATCH_COMIC_PANEL_COLOUR_G, SCRATCH_COMIC_PANEL_COLOUR_B);
             title.BackColor = Color.FromArgb(SCRATCH_COMIC_PANEL_COLOUR_R, SCRATCH_COMIC_PANEL_COLOUR_G, SCRATCH_COMIC_PANEL_COLOUR_B); 
@@ -283,44 +297,56 @@ namespace Reader_UI
                     line.GetControl().BackColor = Color.FromArgb(SCRATCH_COMIC_PANEL_COLOUR_R, SCRATCH_COMIC_PANEL_COLOUR_G, SCRATCH_COMIC_PANEL_COLOUR_B);
                 }
             }
-            tempPB.gif.BringToFront();
         }
         void LoadPage()
         {
-            if (Properties.Settings.Default.autoSave)
+            try
             {
-                Properties.Settings.Default.lastPage = page.number;
-                Properties.Settings.Default.Save();
+                SuspendLayout();
+
+                if (Properties.Settings.Default.autoSave)
+                {
+                    Properties.Settings.Default.lastPage = page.number;
+                    Properties.Settings.Default.Save();
+                }
+                pageQueue.Push(page.number);
+                saveButton.Enabled = true;
+                switch (db.GetStyle(pageRequest))
+                {
+                    case Database.Style.REGULAR:
+                        LoadRegularPage();
+                        break;
+                    case Database.Style.SCRATCH:
+                        LoadScratchPage();
+                        break;
+                    case Database.Style.CASCADE:
+                        LoadCascade();
+                        break;
+                    case Database.Style.SMASH:
+                        LoadSmash();
+                        break;
+                    default:
+                        Debugger.Break();
+                        LoadRegularPage();
+                        break;
+                }
+
+                //dump the garbage
+                page.resources2 = null;
+                page.resources = null;
+
             }
-            pageQueue.Push(page.number);
-            saveButton.Enabled = true;
-            switch (db.GetStyle(pageRequest))
+            catch
             {
-                case Database.Style.REGULAR:
-                    LoadRegularPage();
-                    break;
-                case Database.Style.SCRATCH:
-                    LoadScratchPage();
-                    break;
-                case Database.Style.CASCADE:
-                    LoadCascade();
-                    break;
-                case Database.Style.SMASH:
-                    LoadSmash();
-                    break;
-                default:
-                    Debugger.Break();
-                    LoadRegularPage();
-                    break;
+                throw;
             }
-
-            //dump the garbage
-            page.resources2 = null;
-            page.resources = null;
-
-            //fix scroll bar
-            Update();
-            AutoScrollPosition = new Point(0, 0);
+            finally
+            {
+                ResumeLayout();
+                //fix scroll bar
+                Update();
+                AutoScrollPosition = new Point(0, 0);
+            }
         }
         //https://stackoverflow.com/questions/1874077/loading-a-flash-movie-from-a-memory-stream-or-a-byte-array
         private void InitFlashMovie(AxShockwaveFlashObjects.AxShockwaveFlash flashObj, byte[] swfFile)
