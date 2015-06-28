@@ -247,7 +247,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
              */
             if (bgw != null)
                 bgw.ReportProgress(progress, "Now parsing Cascade, page 6009");
-            Parser.Resource[] cascadeSegments = new Parser.Resource[6];
+            Parser.Resource[] cascadeSegments = new Parser.Resource[7];
             Parser.Link[] next = new Parser.Link[1];
             next[0] = new Parser.Link("END OF ACT 5", 6010);
             try
@@ -278,6 +278,8 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 if (bgw != null)
                     bgw.ReportProgress(progress, cascadeSegments[i].originalFileName + ": " + fileSize2 / 1024 + "KB");
             }
+
+            cascadeSegments[6] = new Parser.Resource(parser.DownloadFile("http://www.mspaintadventures.com/images/header_cascade.gif"), "header_cascade.gif");
             
             Transact();
             WriteResource(cascadeSegments, 6009,false);

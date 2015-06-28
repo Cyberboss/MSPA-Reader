@@ -11,7 +11,7 @@ Homosuck
 Sbahj
 Trickster
 2x (not so much a different style as two pages next to each other)
-Cascade (Remember to call ScratchPreParse on this page)
+Cascade ()
 
 Primary: Openbound solution
 Main problem is figuring out where all the configuration xmls are and fixing them so that we can load resources locally
