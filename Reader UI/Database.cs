@@ -166,11 +166,14 @@ namespace Reader_UI
                 parser = new Parser();
                 lastPage = parser.GetLatestPage();
                 if (lastPage == 0)
-                    if (archivedPages.FindHighestPage() == 0)
+                {
+                    lastPage = archivedPages.FindHighestPage();
+                    if (lastPage == 0)
                     {
                         MessageBox.Show("The database is empty. Cannot read MSPA.");
                         return false;
                     }
+                }
                 return true;
             }
             MessageBox.Show("Error creating the database!");
@@ -364,7 +367,8 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                     //currentPage = 4163;
                     //currentPage = 1926;
                     //currentPage = 7690;
-                    //
+                    //currentPage = 6009;
+
                     if (!bgw.CancellationPending)
                         bgw.ReportProgress(currentProgress, "MSPA is up to page " + lastPage);
                     else
