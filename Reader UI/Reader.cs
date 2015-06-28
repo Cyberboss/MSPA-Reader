@@ -211,6 +211,7 @@ namespace Reader_UI
             flash.AlignMode = 0;
             InitFlashMovie(flash, page.resources[0].data);
             SetFlashDimensions();
+            mainPanel.Height = flash.Height;
             flash.Location = new Point(0, 0);
             flash.Play();
             pageContainsFlash = true;
@@ -309,8 +310,9 @@ namespace Reader_UI
                     case Database.Style.CASCADE:
                         LoadCascade();
                         break;
+                    case Database.Style.DOTA:
                     case Database.Style.SMASH:
-                        LoadSmash();
+                        LoadSmash();    //also works for dota and Shesback
                         break;
                     default:
                         Debugger.Break();
@@ -364,6 +366,7 @@ namespace Reader_UI
                     flash.Height = 1160;
                     break;
                 case (int)Database.PagesOfImportance.CASCADE:
+                case (int)Database.PagesOfImportance.DOTA:
                     flash.Width = 950;
                     flash.Height = 650;
                     break;
@@ -1020,6 +1023,19 @@ namespace Reader_UI
                         candyCorn[i].Image = Properties.Resources.cueBall;
                     }
 
+                    break;
+                case Database.Style.DOTA:
+                    BackColor = Color.Black;
+                    
+                    mainPanel = new Panel();
+                    mainPanel.MaximumSize = new System.Drawing.Size(REGULAR_PANEL_WIDTH, Int32.MaxValue);
+                    mainPanel.Width = CASCADE_PANEL_WIDTH;
+                    mainPanel.Location = new Point(this.Width / 2 - mainPanel.Width / 2, 0);
+                    mainPanel.BackColor = Color.FromArgb(CASCADE_PANEL_COLOUR_R, CASCADE_PANEL_COLOUR_G, CASCADE_PANEL_COLOUR_B);
+                    Controls.Add(mainPanel);
+                    break;
+                default:
+                    Debugger.Break();
                     break;
             }
 

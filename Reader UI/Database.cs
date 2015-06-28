@@ -194,6 +194,8 @@ namespace Reader_UI
         public Style GetStyle(int pageno){
             if (pageno == (int)PagesOfImportance.CASCADE)
                 return Style.CASCADE;
+            if (pageno == (int)PagesOfImportance.DOTA)
+                return Style.DOTA;
             if (parser.Is2x(pageno))
                 return Style.X2;
             if (parser.IsScratch(pageno))
