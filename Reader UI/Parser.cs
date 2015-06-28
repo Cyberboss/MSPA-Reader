@@ -557,8 +557,16 @@ namespace Reader_UI
 
             resources = resources.Distinct().ToList();  //filter out any double grabs
         }
-        void ScratchPostParse(HtmlDocument html)
+        void ScratchPostParse(HtmlDocument html, int pageno)
         {
+            //maunally add the special LE text
+            if (pageno >= 5976 && pageno <=5981)
+            {
+                const string LESecretTextfilepref = "http://cdn.mspaintadventures.com/storyfiles/hs2/scraps/";
+                string file = "LEtext"+ (pageno - 5975) +".gif";
+                resources.Add(new Resource(DownloadFile(LESecretTextfilepref + file), file));
+            }
+
             //grab the alt text
             var node = html.DocumentNode.Descendants("img").First();
 
@@ -599,7 +607,7 @@ namespace Reader_UI
                     ParseResources(false);
                     ParseLinks();
                     ParseText();
-                    ScratchPostParse(html);
+                    ScratchPostParse(html,pageno);
                     return true;
                 }
                 else if (IsSBAHJ(pageno))
