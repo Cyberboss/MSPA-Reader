@@ -132,8 +132,7 @@ CREATE TABLE [dbo].[Dialog](
 	[isImg] [bit] NOT NULL,
 	[text] [nvarchar](max) NULL,
 	[colour] [nchar](7) NULL,
-	[precedingLineBreaks] [int] NOT NULL,
-	[headerAltText] [nvarchar](max) NULL,
+	[precedingLineBreaks] [int] NOT NULL
  CONSTRAINT [PK_Dialog] PRIMARY KEY CLUSTERED 
 (
 	[id] ASC
@@ -157,6 +156,7 @@ CREATE TABLE [dbo].[PageMeta](
 	[x2] [bit] NOT NULL,
 	[title] [nvarchar](max) NULL,
 	[promptType] [nvarchar](100) NULL,
+	[headerAltText] [nvarchar](max) NULL,
  CONSTRAINT [PK_PageMeta] PRIMARY KEY CLUSTERED 
 (
 	[page_id],

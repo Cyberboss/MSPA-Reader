@@ -150,7 +150,7 @@ namespace Reader_UI
             try
             {
                 DbCommand selector = sqlsRConn.CreateCommand();
-                selector.CommandText = "SELECT title,promptType FROM PageMeta WHERE page_id = @pno AND x2 = " + (x2 ? 1 : 0);
+                selector.CommandText = "SELECT title,promptType,headerAltText FROM PageMeta WHERE page_id = @pno AND x2 = " + (x2 ? 1 : 0);
                 AddParameterWithValue(selector, "@pno", pageno);
                 reader = selector.ExecuteReader();
 
@@ -162,6 +162,8 @@ namespace Reader_UI
                     meta.title = reader.GetString(0);
                 if (!reader.IsDBNull(1))
                     meta.promptType = reader.GetString(1);
+                if (!reader.IsDBNull(2))
+                    meta.altText = reader.GetString(2);
 
                 reader.Close();
 
@@ -439,10 +441,11 @@ namespace Reader_UI
         override public void WriteText(Parser.Text tex, int page, bool x2)
         {
             DbCommand textWrite = sqlsWConn.CreateCommand();
-            textWrite.CommandText = "INSERT INTO PageMeta VALUES (" + page + ",@xt,@tit,@pttt)";
+            textWrite.CommandText = "INSERT INTO PageMeta VALUES (" + page + ",@xt,@tit,@pttt,@hAT)";
             AddParameterWithValue(textWrite, "@xt", x2);
             AddParameterWithValue(textWrite, "@tit", tex.title != null ? (object)tex.title : (object)DBNull.Value);
             AddParameterWithValue(textWrite, "@pttt", tex.promptType != null ? (object)tex.promptType : (object)DBNull.Value);
+            AddParameterWithValue(textWrite, "@hAT", tex.altText != null ? (object)tex.altText : (object)DBNull.Value);
             textWrite.Transaction = sqlsTrans;
             textWrite.ExecuteNonQuery();
 

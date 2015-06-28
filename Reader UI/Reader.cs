@@ -237,14 +237,16 @@ namespace Reader_UI
             //headerPanel.BringToFront();
             gifs.Add(tempPB);
 
-            var hoverText = new ToolTip();
-            hoverText.AutoPopDelay = 5000;
-            hoverText.InitialDelay = 500;
-            hoverText.ReshowDelay = 500;
-            // Force the ToolTip text to be displayed whether or not the form is active.
-            hoverText.ShowAlways = true;
-            hoverText.SetToolTip(tempPB.gif, "TODO Parse Scratch text");
-
+            if (page.meta.altText != null)
+            {
+                var hoverText = new ToolTip();
+                hoverText.AutoPopDelay = 5000;
+                hoverText.InitialDelay = 500;
+                hoverText.ReshowDelay = 500;
+                // Force the ToolTip text to be displayed whether or not the form is active.
+                hoverText.ShowAlways = true;
+                hoverText.SetToolTip(tempPB.gif, page.meta.altText);
+            }
             //therefore also Remove the first
 
             var shiftHeight = gifs[0].gif.Height;
