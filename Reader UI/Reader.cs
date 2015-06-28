@@ -310,6 +310,7 @@ namespace Reader_UI
                     case Database.Style.CASCADE:
                         LoadCascade();
                         break;
+                    case Database.Style.SHES8ACK:
                     case Database.Style.DOTA:
                     case Database.Style.SMASH:
                         LoadSmash();    //also works for dota and Shesback
@@ -366,6 +367,7 @@ namespace Reader_UI
                     flash.Height = 1160;
                     break;
                 case (int)Database.PagesOfImportance.CASCADE:
+                case (int)Database.PagesOfImportance.SHES8ACK:
                 case (int)Database.PagesOfImportance.DOTA:
                     flash.Width = 950;
                     flash.Height = 650;
@@ -1028,10 +1030,20 @@ namespace Reader_UI
                     BackColor = Color.Black;
                     
                     mainPanel = new Panel();
+                    mainPanel.BackColor = Color.Black;
                     mainPanel.MaximumSize = new System.Drawing.Size(REGULAR_PANEL_WIDTH, Int32.MaxValue);
                     mainPanel.Width = CASCADE_PANEL_WIDTH;
                     mainPanel.Location = new Point(this.Width / 2 - mainPanel.Width / 2, 0);
-                    mainPanel.BackColor = Color.FromArgb(CASCADE_PANEL_COLOUR_R, CASCADE_PANEL_COLOUR_G, CASCADE_PANEL_COLOUR_B);
+                    Controls.Add(mainPanel);
+                    break;
+                case Database.Style.SHES8ACK:
+                    BackColor = Color.White;
+
+                    mainPanel = new Panel();
+                    mainPanel.BackColor = Color.White;
+                    mainPanel.MaximumSize = new System.Drawing.Size(REGULAR_PANEL_WIDTH, Int32.MaxValue);
+                    mainPanel.Width = CASCADE_PANEL_WIDTH;
+                    mainPanel.Location = new Point(this.Width / 2 - mainPanel.Width / 2, 0);
                     Controls.Add(mainPanel);
                     break;
                 default:

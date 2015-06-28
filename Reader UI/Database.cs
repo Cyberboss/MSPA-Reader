@@ -35,7 +35,7 @@ namespace Reader_UI
             TRICKSTER,
             CASCADE,
             DOTA,
-            SHESBACK,
+            SHES8ACK,
             SMASH
         }
         public class Page
@@ -155,6 +155,7 @@ namespace Reader_UI
             CASCADE = 006009,
             CALIBORN_PAGE_SMASH = 007395,
             DOTA = 006715,
+            SHES8ACK = 009305,
         }
         float totalMegabytesDownloaded = 0;
 
@@ -196,12 +197,12 @@ namespace Reader_UI
                 return Style.CASCADE;
             if (pageno == (int)PagesOfImportance.DOTA)
                 return Style.DOTA;
+            if (pageno == (int)PagesOfImportance.SHES8ACK)
+                return Style.SHES8ACK;
             if (parser.Is2x(pageno))
                 return Style.X2;
             if (parser.IsScratch(pageno))
                 return Style.SCRATCH;
-            if (pageno == (int)PagesOfImportance.CALIBORN_PAGE_SMASH)
-                return Style.SMASH;
             return Style.REGULAR;
         }
         public Page WaitPage(int pageno)
@@ -322,13 +323,13 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             Transact();
             WriteResource(FUCKYOU, 7395, false);
             Parser.Link[] lnk = new Parser.Link[1];
-            lnk[0] = new Parser.Link("", 7396);
-            WriteLinks(lnk, 7395, false);
+            lnk[0] = new Parser.Link("", (int)PagesOfImportance.CALIBORN_PAGE_SMASH + 1);
+            WriteLinks(lnk, (int)PagesOfImportance.CALIBORN_PAGE_SMASH, false);
             Parser.Text asdf = new Parser.Text();
             asdf.narr = new Parser.Text.ScriptLine("#000000", "",0);
             asdf.title = "[S] Cascade.";
-            WriteText(asdf, 7395, false);
-            ArchivePageNumber(7395,false);
+            WriteText(asdf, (int)PagesOfImportance.CALIBORN_PAGE_SMASH, false);
+            ArchivePageNumber((int)PagesOfImportance.CALIBORN_PAGE_SMASH, false);
             Commit();
 
         }
@@ -340,20 +341,44 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             FUCKYOU[0] = new Parser.Resource(parser.DownloadFile("http://cdn.mspaintadventures.com/DOTA/04812.swf"), "04812.swf");
 
             var fileSize2 = FUCKYOU[0].data.Count();
-            totalMegabytesDownloaded += (float)fileSize2 / (1024.0f * 1024.0f); 
+            totalMegabytesDownloaded += (float)fileSize2 / (1024.0f * 1024.0f);
             if (bgw != null)
                 bgw.ReportProgress(progress, FUCKYOU[0].originalFileName + ": " + fileSize2 / 1024 + "KB");
 
             Transact();
-            WriteResource(FUCKYOU, 6715, false);
+            WriteResource(FUCKYOU, (int)PagesOfImportance.DOTA, false);
             Parser.Text asdf = new Parser.Text();
-            asdf.narr = new Parser.Text.ScriptLine("#000000", "",0);
+            asdf.narr = new Parser.Text.ScriptLine("#000000", "", 0);
             asdf.title = "";
             Parser.Link[] lnk = new Parser.Link[1];
-            lnk[0] = new Parser.Link("", 6716);
-            WriteLinks(lnk, 6715, false);
-            WriteText(asdf, 6715, false);
-            ArchivePageNumber(6715,false);
+            lnk[0] = new Parser.Link("", (int)PagesOfImportance.DOTA + 1);
+            WriteLinks(lnk, (int)PagesOfImportance.DOTA, false);
+            WriteText(asdf, (int)PagesOfImportance.DOTA, false);
+            ArchivePageNumber((int)PagesOfImportance.DOTA, false);
+            Commit();
+        }
+        void FailToHandleVriska(System.ComponentModel.BackgroundWorker bgw, int progress)
+        {
+            if (bgw != null)
+                bgw.ReportProgress(progress, "Now parsing the huge 8itch.");
+            Parser.Resource[] FUCKYOU = new Parser.Resource[1];
+            FUCKYOU[0] = new Parser.Resource(parser.DownloadFile("http://www.mspaintadventures.com/shes8ack/07402.swf"), "07402.swf");
+
+            var fileSize2 = FUCKYOU[0].data.Count();
+            totalMegabytesDownloaded += (float)fileSize2 / (1024.0f * 1024.0f);
+            if (bgw != null)
+                bgw.ReportProgress(progress, FUCKYOU[0].originalFileName + ": " + fileSize2 / 1024 + "KB");
+
+            Transact();
+            WriteResource(FUCKYOU, (int)PagesOfImportance.SHES8ACK, false);
+            Parser.Text asdf = new Parser.Text();
+            asdf.narr = new Parser.Text.ScriptLine("#000000", "", 0);
+            asdf.title = "";
+            Parser.Link[] lnk = new Parser.Link[1];
+            lnk[0] = new Parser.Link("", (int)PagesOfImportance.SHES8ACK + 1);
+            WriteLinks(lnk, (int)PagesOfImportance.SHES8ACK, false);
+            WriteText(asdf, (int)PagesOfImportance.SHES8ACK, false);
+            ArchivePageNumber((int)PagesOfImportance.SHES8ACK, false);
             Commit();
         }
         public void ResumeWork(System.ComponentModel.BackgroundWorker bgw)
@@ -447,6 +472,9 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                             break;
                         case PagesOfImportance.DOTA:
                             HandleDota(bgw, currentProgress);
+                            break;
+                        case PagesOfImportance.SHES8ACK:
+                            FailToHandleVriska(bgw, currentProgress);
                             break;
                     }
                 }
