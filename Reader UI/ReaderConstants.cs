@@ -40,6 +40,14 @@ namespace Reader_UI
         public const int CASCADE_BACK_COLOUR_B = 0;
         public const int CASCADE_BACK_COLOUR_G = 0;
 
+        public const int SCRATCH_BACK_COLOUR_R = 0;
+        public const int SCRATCH_BACK_COLOUR_B = 0;
+        public const int SCRATCH_BACK_COLOUR_G = 0;
+
+        public const int SCRATCH_PANEL_COLOUR_R = 8;
+        public const int SCRATCH_PANEL_COLOUR_G = 42;
+        public const int SCRATCH_PANEL_COLOUR_B = 0;
+
         public const int REGULAR_PANEL_WIDTH = 950;
         public const int REGULAR_PANEL_Y_OFFSET = 19;
 
@@ -89,6 +97,10 @@ namespace Reader_UI
         public const int REGULAR_COMIC_PANEL_COLOUR_R = 238;
         public const int REGULAR_COMIC_PANEL_COLOUR_G = 238;
         public const int REGULAR_COMIC_PANEL_COLOUR_B = 238;
+
+        public const int SCRATCH_COMIC_PANEL_COLOUR_R = 14;
+        public const int SCRATCH_COMIC_PANEL_COLOUR_G = 70;
+        public const int SCRATCH_COMIC_PANEL_COLOUR_B = 3;
 
         public const int REGULAR_NARRATIVE_WIDTH = 600;
         public const int REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT = 31;

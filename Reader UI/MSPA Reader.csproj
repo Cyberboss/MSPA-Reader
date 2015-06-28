@@ -173,6 +173,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Mspa_icon[1].ico" />
+    <None Include="Resources\cueBall.png" />
     <None Include="Resources\candyCorn.gif" />
   </ItemGroup>
   <ItemGroup>

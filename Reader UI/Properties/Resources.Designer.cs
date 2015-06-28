@@ -71,6 +71,16 @@ namespace Reader_UI.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap cueBall {
+            get {
+                object obj = ResourceManager.GetObject("cueBall", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to SET ANSI_NULLS ON;
         ///SET QUOTED_IDENTIFIER ON;
         ///CREATE TABLE [dbo].[Dialog](

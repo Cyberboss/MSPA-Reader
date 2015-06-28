@@ -216,6 +216,75 @@ namespace Reader_UI
             pageContainsFlash = true;
 
         }
+        void LoadScratchPage()
+        {
+            LoadRegularPage();
+            //special header
+
+            var tempPB = new GifStream();
+            tempPB.loc = new System.IO.MemoryStream(page.resources[0].data);    //always the first
+            tempPB.gif = new PictureBox();
+            tempPB.gif.Image = Image.FromStream(tempPB.loc);
+            tempPB.gif.Width = tempPB.gif.Image.Width;
+            tempPB.gif.Height = tempPB.gif.Image.Height;
+
+            //increase Y of all mainPanelItems and header by height
+            mainPanel.Location = new Point(mainPanel.Location.X, mainPanel.Location.Y + tempPB.gif.Height);
+            headerPanel.Location = new Point(headerPanel.Location.X, headerPanel.Location.Y + tempPB.gif.Height);
+
+            //color header approprately
+            headerPanel.BackColor = Color.Black;
+            foreach (Control con in headerPanel.Controls)
+                con.BackColor = Color.Black;
+
+            for (int i = 0; i < mspaHeaderLink.Count(); ++i)
+            {
+                mspaHeaderLink[i].ForeColor = Color.White;
+            }
+            for (int i = 0; i < candyCorn.Count(); ++i)
+            {
+                candyCorn[i].Image = Properties.Resources.cueBall;
+            }
+
+
+            Controls.Add(tempPB.gif);
+            tempPB.gif.Location = new Point(Width/2 - tempPB.gif.Width/2, headerPanel.Location.Y - tempPB.gif.Height);
+            gifs.Add(tempPB);
+            //therefore also Remove the first
+
+            var hoverText = new ToolTip();
+            hoverText.AutoPopDelay = 5000;
+            hoverText.InitialDelay = 1000;
+            hoverText.ReshowDelay = 500;
+            // Force the ToolTip text to be displayed whether or not the form is active.
+            hoverText.ShowAlways = true;
+            hoverText.SetToolTip(tempPB.gif, "TODO Parse Scratch text");
+
+
+            var shiftHeight = gifs[0].gif.Height;
+            gifs[0].gif.Dispose();
+            gifs[0].loc.Dispose();
+
+
+            gifs.RemoveAt(0);
+
+            comicPanel.BackColor = Color.FromArgb(SCRATCH_COMIC_PANEL_COLOUR_R, SCRATCH_COMIC_PANEL_COLOUR_G, SCRATCH_COMIC_PANEL_COLOUR_B);
+            title.BackColor = Color.FromArgb(SCRATCH_COMIC_PANEL_COLOUR_R, SCRATCH_COMIC_PANEL_COLOUR_G, SCRATCH_COMIC_PANEL_COLOUR_B); 
+
+            if (page.meta.narr != null)
+            {
+                narrative.BackColor = Color.FromArgb(SCRATCH_COMIC_PANEL_COLOUR_R, SCRATCH_COMIC_PANEL_COLOUR_G, SCRATCH_COMIC_PANEL_COLOUR_B);
+            }
+            else
+            {
+                pesterlog.BackColor = Color.FromArgb(SCRATCH_COMIC_PANEL_COLOUR_R, SCRATCH_COMIC_PANEL_COLOUR_G, SCRATCH_COMIC_PANEL_COLOUR_B);
+                foreach (var line in conversations)
+                {
+                    line.GetControl().BackColor = Color.FromArgb(SCRATCH_COMIC_PANEL_COLOUR_R, SCRATCH_COMIC_PANEL_COLOUR_G, SCRATCH_COMIC_PANEL_COLOUR_B);
+                }
+            }
+            tempPB.gif.BringToFront();
+        }
         void LoadPage()
         {
             if (Properties.Settings.Default.autoSave)
@@ -229,6 +298,9 @@ namespace Reader_UI
             {
                 case Database.Style.REGULAR:
                     LoadRegularPage();
+                    break;
+                case Database.Style.SCRATCH:
+                    LoadScratchPage();
                     break;
                 case Database.Style.CASCADE:
                     LoadCascade();
@@ -420,6 +492,7 @@ namespace Reader_UI
                 narrative.TextAlign = HorizontalAlignment.Center;
                 narrative.Font = new System.Drawing.Font("Courier New", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
                 narrative.Text = page.meta.narr.text.Trim();
+                narrative.ForeColor = System.Drawing.ColorTranslator.FromHtml(page.meta.narr.hexColour);
                 leftSide = comicPanel.Width / 2 - narrative.Width / 2;
                 narrative.Location = new Point(leftSide, currentHeight);
                 currentHeight += narrative.Height;
@@ -900,6 +973,18 @@ namespace Reader_UI
                     break;
                 case Database.Style.SMASH:
                     BackColor = Color.FromArgb(REGULAR_BACK_COLOUR_R, REGULAR_BACK_COLOUR_G, REGULAR_BACK_COLOUR_B);
+                    break;
+                case Database.Style.SCRATCH:
+                    BackColor = Color.FromArgb(SCRATCH_BACK_COLOUR_R, SCRATCH_BACK_COLOUR_G, SCRATCH_BACK_COLOUR_B);
+                    mainPanel = new Panel();
+                    mainPanel.AutoSize = true;
+                    mainPanel.MaximumSize = new System.Drawing.Size(REGULAR_PANEL_WIDTH, Int32.MaxValue);
+                    mainPanel.Width = REGULAR_PANEL_WIDTH;
+                    mainPanel.Location = new Point(this.Width / 2 - mainPanel.Width / 2, REGULAR_PANEL_Y_OFFSET);
+                    mainPanel.BackColor = Color.FromArgb(SCRATCH_PANEL_COLOUR_R, SCRATCH_PANEL_COLOUR_G, SCRATCH_PANEL_COLOUR_B);
+                    Controls.Add(mainPanel);
+
+                    SetupHeader();
                     break;
             }
 
