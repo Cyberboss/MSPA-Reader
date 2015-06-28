@@ -50,6 +50,8 @@ namespace Reader_UI
 
         public const int REGULAR_PANEL_WIDTH = 950;
         public const int REGULAR_PANEL_Y_OFFSET = 19;
+        public const int SCRATCH_PANEL_Y_OFFSET = 195;
+        public const int SCRATCH_HEADER_Y = 175;
 
         public const int CASCADE_PANEL_WIDTH = 950;
         public const int CASCADE_PANEL_Y_OFFSET = 125;

@@ -115,7 +115,7 @@ namespace Reader_UI
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            if (!pageContainsFlash && page != null && keyData != Keys.F5)
+            if (keyData == Keys.F5 || (!pageContainsFlash && page != null))
             {
 
                 switch (keyData)
@@ -229,33 +229,17 @@ namespace Reader_UI
             tempPB.gif.Height = tempPB.gif.Image.Height;
 
             //increase Y of all mainPanelItems and header by height
-            foreach(Control con in mainPanel.Controls)
-                con.Location = new Point(con.Location.X, con.Location.Y + tempPB.gif.Height);
-            headerPanel.Location = new Point(headerPanel.Location.X, headerPanel.Location.Y + tempPB.gif.Height);
-
-            //color header approprately
-            headerPanel.BackColor = Color.Black;
-            foreach (Control con in headerPanel.Controls)
-                con.BackColor = Color.Black;
-
-            for (int i = 0; i < mspaHeaderLink.Count(); ++i)
-            {
-                mspaHeaderLink[i].ForeColor = Color.White;
-            }
-            for (int i = 0; i < candyCorn.Count(); ++i)
-            {
-                candyCorn[i].Image = Properties.Resources.cueBall;
-            }
-
-
             Controls.Add(tempPB.gif);
-            tempPB.gif.Location = new Point(Width / 2 - tempPB.gif.Width / 2, headerPanel.Location.Y - tempPB.gif.Height);
-            tempPB.gif.BringToFront();
+            tempPB.gif.Location = new Point(Width / 2 - tempPB.gif.Width / 2, 0);
+
+
+            //tempPB.gif.BringToFront();
+            //headerPanel.BringToFront();
             gifs.Add(tempPB);
 
             var hoverText = new ToolTip();
             hoverText.AutoPopDelay = 5000;
-            hoverText.InitialDelay = 1000;
+            hoverText.InitialDelay = 500;
             hoverText.ReshowDelay = 500;
             // Force the ToolTip text to be displayed whether or not the form is active.
             hoverText.ShowAlways = true;
@@ -1006,11 +990,26 @@ namespace Reader_UI
                     mainPanel.AutoSize = true;
                     mainPanel.MaximumSize = new System.Drawing.Size(REGULAR_PANEL_WIDTH, Int32.MaxValue);
                     mainPanel.Width = REGULAR_PANEL_WIDTH;
-                    mainPanel.Location = new Point(this.Width / 2 - mainPanel.Width / 2, REGULAR_PANEL_Y_OFFSET);
+                    mainPanel.Location = new Point(this.Width / 2 - mainPanel.Width / 2, SCRATCH_PANEL_Y_OFFSET);
                     mainPanel.BackColor = Color.FromArgb(SCRATCH_PANEL_COLOUR_R, SCRATCH_PANEL_COLOUR_G, SCRATCH_PANEL_COLOUR_B);
                     Controls.Add(mainPanel);
 
                     SetupHeader();
+                    headerPanel.Location = new Point(headerPanel.Location.X,SCRATCH_HEADER_Y);
+                    //color header approprately
+                    headerPanel.BackColor = Color.Black;
+                    foreach (Control con in headerPanel.Controls)
+                        con.BackColor = Color.Black;
+
+                    for (int i = 0; i < mspaHeaderLink.Count(); ++i)
+                    {
+                        mspaHeaderLink[i].ForeColor = Color.White;
+                    }
+                    for (int i = 0; i < candyCorn.Count(); ++i)
+                    {
+                        candyCorn[i].Image = Properties.Resources.cueBall;
+                    }
+
                     break;
             }
 

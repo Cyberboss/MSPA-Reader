@@ -92,10 +92,11 @@ namespace Reader_UI.Properties {
         ///	[text] [nvarchar](max) NULL,
         ///	[colour] [nchar](7) NULL,
         ///	[precedingLineBreaks] [int] NOT NULL,
+        ///	[headerAltText] [nvarchar](max) NULL,
         /// CONSTRAINT [PK_Dialog] PRIMARY KEY CLUSTERED 
         ///(
         ///	[id] ASC
-        ///)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRI [rest of string was truncated]&quot;;.
+        ///)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LO [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLSDBCreationScript {
             get {

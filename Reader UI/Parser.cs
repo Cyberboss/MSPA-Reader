@@ -102,6 +102,7 @@ namespace Reader_UI
             public ScriptLine narr = null;
             public string promptType = null;
             public ScriptLine[] lines = null;
+            public string altText = null;
         }
         public class Link
         {
@@ -556,6 +557,18 @@ namespace Reader_UI
 
             resources = resources.Distinct().ToList();  //filter out any double grabs
         }
+        void ScratchPostParse(HtmlDocument html)
+        {
+            //grab the alt text
+            var node = html.DocumentNode.Descendants("img").First();
+
+            try
+            {
+                texts.altText = node.Attributes["title"].Value;
+            }
+            catch { }
+
+        }
         public bool IsScratch(int page)
         {
             return page >= 5664 && page <= 5981;
@@ -583,6 +596,11 @@ namespace Reader_UI
                 {
                     ScratchPreParse(html);
                     contentTable = html.DocumentNode.Descendants("body").First().Descendants("table").First().Descendants("table").ElementAt(1).Descendants("table").First();
+                    ParseResources(false);
+                    ParseLinks();
+                    ParseText();
+                    ScratchPostParse(html);
+                    return true;
                 }
                 else if (IsSBAHJ(pageno))
                 {
@@ -605,7 +623,7 @@ namespace Reader_UI
                     //regular, homosuck, or trickster
                     contentTable = html.DocumentNode.Descendants("table").First().SelectNodes("tr").ElementAt(1).SelectNodes("td").First().SelectNodes("table").First();
                 }
-                ParseResources(!IsScratch(pageno));
+                ParseResources(true);
                 ParseLinks();
                 ParseText();
             }
