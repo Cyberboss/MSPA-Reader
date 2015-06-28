@@ -191,6 +191,12 @@ namespace Reader_UI
 
         public abstract Page GetPage(int pageno,bool x2);
         public Style GetStyle(int pageno){
+            if (pageno == (int)PagesOfImportance.CASCADE)
+                return Style.CASCADE;
+            if (parser.Is2x(pageno))
+                return Style.X2;
+            if (parser.IsScratch(pageno))
+                return Style.SCRATCH;
             return Style.REGULAR;
         }
         public Page WaitPage(int pageno)

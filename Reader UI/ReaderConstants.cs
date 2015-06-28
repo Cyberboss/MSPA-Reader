@@ -29,16 +29,31 @@ namespace Reader_UI
         public const string REGULAR_LABEL_TEXT_16 = "|";
         public const string REGULAR_LABEL_TEXT_17 = "CREDITS";
 
+        public const int HEADER_HEIGHT = 16;
+        public const int HEADER_FIRST_LINK_OFFSET = 120;
+
         public const int REGULAR_BACK_COLOUR_R = 90;
         public const int REGULAR_BACK_COLOUR_B = 90;
         public const int REGULAR_BACK_COLOUR_G = 90;
 
+        public const int CASCADE_BACK_COLOUR_R = 0;
+        public const int CASCADE_BACK_COLOUR_B = 0;
+        public const int CASCADE_BACK_COLOUR_G = 0;
+
         public const int REGULAR_PANEL_WIDTH = 950;
         public const int REGULAR_PANEL_Y_OFFSET = 19;
+
+        public const int CASCADE_PANEL_WIDTH = 950;
+        public const int CASCADE_PANEL_Y_OFFSET = 125;
 
         public const int REGULAR_PANEL_COLOUR_R = 192;
         public const int REGULAR_PANEL_COLOUR_B = 192;
         public const int REGULAR_PANEL_COLOUR_G = 192;
+
+        public const int CASCADE_PANEL_COLOUR_R = 38;
+        public const int CASCADE_PANEL_COLOUR_B = 38;
+        public const int CASCADE_PANEL_COLOUR_G = 38;
+        public const int CASCADE_BOTTOM_Y_OFFSET = 118;
 
         public const int REGULAR_MSPAHEADERLINK_Y_OFFSET = 3;
 

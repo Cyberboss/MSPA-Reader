@@ -556,7 +556,7 @@ namespace Reader_UI
 
             resources = resources.Distinct().ToList();  //filter out any double grabs
         }
-        bool IsScratch(int page)
+        public bool IsScratch(int page)
         {
             return page >= 5664 && page <= 5981;
         }

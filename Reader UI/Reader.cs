@@ -115,7 +115,7 @@ namespace Reader_UI
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            if (!pageContainsFlash&& page != null)
+            if (!pageContainsFlash && page != null && keyData != Keys.F5)
             {
 
                 switch (keyData)
@@ -193,7 +193,11 @@ namespace Reader_UI
             }else
                 LoadPage();
 
-            flashWarning.Visible = pageContainsFlash;
+            if (pageContainsFlash && (uiToggleButton.Text != "Show UI"))
+            {
+                flashWarning.Visible = true;
+                //dissappear after 5 secs
+            }
         }
 
         void LoadPage()
@@ -205,12 +209,16 @@ namespace Reader_UI
             }
             pageQueue.Push(page.number);
             saveButton.Enabled = true;
-            var newStyle = db.GetStyle(pageRequest);
-            if(previousStyle != newStyle)
-                CurtainsUp(newStyle);
-            switch (newStyle)
+            switch (db.GetStyle(pageRequest))
             {
                 case Database.Style.REGULAR:
+                    LoadRegularPage();
+                    break;
+                case Database.Style.CASCADE:
+                    LoadCascade();
+                    break;
+                default:
+                    Debugger.Break();
                     LoadRegularPage();
                     break;
             }
@@ -257,13 +265,75 @@ namespace Reader_UI
                     break;
             }
         }
+        void LoadCascade()
+        {
+
+            //cascade has no comic panel, use the mainPanel
+            comicPanel = mainPanel;
+            comicPanel.Location = new Point(comicPanel.Location.X, 0);
+
+            //title is part of the flash
+            title = null;
+
+            //special header
+
+            var tempPB = new GifStream();
+            tempPB.loc = new System.IO.MemoryStream(page.resources[6].data);
+            tempPB.gif = new PictureBox();
+            tempPB.gif.Image = Image.FromStream(tempPB.loc);
+            tempPB.gif.Width = tempPB.gif.Image.Width;
+            tempPB.gif.Height = tempPB.gif.Image.Height;
+            tempPB.gif.Location = new Point(comicPanel.Width / 2 - tempPB.gif.Width / 2, 0);
+            comicPanel.Controls.Add(tempPB.gif);
+            gifs.Add(tempPB);
+
+            var oldWidth = headerPanel.Width;
+            headerPanel.Width = comicPanel.Width;
+            headerPanel.Location = new Point(headerPanel.Location.X, CASCADE_PANEL_Y_OFFSET);
+
+            flash = new AxShockwaveFlashObjects.AxShockwaveFlash();
+            comicPanel.Controls.Add(flash);
+            flash.Enabled = true;
+            flash.ScaleMode = 1;
+            flash.AlignMode = 0;
+            InitFlashMovie(flash, page.resources[0].data);
+            SetFlashDimensions();
+            flash.Location = new Point(comicPanel.Width / 2 - flash.Width / 2, CASCADE_PANEL_Y_OFFSET + REGULAR_PANEL_Y_OFFSET + 40);
+            flash.Play();
+            pageContainsFlash = true;
+
+
+
+            linkPrefix = new Label();
+            linkPrefix.AutoSize = true;
+            linkPrefix.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            linkPrefix.Text = REGULAR_LINK_PREFIX;
+            linkPrefix.Location = new Point(REGULAR_PANEL_WIDTH / 2  - REGULAR_PESTERLOG_WIDTH/2, flash.Location.Y + flash.Height + 23);
+            comicPanel.Controls.Add(linkPrefix);
+
+            next = new GrowLinkLabel();
+            next.Width = 600;
+            next.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            next.Text = "    " + page.links[0].originalText;
+            next.Location = linkPrefix.Location; //TODO: MAGIC NUMBERS!!!
+            next.LinkClicked += next_LinkClicked;
+            comicPanel.Controls.Add(next);
+
+            linkPrefix.BringToFront();
+
+            mainPanel.Height = flash.Location.Y + flash.Height + CASCADE_BOTTOM_Y_OFFSET;
+
+            headerPanel.BringToFront();
+
+            RemoveControl(pageLoadingProgress);
+        }
         void LoadRegularPage()
         {
             //panel
             comicPanel = new Panel();
             comicPanel.AutoSize = true;
             comicPanel.Width = REGULAR_COMIC_PANEL_WIDTH;
-            comicPanel.MaximumSize = new Size(REGULAR_COMIC_PANEL_WIDTH,Int32.MaxValue);
+            comicPanel.MaximumSize = new Size(REGULAR_COMIC_PANEL_WIDTH, Int32.MaxValue);
             comicPanel.Location = new Point(mainPanel.Width / 2 - comicPanel.Width / 2, REGULAR_COMIC_PANEL_Y_OFFSET);
             comicPanel.BackColor = Color.FromArgb(REGULAR_COMIC_PANEL_COLOUR_R, REGULAR_COMIC_PANEL_COLOUR_G, REGULAR_COMIC_PANEL_COLOUR_B);
             mainPanel.Controls.Add(comicPanel);
@@ -316,22 +386,22 @@ namespace Reader_UI
                 }
             }
 
-            currentHeight+=REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
+            currentHeight += REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
 
             //words
             int leftSide;
             if (page.meta.narr != null)
             {
-                    narrative = new GrowLabel();
-                    narrative.Width = REGULAR_NARRATIVE_WIDTH;
-                    narrative.TextAlign = HorizontalAlignment.Center;
-                    narrative.Font = new System.Drawing.Font("Courier New", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-                    narrative.Text = page.meta.narr.text.Trim();
-                    leftSide = comicPanel.Width / 2 - narrative.Width / 2;
-                    narrative.Location = new Point(leftSide, currentHeight);
-                    currentHeight += narrative.Height;
-                    comicPanel.Controls.Add(narrative);
-                
+                narrative = new GrowLabel();
+                narrative.Width = REGULAR_NARRATIVE_WIDTH;
+                narrative.TextAlign = HorizontalAlignment.Center;
+                narrative.Font = new System.Drawing.Font("Courier New", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                narrative.Text = page.meta.narr.text.Trim();
+                leftSide = comicPanel.Width / 2 - narrative.Width / 2;
+                narrative.Location = new Point(leftSide, currentHeight);
+                currentHeight += narrative.Height;
+                comicPanel.Controls.Add(narrative);
+
             }
             else
             {
@@ -399,7 +469,7 @@ namespace Reader_UI
 
                                     string spaces = "";
                                     int needed = tmpPB.gif.Image.Width / 14;
-                                    for(int k= 0; k  < needed; ++k)
+                                    for (int k = 0; k < needed; ++k)
                                         spaces += " ";
 
                                     tmpl.Text = tmpl.Text.Substring(0, page.meta.lines[i].subTexts[j].begin) + spaces + tmpl.Text.Substring(page.meta.lines[i].subTexts[j].begin);
@@ -458,7 +528,7 @@ namespace Reader_UI
                 linkPrefix.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
                 linkPrefix.Text = REGULAR_LINK_PREFIX;
                 linkPrefix.Location = new Point(leftSide, currentHeight);
-                comicPanel.Controls.Add(linkPrefix);    
+                comicPanel.Controls.Add(linkPrefix);
 
                 next = new GrowLinkLabel();
                 next.Width = 600;
@@ -525,6 +595,9 @@ namespace Reader_UI
             saveButton.Enabled = false;
             pageContainsFlash = false;
             numericUpDown1.Value = pg;
+            var newStyle = db.GetStyle(pg);
+            if (previousStyle != newStyle)
+                CurtainsUp(newStyle);
             ShowLoadingScreen();
             pageRequest = pg;
             mrAjax.RunWorkerAsync();
@@ -554,13 +627,15 @@ namespace Reader_UI
         {
 
             headerPanel = new Panel();
-            headerPanel.AutoSize = true;
+            headerPanel.Width = REGULAR_PANEL_WIDTH;
+            headerPanel.Height = HEADER_HEIGHT; //TODO: MG NMBR
+            headerPanel.BackColor = Color.FromArgb(REGULAR_BACK_COLOUR_R, REGULAR_BACK_COLOUR_G, REGULAR_BACK_COLOUR_B);
 
             mspaHeaderLink[0] = new Label();
             mspaHeaderLink[0].AutoSize = true;
             mspaHeaderLink[0].Font = new System.Drawing.Font("Arial", 7F, System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             mspaHeaderLink[0].ForeColor = System.Drawing.Color.White;
-            mspaHeaderLink[0].Location = new System.Drawing.Point(0, REGULAR_MSPAHEADERLINK_Y_OFFSET);
+            mspaHeaderLink[0].Location = new System.Drawing.Point(HEADER_FIRST_LINK_OFFSET, REGULAR_MSPAHEADERLINK_Y_OFFSET);
             mspaHeaderLink[0].Text = REGULAR_LABEL_TEXT_1;
             headerPanel.Controls.Add(mspaHeaderLink[0]);
 
@@ -770,16 +845,31 @@ namespace Reader_UI
 
             CleanControls();
 
-            switch (s) { 
+            switch (s)
+            {
                 case Database.Style.REGULAR:
-                    BackColor = Color.FromArgb(REGULAR_BACK_COLOUR_R,REGULAR_BACK_COLOUR_G,REGULAR_BACK_COLOUR_B);
-                    
+                    BackColor = Color.FromArgb(REGULAR_BACK_COLOUR_R, REGULAR_BACK_COLOUR_G, REGULAR_BACK_COLOUR_B);
+
                     mainPanel = new Panel();
                     mainPanel.AutoSize = true;
                     mainPanel.MaximumSize = new System.Drawing.Size(REGULAR_PANEL_WIDTH, Int32.MaxValue);
                     mainPanel.Width = REGULAR_PANEL_WIDTH;
-                    mainPanel.Location = new Point(this.Width / 2 - REGULAR_PANEL_WIDTH / 2, REGULAR_PANEL_Y_OFFSET);
+                    mainPanel.Location = new Point(this.Width / 2 - mainPanel.Width / 2, REGULAR_PANEL_Y_OFFSET);
                     mainPanel.BackColor = Color.FromArgb(REGULAR_PANEL_COLOUR_R, REGULAR_PANEL_COLOUR_G, REGULAR_PANEL_COLOUR_B);
+                    Controls.Add(mainPanel);
+
+                    SetupHeader();
+
+                    break;
+                case Database.Style.CASCADE:
+                    BackColor = Color.FromArgb(CASCADE_BACK_COLOUR_R, CASCADE_BACK_COLOUR_G, CASCADE_BACK_COLOUR_B);
+
+                    mainPanel = new Panel();
+                    mainPanel.AutoSize = true;
+                    mainPanel.MaximumSize = new System.Drawing.Size(REGULAR_PANEL_WIDTH, Int32.MaxValue);
+                    mainPanel.Width = CASCADE_PANEL_WIDTH;
+                    mainPanel.Location = new Point(this.Width / 2 - mainPanel.Width / 2, 0);
+                    mainPanel.BackColor = Color.FromArgb(CASCADE_PANEL_COLOUR_R, CASCADE_PANEL_COLOUR_G, CASCADE_PANEL_COLOUR_B);
                     Controls.Add(mainPanel);
 
                     SetupHeader();
@@ -833,10 +923,13 @@ namespace Reader_UI
 
         private void goBack_Click(object sender, EventArgs e)
         {
-            if (pageQueue.Count < 2)
-                return;
-            pageQueue.Pop();
-            WakeUpMr(pageQueue.Pop());
+            if(pageQueue.Count > 0)
+                pageQueue.Pop();
+            if (pageQueue.Count == 0)
+                if (page != null && page.number > (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE)
+                    WakeUpMr(page.number - 1);
+            else
+                WakeUpMr(pageQueue.Pop());
         }
 
         private void autoSave_CheckedChanged(object sender, EventArgs e)
@@ -904,6 +997,7 @@ namespace Reader_UI
                 openArchiver.Visible = false;
                 loadButton.Visible = false;
                 startOverButton.Visible = false;
+                flashWarning.Visible = false;
                 AcceptButton = null;
             }
             else
@@ -919,6 +1013,10 @@ namespace Reader_UI
                 openArchiver.Visible = true;
                 loadButton.Visible = true;
                 startOverButton.Visible = true;
+                if (pageContainsFlash)
+                {
+                    flashWarning.Visible = true;
+                }
                 AcceptButton = jumpButton;
 
             }
