@@ -35,7 +35,8 @@ namespace Reader_UI
             TRICKSTER,
             CASCADE,
             DOTA,
-            SHESBACK
+            SHESBACK,
+            SMASH
         }
         public class Page
         {
@@ -197,6 +198,8 @@ namespace Reader_UI
                 return Style.X2;
             if (parser.IsScratch(pageno))
                 return Style.SCRATCH;
+            if (pageno == (int)PagesOfImportance.CALIBORN_PAGE_SMASH)
+                return Style.SMASH;
             return Style.REGULAR;
         }
         public Page WaitPage(int pageno)

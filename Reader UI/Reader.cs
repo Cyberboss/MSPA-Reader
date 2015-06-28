@@ -199,7 +199,23 @@ namespace Reader_UI
                 //dissappear after 5 secs
             }
         }
+        void LoadSmash()
+        {
+            //nothing but the flash
+            //for some reason the y offset is wrong
 
+            flash = new AxShockwaveFlashObjects.AxShockwaveFlash();
+            Controls.Add(flash);
+            flash.Enabled = true;
+            flash.ScaleMode = 1;
+            flash.AlignMode = 0;
+            InitFlashMovie(flash, page.resources[0].data);
+            SetFlashDimensions();
+            flash.Location = new Point(Width / 2 - flash.Width / 2, 0);
+            flash.Play();
+            pageContainsFlash = true;
+
+        }
         void LoadPage()
         {
             if (Properties.Settings.Default.autoSave)
@@ -216,6 +232,9 @@ namespace Reader_UI
                     break;
                 case Database.Style.CASCADE:
                     LoadCascade();
+                    break;
+                case Database.Style.SMASH:
+                    LoadSmash();
                     break;
                 default:
                     Debugger.Break();
@@ -255,6 +274,10 @@ namespace Reader_UI
         void SetFlashDimensions()
         {
             switch (page.number) { 
+                case (int)Database.PagesOfImportance.CALIBORN_PAGE_SMASH:
+                    flash.Width = 950;
+                    flash.Height = 1160;
+                    break;
                 case (int)Database.PagesOfImportance.CASCADE:
                     flash.Width = 950;
                     flash.Height = 650;
@@ -874,6 +897,9 @@ namespace Reader_UI
 
                     SetupHeader();
 
+                    break;
+                case Database.Style.SMASH:
+                    BackColor = Color.FromArgb(REGULAR_BACK_COLOUR_R, REGULAR_BACK_COLOUR_G, REGULAR_BACK_COLOUR_B);
                     break;
             }
 
