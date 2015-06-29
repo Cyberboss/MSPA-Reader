@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace Reader_UI
 {
-    public partial class DatabaseLogin : MSPAForm
+    public partial class DatabaseLogin : Form
     {
         public DatabaseLogin()
         {

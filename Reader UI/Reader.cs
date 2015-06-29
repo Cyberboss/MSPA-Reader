@@ -15,18 +15,7 @@ namespace Reader_UI
     partial class Reader : ReaderConstants
     {
 
-        Database db;
-        Panel mainPanel = null, headerPanel = null, comicPanel = null;
-        Label[] mspaHeaderLink = new Label[REGULAR_NUMBER_OF_HEADER_LABELS];
-        PictureBox[] candyCorn = new PictureBox[REGULAR_NUMBER_OF_HEADER_CANDY_CORNS];
-        ProgressBar pageLoadingProgress = null;
-        int pageRequest;
-        Database.Page page = null;
-        Database.Style previousStyle;
-        AxShockwaveFlashObjects.AxShockwaveFlash flash = null;
-        Button pesterHideShow = null;
-
-        class LineOrPB 
+        class LineOrPB
         {
             readonly bool isImg;
             GifStream strm = null;
@@ -60,6 +49,23 @@ namespace Reader_UI
                 return other;
             }
         }
+        class GifStream
+        {
+            public PictureBox gif;
+            public System.IO.MemoryStream loc;
+        }
+
+        Database db;
+        Panel mainPanel = null, headerPanel = null, comicPanel = null;
+        Label[] mspaHeaderLink = new Label[REGULAR_NUMBER_OF_HEADER_LABELS];
+        PictureBox[] candyCorn = new PictureBox[REGULAR_NUMBER_OF_HEADER_CANDY_CORNS];
+        ProgressBar pageLoadingProgress = null;
+        int pageRequest;
+        Database.Page page = null;
+        Database.Style previousStyle;
+        Button pesterHideShow = null;
+        bool fullscreen = true;
+
 
         List<LineOrPB> conversations = new List<LineOrPB>();
         Label errorLabel = null;
@@ -69,15 +75,11 @@ namespace Reader_UI
 
         Stack<int> pageQueue = new Stack<int>();
 
-        class GifStream
-        {
-            public PictureBox gif;
-            public System.IO.MemoryStream loc;
-        }
 
         //page stuff
         GrowLabel title = null;
         List<GifStream> gifs = new List<GifStream>();
+        AxShockwaveFlashObjects.AxShockwaveFlash flash = null;
         GrowLabel narrative = null;
         Label linkPrefix = null;
         LinkLabel next = null, tereziPassword = null;
@@ -112,7 +114,7 @@ namespace Reader_UI
             if(page != null)
                 WakeUpMr(page.number);
         }
-
+       
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             if (keyData == Keys.F5 || (!pageContainsFlash && page != null))
@@ -153,18 +155,11 @@ namespace Reader_UI
 
         void Reader_Resize(object sender, EventArgs e)
         {
+            if (fullscreen)
+                return;
             if (WindowState == FormWindowState.Minimized)
                 return;
-            if (WindowState == FormWindowState.Maximized)
-            {
-                FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-
-                Program.NativeMethods.RECT Rect = new Program.NativeMethods.RECT();
-                var id = Program.NativeMethods.GetForegroundWindow();
-                Program.NativeMethods.GetWindowRect(id, ref Rect);
-                Program.NativeMethods.MoveWindow(id,0,0, Rect.right - Rect.left, Rect.bottom - Rect.top, true);
-            }
-            else
+            if (WindowState != FormWindowState.Maximized)
             {
 
                 FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
@@ -1211,11 +1206,6 @@ namespace Reader_UI
             Properties.Settings.Default.lastReadPage = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
         }
 
-        private void unMaxButton_Click(object sender, EventArgs e)
-        {
-            this.WindowState = FormWindowState.Normal;
-        }
-
         private void uiToggleButton_Click(object sender, EventArgs e)
         {
             if (uiToggleButton.Text == "Hide UI")
@@ -1232,6 +1222,7 @@ namespace Reader_UI
                 loadButton.Visible = false;
                 startOverButton.Visible = false;
                 flashWarning.Visible = false;
+                toggleFullscreen.Visible = false;
                 AcceptButton = null;
             }
             else
@@ -1247,6 +1238,7 @@ namespace Reader_UI
                 openArchiver.Visible = true;
                 loadButton.Visible = true;
                 startOverButton.Visible = true;
+                toggleFullscreen.Visible = true;
                 if (pageContainsFlash)
                 {
                     flashWarning.Visible = true;
@@ -1254,6 +1246,29 @@ namespace Reader_UI
                 AcceptButton = jumpButton;
 
             }
+        }
+
+        private void toggleFullscreen_Click(object sender, EventArgs e)
+        {
+            fullscreen = !fullscreen;
+            if (fullscreen)
+            {
+
+                FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+
+                Program.NativeMethods.RECT Rect = new Program.NativeMethods.RECT();
+                var id = Program.NativeMethods.GetForegroundWindow();
+                Program.NativeMethods.GetWindowRect(id, ref Rect);
+                Program.NativeMethods.MoveWindow(id, 0, 0, Rect.right - Rect.left, Rect.bottom - Rect.top, true);
+            }
+            else
+            {
+
+                FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
+            }
+            WindowState = FormWindowState.Maximized;
+            Update();
+            Reader_ResizeEnd(null, null);
         }
     }
 }

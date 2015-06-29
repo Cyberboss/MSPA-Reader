@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Reader_UI
 {
-    public class ReaderConstants : MSPAForm
+    public class ReaderConstants : Form
     {
         // not using enums because i don't feel like dealing with the conversions every time
         public const int WINDOW_BUTTON_ABSOLUTE_HEIGHT = 12;

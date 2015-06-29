@@ -49,7 +49,7 @@ namespace Reader_UI
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
-        static System.Threading.Mutex mutex = new System.Threading.Mutex(true, "{e416462f-1fe3-4bbf-a7ae-31a257441a37}");
+        static System.Threading.Mutex mutex = new System.Threading.Mutex(true, System.Reflection.Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId.ToString());//unique per build
         [STAThread]
         static void Main()
         {
@@ -57,20 +57,12 @@ namespace Reader_UI
             {
                 try
                 {
-                    if (Properties.Settings.Default.savePassword)
-                        try
-                        {
-                            Properties.Settings.Default.password = ToInsecureString(DecryptString(Properties.Settings.Default.password));
-                        }
-                        catch {
-                            Properties.Settings.Default.savePassword = false;
-                        }
+                    DecryptSavedPassword();
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
                     var lastPage = Properties.Settings.Default.lastReadPage;
                     new DatabaseLogin().Show();
                     Application.Run();
-                    mutex.ReleaseMutex();
                 }
                 catch
                 {
@@ -78,8 +70,8 @@ namespace Reader_UI
                 }
                 finally
                 {
-                    if(Properties.Settings.Default.savePassword)
-                        Properties.Settings.Default.password = EncryptString(ToSecureString(Properties.Settings.Default.password));
+                    mutex.ReleaseMutex();
+                    EncryptSavedPassword();
                     Properties.Settings.Default.Save();
                 }
             }
@@ -87,6 +79,7 @@ namespace Reader_UI
             {
                 // send our Win32 message to make the currently running instance
                 // jump on top of all the other windows
+                // and quit
                 NativeMethods.PostMessage(
                     (IntPtr)NativeMethods.HWND_BROADCAST,
                     (IntPtr)NativeMethods.WM_SHOWME,
@@ -132,7 +125,38 @@ namespace Reader_UI
                 dbr.Focus();
             }
         }
+        private static void DecryptSavedPassword()
+        {
 
+            if (!Properties.Settings.Default.savePassword)
+                return;
+            try
+            {
+                Properties.Settings.Default.password = ToInsecureString(DecryptString(Properties.Settings.Default.password));
+            }
+            catch
+            {
+                Properties.Settings.Default.savePassword = false;
+                Properties.Settings.Default.password = "";
+            }
+
+        }
+        private static void EncryptSavedPassword()
+        {
+
+            if (!Properties.Settings.Default.savePassword)
+                return;
+            try
+            {
+                Properties.Settings.Default.password = EncryptString(ToSecureString(Properties.Settings.Default.password));
+            }
+            catch
+            {
+                Properties.Settings.Default.savePassword = false;
+                Properties.Settings.Default.password = "";
+            }
+
+        }
         //saved password encryption
         //http://weblogs.asp.net/jongalloway//encrypting-passwords-in-a-net-app-config-file
         //less so encryption and more obfuscation?
