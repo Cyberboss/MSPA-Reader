@@ -288,6 +288,66 @@ namespace Reader_UI
 
             //handle the top le text if in the range
             //TODO
+
+            if (page.number >= 5976 && page.number <= 5981)
+            {
+
+                //kill off the second last gif
+
+                var theLEText = gifs[gifs.Count - 2].gif.Height;
+                comicPanel.Controls.Remove(gifs[gifs.Count - 2].gif);
+                gifs[gifs.Count - 2].gif.BackColor = System.Drawing.Color.Transparent;
+
+
+                gifs[gifs.Count - 2].gif.Visible = false;
+                Controls.Add(gifs[gifs.Count - 2].gif);
+                gifs[gifs.Count - 2].gif.BringToFront();
+                //move narrative/pesterlog and link up
+
+                if (page.meta.narr != null)
+                {
+                    narrative.Location = new Point(narrative.Location.X, narrative.Location.Y - theLEText);
+                }
+                else
+                {
+                    foreach (var lin in conversations)
+                    {
+                        lin.GetControl().Location = new Point(lin.GetControl().Location.X, lin.GetControl().Location.Y - theLEText);
+                    }
+                }
+
+                linkPrefix.Location = new Point(linkPrefix.Location.X, linkPrefix.Location.Y - theLEText);
+                next.Location = new Point(next.Location.X, next.Location.Y - theLEText);
+
+                comicPanel.Height -= theLEText;
+                mainPanel.Height -= theLEText;
+
+                tempPB.gif.MouseMove += MoveLEText;
+                tempPB.gif.MouseEnter += ShowLEText;
+                tempPB.gif.MouseLeave += HideLEText;
+            }
+        }
+
+        void HideLEText(object sender, EventArgs e)
+        {
+            gifs[gifs.Count - 2].gif.Visible = false;
+        }
+
+        void ShowLEText(object sender, EventArgs e)
+        {
+            gifs[gifs.Count - 2].gif.Visible = true;
+        }
+
+        void MoveLEText(object sender, MouseEventArgs e)
+        {
+
+            var theLEText = gifs[gifs.Count - 2].gif;
+            if (WindowState != FormWindowState.Maximized || e.X + mainPanel.Location.X + 5 + theLEText.Width < Width)
+            {
+                theLEText.Location = new Point(e.X + mainPanel.Location.X + 5, e.Y + 5);
+            }
+            else
+                theLEText.Visible = false;
         }
         void LoadPage()
         {
