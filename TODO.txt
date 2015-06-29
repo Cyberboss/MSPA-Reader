@@ -19,6 +19,7 @@ Primary: Flash redirection
 Some pages (6000) have flash handling page advancement, we need to intercept the link somehow and load that page (hard i know, will take some research)
 Second option is to diff the flash somehow and do something else when its clicked
 Temp solution TODO: Include link to next page
+UPDATE: By going to webbroswer based flashes we could intercept the page requst somehow maybe?...
 
 Primary: Openbound solution
 Main problem is figuring out where all the configuration xmls are and fixing them so that we can load resources locally
@@ -32,22 +33,22 @@ Generic TODO list(no particular order)
 -- Review password saving code
 -- Implement ads taken straight from the website in comic footer, legal? (trying to help out hussie here)
 -- Figure out how to load Cascade properly (only multipart flash, as of right now I have no idea how it's loading while I'm not connected to the internet, motherfucking miracles? 
-It's probably sitting in some cache that I, for the life of me, cannot find. Easiest option is to write the parts to the temp directory and load it from there. But if we can get away with
-loading it directly into the state somehow that'd be grate.)
+	It's probably sitting in some cache that I, for the life of me, cannot find. Easiest option is to write the parts to the temp directory and load it from there. But if we can get away with
+	loading it directly into the state somehow that'd be grate.)
 -- Support for archival and serial reading modes (x.gif vs x_retcon.gif, activate retcon once past a certain page)
 -- Handle pages with inline images such as 4943
 -- Better narrative/dialog parsing
 -- Support line breaks in pesterlogs
 -- Note side by side longways images so the reader doesn't arrange them turnways (*horizontal, *vertical)
--- Support fonts via parsing instead of statically
--- Fix pesterlog system message regex
+(NOT NEEDED?) -- Support fonts via parsing instead of statically
+-- Fix pesterlog system message regex?
 -- Add funtionality to the header (direct to mspa)
 -- Read through and mark down problem pages
 -- Fix problem pages
--- Support Sqlite
+(DONE? lack of integrity check may make it buggy) -- Support Sqlite
 -- Support Mysql
 -- Better parsing techniques?
--- Support *nix (Theoretically we could as it's .NET, we do have a bunch of native methods however...)
--- S̶u̶p̶p̶o̶r̶t̶ ̶V̶r̶i̶s̶k̶a̶  Dismissed as Impossible
+(DONE?) -- Support *nix (Theoretically we could as it's .NET, we do have a bunch of native methods however...)
+(Dismissed as Impossible) -- S̶u̶p̶p̶o̶r̶t̶ ̶V̶r̶i̶s̶k̶a̶  
 while(true)
 	-- More Horses

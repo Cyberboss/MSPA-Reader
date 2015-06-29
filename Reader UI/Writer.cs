@@ -8,7 +8,7 @@ using System.Diagnostics;
 using System.Collections.Concurrent;
 namespace Reader_UI
 {
-    public abstract class Database : IDisposable
+    public abstract class Writer : IDisposable
     {
         
         void Dispose(bool mgd)
@@ -21,7 +21,7 @@ namespace Reader_UI
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-        ~Database()
+        ~Writer()
         {
             Dispose(false);
         }
@@ -522,7 +522,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 var text = parser.GetText();
 
                 if (bgw != null)
-                    bgw.ReportProgress(currentProgress, "Page " + currentPage + ": text.title");
+                    bgw.ReportProgress(currentProgress, "Page " + currentPage + ":" + text.title);
 
                 if (text.narr == null)
                 {

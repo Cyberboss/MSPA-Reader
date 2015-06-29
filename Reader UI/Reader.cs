@@ -55,14 +55,14 @@ namespace Reader_UI
             public System.IO.MemoryStream loc;
         }
 
-        Database db;
+        Writer db;
         Panel mainPanel = null, headerPanel = null, comicPanel = null;
         Label[] mspaHeaderLink = new Label[REGULAR_NUMBER_OF_HEADER_LABELS];
         PictureBox[] candyCorn = new PictureBox[REGULAR_NUMBER_OF_HEADER_CANDY_CORNS];
         ProgressBar pageLoadingProgress = null;
         int pageRequest;
-        Database.Page page = null;
-        Database.Style previousStyle;
+        Writer.Page page = null;
+        Writer.Style previousStyle;
         Button pesterHideShow = null;
         bool fullscreen = true;
 
@@ -85,14 +85,14 @@ namespace Reader_UI
         LinkLabel next = null, tereziPassword = null;
         Panel pesterlog = null;
 
-        public Reader(Database idb)
+        public Reader(Writer idb)
         {
             db = idb;
             InitializeComponent();
             WindowState = FormWindowState.Maximized;
             FormClosed += Reader_Closed;
             numericUpDown1.Maximum = db.lastPage;
-            numericUpDown1.Minimum = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
+            numericUpDown1.Minimum = (int)Writer.PagesOfImportance.HOMESTUCK_PAGE_ONE;
             numericUpDown1.Value = numericUpDown1.Minimum;
             AcceptButton = jumpButton;
             Shown += Reader_Shown;
@@ -132,7 +132,7 @@ namespace Reader_UI
                         toggleFullscreen_Click(null, null);
                         return true;
                     case Keys.Left:
-                        if (page.number > (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE)
+                        if (page.number > (int)Writer.PagesOfImportance.HOMESTUCK_PAGE_ONE)
                             WakeUpMr(page.number - 1);
                         return true;
                     case Keys.Right:
@@ -180,7 +180,7 @@ namespace Reader_UI
         {
             if (page == null)
             {
-                page = new Database.Page(pageRequest);
+                page = new Writer.Page(pageRequest);
                 MessageBox.Show("An internal error occurred when retrieving the page. Usually this means you are out of memory or some resource on the page cannot be downloaded. (Yes, I checked both the cdn and www).");
                 RemoveControl(pageLoadingProgress);
                 errorLabel = new Label();
@@ -363,18 +363,18 @@ namespace Reader_UI
                 saveButton.Enabled = true;
                 switch (db.GetStyle(pageRequest))
                 {
-                    case Database.Style.REGULAR:
+                    case Writer.Style.REGULAR:
                         LoadRegularPage();
                         break;
-                    case Database.Style.SCRATCH:
+                    case Writer.Style.SCRATCH:
                         LoadScratchPage();
                         break;
-                    case Database.Style.CASCADE:
+                    case Writer.Style.CASCADE:
                         LoadCascade();
                         break;
-                    case Database.Style.SHES8ACK:
-                    case Database.Style.DOTA:
-                    case Database.Style.SMASH:
+                    case Writer.Style.SHES8ACK:
+                    case Writer.Style.DOTA:
+                    case Writer.Style.SMASH:
                         LoadSmash();    //also works for dota and Shesback
                         break;
                     default:
@@ -788,11 +788,11 @@ namespace Reader_UI
             Reader_Resize(null, null);
             CurtainsUp();
             int pr;
-            if (Properties.Settings.Default.lastReadPage >= (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE &&
+            if (Properties.Settings.Default.lastReadPage >= (int)Writer.PagesOfImportance.HOMESTUCK_PAGE_ONE &&
                 Properties.Settings.Default.lastReadPage <= db.lastPage)
                 pr = Properties.Settings.Default.lastReadPage;
             else
-                pr = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
+                pr = (int)Writer.PagesOfImportance.HOMESTUCK_PAGE_ONE;
             WakeUpMr(pr);
         }
         void RemoveControl(Control c)
@@ -1018,7 +1018,7 @@ namespace Reader_UI
             RemoveControl(headerPanel);
             RemoveControl(pageLoadingProgress);
         }
-        void CurtainsUp(Database.Style s = Database.Style.REGULAR)
+        void CurtainsUp(Writer.Style s = Writer.Style.REGULAR)
         {
             previousStyle = s;
 
@@ -1026,7 +1026,7 @@ namespace Reader_UI
 
             switch (s)
             {
-                case Database.Style.REGULAR:
+                case Writer.Style.REGULAR:
                     BackColor = Color.FromArgb(REGULAR_BACK_COLOUR_R, REGULAR_BACK_COLOUR_G, REGULAR_BACK_COLOUR_B);
 
                     mainPanel = new Panel();
@@ -1040,7 +1040,7 @@ namespace Reader_UI
                     SetupHeader();
 
                     break;
-                case Database.Style.CASCADE:
+                case Writer.Style.CASCADE:
                     BackColor = Color.FromArgb(CASCADE_BACK_COLOUR_R, CASCADE_BACK_COLOUR_G, CASCADE_BACK_COLOUR_B);
 
                     mainPanel = new Panel();
@@ -1055,7 +1055,7 @@ namespace Reader_UI
                        headerPanel.Location = new Point(headerPanel.Location.X, CASCADE_PANEL_Y_OFFSET);
 
                     break;
-                case Database.Style.SMASH:
+                case Writer.Style.SMASH:
                     BackColor = Color.FromArgb(REGULAR_BACK_COLOUR_R, REGULAR_BACK_COLOUR_G, REGULAR_BACK_COLOUR_B);
 
                     
@@ -1067,7 +1067,7 @@ namespace Reader_UI
                     mainPanel.BackColor = Color.FromArgb(CASCADE_PANEL_COLOUR_R, CASCADE_PANEL_COLOUR_G, CASCADE_PANEL_COLOUR_B);
                     Controls.Add(mainPanel);
                     break;
-                case Database.Style.SCRATCH:
+                case Writer.Style.SCRATCH:
                     BackColor = Color.FromArgb(SCRATCH_BACK_COLOUR_R, SCRATCH_BACK_COLOUR_G, SCRATCH_BACK_COLOUR_B);
                     mainPanel = new Panel();
                     mainPanel.AutoSize = true;
@@ -1095,7 +1095,7 @@ namespace Reader_UI
                     }
 
                     break;
-                case Database.Style.DOTA:
+                case Writer.Style.DOTA:
                     BackColor = Color.Black;
                     
                     mainPanel = new Panel();
@@ -1105,7 +1105,7 @@ namespace Reader_UI
                     mainPanel.Location = new Point(this.Width / 2 - mainPanel.Width / 2, 0);
                     Controls.Add(mainPanel);
                     break;
-                case Database.Style.SHES8ACK:
+                case Writer.Style.SHES8ACK:
                     BackColor = Color.White;
 
                     mainPanel = new Panel();
@@ -1169,7 +1169,7 @@ namespace Reader_UI
             if(pageQueue.Count > 0)
                 pageQueue.Pop();
             if (pageQueue.Count == 0)
-                if (page != null && page.number > (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE)
+                if (page != null && page.number > (int)Writer.PagesOfImportance.HOMESTUCK_PAGE_ONE)
                     WakeUpMr(page.number - 1);
             else
                 WakeUpMr(pageQueue.Pop());
@@ -1209,12 +1209,12 @@ namespace Reader_UI
 
         private void startOverButton_Click(object sender, EventArgs e)
         {
-            WakeUpMr((int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE);
+            WakeUpMr((int)Writer.PagesOfImportance.HOMESTUCK_PAGE_ONE);
         }
 
         private void deleteButton_Click(object sender, EventArgs e)
         {
-            Properties.Settings.Default.lastReadPage = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
+            Properties.Settings.Default.lastReadPage = (int)Writer.PagesOfImportance.HOMESTUCK_PAGE_ONE;
         }
 
         private void uiToggleButton_Click(object sender, EventArgs e)

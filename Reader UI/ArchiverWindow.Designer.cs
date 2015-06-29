@@ -1,6 +1,6 @@
 ﻿namespace Reader_UI
 {
-    partial class DatabaseWriter
+    partial class ArchiverWindow
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DatabaseWriter));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ArchiverWindow));
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.logOutput = new System.Windows.Forms.TextBox();
             this.worker = new System.ComponentModel.BackgroundWorker();

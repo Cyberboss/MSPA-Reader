@@ -15,7 +15,7 @@ namespace Reader_UI
     static class Program
     {
 
-        public static DatabaseWriter dbw = null;
+        public static ArchiverWindow dbw = null;
         public static Reader dbr = null;
         /// <summary>
         /// The main entry point for the application.
@@ -47,7 +47,7 @@ namespace Reader_UI
                 
         }
 
-        public static void Shutdown(Form window, Database db)
+        public static void Shutdown(Form window, Writer db)
         {
             if (dbr == null && dbw == null)
             {
@@ -67,12 +67,12 @@ namespace Reader_UI
             else
                 dbw = null;
         }
-        public static void Open(Database db, bool writer, bool immediate = false)
+        public static void Open(Writer db, bool writer, bool immediate = false)
         {
             if (writer)
             {
                 if (dbw == null)
-                    dbw = new DatabaseWriter(db, immediate);
+                    dbw = new ArchiverWindow(db, immediate);
                 dbw.Show();
                 dbw.Focus();
             }

@@ -17,6 +17,7 @@ namespace Reader_UI
             InitializeComponent();
             dataSourceInput.Items.Add("SQL Server");
             dataSourceInput.Items.Add("SQL LocalDB");
+            dataSourceInput.Items.Add("SQLite");
             dataSourceInput.SelectedIndex = Properties.Settings.Default.serverType;
             dataSourceInput_SelectedIndexChanged(null, null);
             saveUsername.Checked = Properties.Settings.Default.saveUsername;
@@ -39,14 +40,17 @@ namespace Reader_UI
 
         private void okButton_Click(object sender, EventArgs e)
         {
-            Database db;
+            Writer db;
             switch (dataSourceInput.SelectedIndex)
             {
                 case 0:
-                    db = new SQLServerDatabase(false);
+                    db = new SQL(SQL.DBType.SQLSERVER);
                     break;
                 case 1:
-                    db = new SQLServerDatabase(true);
+                    db = new SQL(SQL.DBType.SQLLOCALDB);
+                    break;
+                case 2:
+                    db = new SQL(SQL.DBType.SQLITE);
                     break;
                 default:
                     MessageBox.Show("Invalid database selection.... How???");
@@ -72,7 +76,7 @@ namespace Reader_UI
                 Hide();
                 if (resetDatabase.Checked)
                 {
-                    Properties.Settings.Default.lastReadPage = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
+                    Properties.Settings.Default.lastReadPage = (int)Writer.PagesOfImportance.HOMESTUCK_PAGE_ONE;
                 }
                 if(checkBox1.Checked)
                     Program.Open(db, false,true);
@@ -133,6 +137,7 @@ namespace Reader_UI
                     ipInput.ReadOnly = false;
                     break;
                 case 1:
+                case 2:
                     foreach (Control c in Controls)
                     {
                         c.Enabled = false;

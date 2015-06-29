@@ -10,13 +10,13 @@ using System.Windows.Forms;
 
 namespace Reader_UI
 {
-    public partial class DatabaseWriter : Form
+    public partial class ArchiverWindow : Form
     {
-        Database db = null;
+        Writer db = null;
         bool running = false;
         bool closeRequested = false;
         readonly bool startImmediate;
-        public DatabaseWriter(Database idb,bool start)
+        public ArchiverWindow(Writer idb,bool start)
         {
             startImmediate = start;
             db = idb;

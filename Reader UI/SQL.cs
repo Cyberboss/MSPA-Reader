@@ -8,22 +8,30 @@ using System.Data.Common;
 using System.Windows.Forms;
 using System.IO;
 using System.Reflection;
+using System.Data.SQLite;
 
 namespace Reader_UI
 {
-    class SQLServerDatabase : Database
+    class SQL : Writer
     {
 
         DbConnection sqlsRConn = null, sqlsWConn = null;
         DbTransaction sqlsTrans = null;
         string connectionString = null;
 
-        readonly bool compact;
+        public enum DBType
+        {
+            SQLSERVER,
+            SQLLOCALDB,
+            SQLITE,
+        }
+
+        readonly DBType databaseType;
         bool resetFlag = false;
 
-        public SQLServerDatabase(bool com)
+        public SQL(DBType com)
         {
-            compact = com;
+            databaseType = com;
         }
 
         //local db handlers
@@ -115,19 +123,30 @@ namespace Reader_UI
         override public void Connect(string serverName, string username, string password,bool reset)
         {
             resetFlag = reset;
-            if (!compact)
-            {
-                connectionString = "Server=" + serverName + ";Initial Catalog=MSPAArchive;";
-                if (username != "")
-                    connectionString += "User ID=" + username + ";Password=" + password;
-                else
-                    connectionString += "Integrated Security=True;";
-            }
-            else
-            {
-                connectionString = GetLocalDB("MSPAArchive", false, serverName);
-            }
 
+            switch (databaseType) { 
+                case DBType.SQLLOCALDB:
+                {
+                    connectionString = "Server=" + serverName + ";Initial Catalog=MSPAArchive;";
+                    if (username != "")
+                        connectionString += "User ID=" + username + ";Password=" + password;
+                    else
+                        connectionString += "Integrated Security=True;";
+                    break;
+                }
+                case DBType.SQLSERVER:
+                {
+                    connectionString = GetLocalDB("MSPAArchive", false, serverName);
+                    break;
+                }
+                case DBType.SQLITE:
+                connectionString = "data source=" + serverName + @"\MSPAArchive.sqlite3; Version=3";
+            sqlsRConn = new SQLiteConnection(connectionString + ";MultipleActiveResultSets=True;");
+            sqlsWConn = new SQLiteConnection(connectionString);
+            sqlsRConn.Open();
+            sqlsWConn.Open();
+                    return;
+            }
             sqlsRConn = new SqlConnection(connectionString + ";MultipleActiveResultSets=True;");
             sqlsWConn = new SqlConnection(connectionString);
             sqlsRConn.Open();
@@ -150,10 +169,10 @@ namespace Reader_UI
             DbDataReader reader3 = null;
             try
             {
-                DbCommand selector = sqlsRConn.CreateCommand();
-                selector.CommandText = "SELECT title,promptType,headerAltText FROM PageMeta WHERE page_id = @pno AND x2 = " + (x2 ? 1 : 0);
-                AddParameterWithValue(selector, "@pno", pageno);
-                reader1 = selector.ExecuteReader();
+                DbCommand selector1 = sqlsRConn.CreateCommand();
+                selector1.CommandText = "SELECT title,promptType,headerAltText FROM PageMeta WHERE page_id = @pno AND x2 = " + (x2 ? 1 : 0);
+                AddParameterWithValue(selector1, "@pno", pageno);
+                reader1 = selector1.ExecuteReader();
 
                 var meta = new Parser.Text();
                 if (!reader1.HasRows || !reader1.Read())
@@ -167,9 +186,11 @@ namespace Reader_UI
                     meta.altText = reader1.GetString(2);
 
 
-                selector.CommandText = "SELECT id,isNarrative,isImg,text,colour,precedingLineBreaks FROM Dialog WHERE page_id = @pno AND x2 = " + (x2 ? 1 : 0);
+                DbCommand selector2 = sqlsRConn.CreateCommand();
+                selector2.CommandText = "SELECT id,isNarrative,isImg,text,colour,precedingLineBreaks FROM Dialog WHERE page_id = @pno AND x2 = " + (x2 ? 1 : 0);
+                AddParameterWithValue(selector2, "@pno", pageno);
 
-                reader2 = selector.ExecuteReader();
+                reader2 = selector2.ExecuteReader();
                 if (!reader2.HasRows || !reader2.Read())
                     throw new Exception();  //should never happen if called using waitpage
 
@@ -179,10 +200,10 @@ namespace Reader_UI
                     if (reader2.GetBoolean(2))//isImg
                         meta.narr = new Parser.Text.ScriptLine(reader2.GetString(3),reader2.GetInt32(5));
                     else
-                        meta.narr = new Parser.Text.ScriptLine(reader2.GetString(4), reader2.GetString(3), reader2.GetInt32(5));
-                    selector.Parameters.Clear();
-                    selector.CommandText = "SELECT underline,colour,sbegin,length,isImg FROM SpecialText WHERE dialog_id = " + reader2.GetInt32(0);
-                    reader3 = selector.ExecuteReader();
+                        meta.narr = new Parser.Text.ScriptLine(reader2.GetString(4), reader2.GetString(3), reader2.GetInt32(5)); 
+                    var selector3 = sqlsRConn.CreateCommand();
+                    selector3.CommandText = "SELECT underline,colour,sbegin,length,isImg FROM SpecialText WHERE dialog_id = " + reader2.GetInt32(0);
+                    reader3 = selector3.ExecuteReader();
                     meta.narr.subTexts = GetSpecialText(reader2);
                     reader3.Close();
                 }
@@ -199,9 +220,9 @@ namespace Reader_UI
                                 currentLine = new Parser.Text.ScriptLine(reader2.GetString(3), reader2.GetInt32(5));
                             else
                                 currentLine = new Parser.Text.ScriptLine(reader2.GetString(4), reader2.GetString(3), reader2.GetInt32(5));
-                            var selector2 = sqlsRConn.CreateCommand();
-                            selector2.CommandText = "SELECT underline,colour,sbegin,length,isImg FROM SpecialText WHERE dialog_id = " + reader2.GetInt32(0);
-                            specReader = selector2.ExecuteReader();
+                            var selector3 = sqlsRConn.CreateCommand();
+                            selector3.CommandText = "SELECT underline,colour,sbegin,length,isImg FROM SpecialText WHERE dialog_id = " + reader2.GetInt32(0);
+                            specReader = selector3.ExecuteReader();
 
                             currentLine.subTexts = GetSpecialText(specReader);
                             lines.Add(currentLine);
@@ -386,7 +407,12 @@ namespace Reader_UI
                     Transact();
                     DbCommand creationCommands = sqlsWConn.CreateCommand();
 
-                    creationCommands.CommandText = Properties.Resources.SQLSDBCreationScript;
+                    if (databaseType == DBType.SQLITE)
+                    {
+                        creationCommands.CommandText = Properties.Resources.SQLiteDBCreationScript;
+                    }
+                    else
+                        creationCommands.CommandText = Properties.Resources.SQLSDBCreationScript;
                     creationCommands.Transaction = sqlsTrans;
                     creationCommands.ExecuteNonQuery();
                     Commit();
@@ -394,7 +420,7 @@ namespace Reader_UI
                 catch
                 {
                     Rollback();
-                    if(compact)
+                    if(databaseType != DBType.SQLSERVER)
                         MessageBox.Show("Error creating database, make sure the application has read/write permissions in the working directory.");
                     else
                         MessageBox.Show("Error creating database, make sure the specified account has read/write permissions.");
@@ -443,6 +469,7 @@ namespace Reader_UI
                 resourceWrite.ExecuteNonQuery();
             }
         }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities")]
         override public void WriteText(Parser.Text tex, int page, bool x2)
         {
             DbCommand textWrite = sqlsWConn.CreateCommand();
@@ -454,7 +481,11 @@ namespace Reader_UI
             textWrite.Transaction = sqlsTrans;
             textWrite.ExecuteNonQuery();
 
-            textWrite.CommandText = "INSERT INTO Dialog (page_id,x2,isNarrative,isImg,text,colour,precedingLineBreaks) VALUES (" + page + ",@xt, @narr,@isIm, @tex,@colour,@prb) SELECT SCOPE_IDENTITY()";
+            textWrite.CommandText = "INSERT INTO Dialog (page_id,x2,isNarrative,isImg,text,colour,precedingLineBreaks) VALUES (" + page + ",@xt, @narr,@isIm, @tex,@colour,@prb)";
+            if (databaseType == DBType.SQLITE)
+                textWrite.CommandText += "; SELECT last_insert_rowid() FROM Dialog";
+            else
+                textWrite.CommandText += " SELECT SCOPE_IDENTITY()";
 
             if (tex.narr != null)
             {
@@ -481,7 +512,12 @@ namespace Reader_UI
                     AddParameterWithValue(textWrite, "@tex", tex.lines[i].text);
                     AddParameterWithValue(textWrite, "@colour", tex.lines[i].hexColour != null ? (object)tex.lines[i].hexColour : (object)DBNull.Value);
                     AddParameterWithValue(textWrite, "@prb", tex.lines[i].precedingLineBreaks);
-                    var diaId = (int)(decimal)textWrite.ExecuteScalar();
+                    var res = textWrite.ExecuteScalar();
+                    int diaId;
+                    if (databaseType == DBType.SQLITE)
+                        diaId = Convert.ToInt32(res);
+                    else
+                        diaId = (int)(decimal)res;
                     if(tex.lines[i].subTexts != null)
                         for (int j = 0; j < tex.lines[i].subTexts.Count(); ++j)
                         {
