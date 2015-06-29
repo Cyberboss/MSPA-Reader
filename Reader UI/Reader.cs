@@ -193,11 +193,8 @@ namespace Reader_UI
             }else
                 LoadPage();
 
-            if (pageContainsFlash && (uiToggleButton.Text != "Show UI"))
-            {
-                flashWarning.Visible = true;
-                //dissappear after 5 secs
-            }
+                flashWarning.Visible = pageContainsFlash && (uiToggleButton.Text != "Show UI");
+             
         }
         void LoadSmash()
         {
@@ -227,16 +224,18 @@ namespace Reader_UI
             tempPB.loc = new System.IO.MemoryStream(page.resources[0].data);    //always the first
             tempPB.gif = new PictureBox();
             tempPB.gif.Image = Image.FromStream(tempPB.loc);
-            tempPB.gif.Width = tempPB.gif.Image.Width;
+            tempPB.gif.SizeMode = PictureBoxSizeMode.CenterImage;
+            tempPB.gif.Width = mainPanel.Width;
             tempPB.gif.Height = tempPB.gif.Image.Height;
+            tempPB.gif.BackColor = Color.Black;
 
             //increase Y of all mainPanelItems and header by height
-            Controls.Add(tempPB.gif);
-            tempPB.gif.Location = new Point(Width / 2 - tempPB.gif.Width / 2, 0);
+            foreach (Control i in mainPanel.Controls)
+                i.Location = new Point(i.Location.X, i.Location.Y + SCRATCH_PANEL_Y_OFFSET);
+            //mainPanel.Controls.Add(tempPB.gif);
+            tempPB.gif.Location = new Point(mainPanel.Width / 2 - tempPB.gif.Width / 2, 0);
+            mainPanel.Controls.Add(tempPB.gif);
 
-
-            //tempPB.gif.BringToFront();
-            //headerPanel.BringToFront();
             gifs.Add(tempPB);
 
             if (page.meta.altText != null)
@@ -257,6 +256,7 @@ namespace Reader_UI
 
 
             gifs.RemoveAt(0);
+
 
             //decrease Y of all comicPanel Items and header by height except title
             foreach (Control con in comicPanel.Controls)
@@ -285,6 +285,9 @@ namespace Reader_UI
                     line.GetControl().BackColor = Color.FromArgb(SCRATCH_COMIC_PANEL_COLOUR_R, SCRATCH_COMIC_PANEL_COLOUR_G, SCRATCH_COMIC_PANEL_COLOUR_B);
                 }
             }
+
+            //handle the top le text if in the range
+            //TODO
         }
         void LoadPage()
         {
@@ -1005,7 +1008,7 @@ namespace Reader_UI
                     mainPanel.AutoSize = true;
                     mainPanel.MaximumSize = new System.Drawing.Size(REGULAR_PANEL_WIDTH, Int32.MaxValue);
                     mainPanel.Width = REGULAR_PANEL_WIDTH;
-                    mainPanel.Location = new Point(this.Width / 2 - mainPanel.Width / 2, SCRATCH_PANEL_Y_OFFSET);
+                    mainPanel.Location = new Point(this.Width / 2 - mainPanel.Width / 2, 0);
                     mainPanel.BackColor = Color.FromArgb(SCRATCH_PANEL_COLOUR_R, SCRATCH_PANEL_COLOUR_G, SCRATCH_PANEL_COLOUR_B);
                     Controls.Add(mainPanel);
 
@@ -1015,6 +1018,7 @@ namespace Reader_UI
                     headerPanel.BackColor = Color.Black;
                     foreach (Control con in headerPanel.Controls)
                         con.BackColor = Color.Black;
+                    headerPanel.BringToFront();
 
                     for (int i = 0; i < mspaHeaderLink.Count(); ++i)
                     {
