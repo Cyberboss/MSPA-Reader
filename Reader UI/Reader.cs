@@ -77,10 +77,10 @@ namespace Reader_UI
 
 
         //page stuff
-        GrowLabel title = null;
+        GrowRich title = null;
         List<GifStream> gifs = new List<GifStream>();
         AxShockwaveFlashObjects.AxShockwaveFlash flash = null;
-        GrowLabel narrative = null;
+        GrowRich narrative = null;
         Label linkPrefix = null;
         LinkLabel next = null, tereziPassword = null;
         Panel pesterlog = null;
@@ -117,7 +117,7 @@ namespace Reader_UI
        
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            if (keyData == Keys.F5 || (!pageContainsFlash && page != null))
+            if (keyData == Keys.F5 || keyData == Keys.F11 ||(!pageContainsFlash && page != null))
             {
 
                 switch (keyData)
@@ -127,6 +127,9 @@ namespace Reader_UI
                         return true;
                     case Keys.F5:
                         WakeUpMr(page.number);
+                        return true;
+                    case Keys.F11:
+                        toggleFullscreen_Click(null, null);
                         return true;
                     case Keys.Left:
                         if (page.number > (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE)
@@ -506,9 +509,9 @@ namespace Reader_UI
             mainPanel.Controls.Add(comicPanel);
 
             //title
-            title = new GrowLabel();
+            title = new GrowRich();
             title.Width = REGULAR_PAGE_TITLE_WIDTH;
-            title.TextAlign = HorizontalAlignment.Center;
+            title.SelectionAlignment = HorizontalAlignment.Center;
             title.Font = new System.Drawing.Font("Courier New", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             title.Text = page.meta.title;
             comicPanel.Controls.Add(title);
@@ -559,9 +562,9 @@ namespace Reader_UI
             int leftSide;
             if (page.meta.narr != null)
             {
-                narrative = new GrowLabel();
+                narrative = new GrowRich();
                 narrative.Width = REGULAR_NARRATIVE_WIDTH;
-                narrative.TextAlign = HorizontalAlignment.Center;
+                narrative.SelectionAlignment = HorizontalAlignment.Center;
                 narrative.Font = new System.Drawing.Font("Courier New", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
                 narrative.Text = page.meta.narr.text.Trim();
                 narrative.ForeColor = System.Drawing.ColorTranslator.FromHtml(page.meta.narr.hexColour);
@@ -772,7 +775,6 @@ namespace Reader_UI
         }
         void Reader_Shown(object sender, EventArgs e)
         {
-            Location = new Point(0, 0);
             WindowState = FormWindowState.Maximized;
             Reader_Resize(null, null);
             CurtainsUp();
@@ -1255,19 +1257,14 @@ namespace Reader_UI
             {
 
                 FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-
-                Program.NativeMethods.RECT Rect = new Program.NativeMethods.RECT();
-                var id = Program.NativeMethods.GetForegroundWindow();
-                Program.NativeMethods.GetWindowRect(id, ref Rect);
-                Program.NativeMethods.MoveWindow(id, 0, 0, Rect.right - Rect.left, Rect.bottom - Rect.top, true);
             }
             else
             {
 
                 FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
             }
+            WindowState = FormWindowState.Normal;
             WindowState = FormWindowState.Maximized;
-            Update();
             Reader_ResizeEnd(null, null);
         }
     }

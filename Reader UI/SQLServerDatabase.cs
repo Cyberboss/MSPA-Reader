@@ -78,7 +78,7 @@ namespace Reader_UI
 
 
                     DetachDatabase(dbName);
-                    cmd.CommandText = String.Format("CREATE DATABASE {0} ON (NAME = N'{0}', FILENAME = '{1}')", dbName, dbFileName);
+                    cmd.CommandText = "CREATE DATABASE " + dbName + " ON (NAME = N'" + dbName + "', FILENAME = " + dbFileName + ")";
                     cmd.ExecuteNonQuery();
                 }
 
@@ -100,7 +100,7 @@ namespace Reader_UI
                 {
                     connection.Open();
                     SqlCommand cmd = connection.CreateCommand(); 
-                    cmd.CommandText = String.Format("exec sp_detach_db '{0}'", dbName);
+                    cmd.CommandText = "exec sp_detach_db '"+dbName+"'";
                     cmd.ExecuteNonQuery();
 
                     return true;
@@ -143,49 +143,48 @@ namespace Reader_UI
             }
             return list.ToArray();
         }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         Parser.Text GetMeta(int pageno, bool x2)
         {
-            DbDataReader reader = null;
+            DbDataReader reader1 = null;
+            DbDataReader reader2 = null;
+            DbDataReader reader3 = null;
             try
             {
                 DbCommand selector = sqlsRConn.CreateCommand();
                 selector.CommandText = "SELECT title,promptType,headerAltText FROM PageMeta WHERE page_id = @pno AND x2 = " + (x2 ? 1 : 0);
                 AddParameterWithValue(selector, "@pno", pageno);
-                reader = selector.ExecuteReader();
+                reader1 = selector.ExecuteReader();
 
                 var meta = new Parser.Text();
-                if (!reader.HasRows || !reader.Read())
+                if (!reader1.HasRows || !reader1.Read())
                     throw new Exception();  //should never happen if called using waitpage
 
-                if (!reader.IsDBNull(0))
-                    meta.title = reader.GetString(0);
-                if (!reader.IsDBNull(1))
-                    meta.promptType = reader.GetString(1);
-                if (!reader.IsDBNull(2))
-                    meta.altText = reader.GetString(2);
+                if (!reader1.IsDBNull(0))
+                    meta.title = reader1.GetString(0);
+                if (!reader1.IsDBNull(1))
+                    meta.promptType = reader1.GetString(1);
+                if (!reader1.IsDBNull(2))
+                    meta.altText = reader1.GetString(2);
 
-                reader.Close();
 
                 selector.CommandText = "SELECT id,isNarrative,isImg,text,colour,precedingLineBreaks FROM Dialog WHERE page_id = @pno AND x2 = " + (x2 ? 1 : 0);
 
-                reader = selector.ExecuteReader();
-                if (!reader.HasRows || !reader.Read())
+                reader2 = selector.ExecuteReader();
+                if (!reader2.HasRows || !reader2.Read())
                     throw new Exception();  //should never happen if called using waitpage
 
 
-                if (reader.GetBoolean(1))
+                if (reader2.GetBoolean(1))
                 {//isNarrative
-                    if (reader.GetBoolean(2))//isImg
-                        meta.narr = new Parser.Text.ScriptLine(reader.GetString(3),reader.GetInt32(5));
+                    if (reader2.GetBoolean(2))//isImg
+                        meta.narr = new Parser.Text.ScriptLine(reader2.GetString(3),reader2.GetInt32(5));
                     else
-                        meta.narr = new Parser.Text.ScriptLine(reader.GetString(4), reader.GetString(3), reader.GetInt32(5));
+                        meta.narr = new Parser.Text.ScriptLine(reader2.GetString(4), reader2.GetString(3), reader2.GetInt32(5));
                     selector.Parameters.Clear();
-                    selector.CommandText = "SELECT underline,colour,sbegin,length,isImg FROM SpecialText WHERE dialog_id = " + reader.GetInt32(0);
-                    reader.Close();
-                    reader = selector.ExecuteReader();
-                    meta.narr.subTexts = GetSpecialText(reader);
-                    reader.Close();
+                    selector.CommandText = "SELECT underline,colour,sbegin,length,isImg FROM SpecialText WHERE dialog_id = " + reader2.GetInt32(0);
+                    reader3 = selector.ExecuteReader();
+                    meta.narr.subTexts = GetSpecialText(reader2);
+                    reader3.Close();
                 }
                 else
                 {
@@ -196,12 +195,12 @@ namespace Reader_UI
                         try
                         {
                             Parser.Text.ScriptLine currentLine;
-                            if (reader.GetBoolean(2))//isImg
-                                currentLine = new Parser.Text.ScriptLine(reader.GetString(3), reader.GetInt32(5));
+                            if (reader2.GetBoolean(2))//isImg
+                                currentLine = new Parser.Text.ScriptLine(reader2.GetString(3), reader2.GetInt32(5));
                             else
-                                currentLine = new Parser.Text.ScriptLine(reader.GetString(4), reader.GetString(3), reader.GetInt32(5));
+                                currentLine = new Parser.Text.ScriptLine(reader2.GetString(4), reader2.GetString(3), reader2.GetInt32(5));
                             var selector2 = sqlsRConn.CreateCommand();
-                            selector2.CommandText = "SELECT underline,colour,sbegin,length,isImg FROM SpecialText WHERE dialog_id = " + reader.GetInt32(0);
+                            selector2.CommandText = "SELECT underline,colour,sbegin,length,isImg FROM SpecialText WHERE dialog_id = " + reader2.GetInt32(0);
                             specReader = selector2.ExecuteReader();
 
                             currentLine.subTexts = GetSpecialText(specReader);
@@ -215,13 +214,19 @@ namespace Reader_UI
                             specReader.Close();
                         }
 
-                    } while (reader.Read());
-                    reader.Close();
+                    } while (reader2.Read());
                     meta.lines = lines.ToArray();
                 }
                 return meta;
-            }catch{
-                reader.Close();
+            }
+            catch
+            {
+                if(reader1 != null)
+                    reader1.Close();
+                if (reader2 != null)
+                    reader2.Close();
+                if (reader3 != null)
+                    reader3.Close();
                 throw;
             }
         }

@@ -27,7 +27,7 @@ public class GrowRich : RichTextBox
         try
         {
             mGrowing = true;
-            var numberOfLines = (int)Reader_UI.Program.NativeMethods.SendMessage((IntPtr)Handle.ToInt32(), (IntPtr)EM_GETLINECOUNT, (IntPtr)0, (IntPtr)0);
+            var numberOfLines = GetLineFromCharIndex(TextLength) + 1;
             this.Height = (Font.Height + 2) * numberOfLines;
         }
         finally

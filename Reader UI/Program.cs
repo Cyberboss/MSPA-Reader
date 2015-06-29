@@ -15,35 +15,6 @@ namespace Reader_UI
     static class Program
     {
 
-
-        public class NativeMethods
-
-        {
-            //MSDN said to use intptr and the anaylzer is still complaining :\
-            public const int HWND_BROADCAST = 0xffff;
-            public static readonly int WM_SHOWME = (int)RegisterWindowMessage("WM_SHOWME");
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Portability", "CA1901:PInvokeDeclarationsShouldBePortable", MessageId = "1"), DllImport("user32", CharSet = CharSet.Unicode)]
-            public static extern bool PostMessage(IntPtr hwnd, IntPtr msg, IntPtr wparam, IntPtr lparam);
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Portability", "CA1901:PInvokeDeclarationsShouldBePortable", MessageId = "return"), DllImport("user32", CharSet = CharSet.Unicode)]
-            public static extern IntPtr RegisterWindowMessage(string message);
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Portability", "CA1901:PInvokeDeclarationsShouldBePortable", MessageId = "1"), DllImport("user32", CharSet = CharSet.Unicode)]
-            public static extern IntPtr SendMessage(IntPtr hwnd, IntPtr wMsg, IntPtr wParam, IntPtr lParam);
-            [DllImport("user32.dll", ExactSpelling = true, SetLastError = true)]
-            public static extern IntPtr GetForegroundWindow();
-            public struct RECT
-            {
-                public int left;
-                public int top;
-                public int right;
-                public int bottom;
-            }
-
-            [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall, ExactSpelling = true, SetLastError = true)]
-            public static extern bool GetWindowRect(IntPtr hWnd, ref RECT rect);
-
-            [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall, ExactSpelling = true, SetLastError = true)]
-            public static extern void MoveWindow(IntPtr hwnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
-        }
         public static DatabaseWriter dbw = null;
         public static Reader dbr = null;
         /// <summary>
@@ -54,7 +25,6 @@ namespace Reader_UI
         static void Main()
         {
             if (mutex.WaitOne(TimeSpan.Zero, true))
-            {
                 try
                 {
                     DecryptSavedPassword();
@@ -74,18 +44,7 @@ namespace Reader_UI
                     EncryptSavedPassword();
                     Properties.Settings.Default.Save();
                 }
-            }
-            else
-            {
-                // send our Win32 message to make the currently running instance
-                // jump on top of all the other windows
-                // and quit
-                NativeMethods.PostMessage(
-                    (IntPtr)NativeMethods.HWND_BROADCAST,
-                    (IntPtr)NativeMethods.WM_SHOWME,
-                    IntPtr.Zero,
-                    IntPtr.Zero);
-            }     
+                
         }
 
         public static void Shutdown(Form window, Database db)
