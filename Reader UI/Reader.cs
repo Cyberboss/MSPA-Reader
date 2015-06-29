@@ -357,8 +357,7 @@ namespace Reader_UI
 
                 if (Properties.Settings.Default.autoSave)
                 {
-                    Properties.Settings.Default.lastPage = page.number;
-                    Properties.Settings.Default.Save();
+                    Properties.Settings.Default.lastReadPage = page.number;
                 }
                 pageQueue.Push(page.number);
                 saveButton.Enabled = true;
@@ -783,9 +782,9 @@ namespace Reader_UI
             Reader_Resize(null, null);
             CurtainsUp();
             int pr;
-            if (Properties.Settings.Default.lastPage >= (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE &&
-                Properties.Settings.Default.lastPage <= db.lastPage)
-                pr = Properties.Settings.Default.lastPage;
+            if (Properties.Settings.Default.lastReadPage >= (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE &&
+                Properties.Settings.Default.lastReadPage <= db.lastPage)
+                pr = Properties.Settings.Default.lastReadPage;
             else
                 pr = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
             WakeUpMr(pr);
@@ -1173,20 +1172,18 @@ namespace Reader_UI
         private void autoSave_CheckedChanged(object sender, EventArgs e)
         {
             Properties.Settings.Default.autoSave = autoSave.Checked;
-            Properties.Settings.Default.Save();
         }
 
         private void saveButton_Click(object sender, EventArgs e)
         {
             if (page == null)
                 return;
-            Properties.Settings.Default.lastPage = page.number;
-            Properties.Settings.Default.Save();
+            Properties.Settings.Default.lastReadPage = page.number;
         }
 
         private void loadButton_Click(object sender, EventArgs e)
         {
-            WakeUpMr(Properties.Settings.Default.lastPage);
+            WakeUpMr(Properties.Settings.Default.lastReadPage);
         }
 
         private void exitButton_Click(object sender, EventArgs e)
@@ -1211,8 +1208,7 @@ namespace Reader_UI
 
         private void deleteButton_Click(object sender, EventArgs e)
         {
-            Properties.Settings.Default.lastPage = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
-            Properties.Settings.Default.Save();
+            Properties.Settings.Default.lastReadPage = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
         }
 
         private void unMaxButton_Click(object sender, EventArgs e)

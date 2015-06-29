@@ -1,16 +1,23 @@
-﻿using System;
+﻿//YOOOOO CHANGE THIS BEFORE RELEASING
+
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Configuration;
+using System.Security;
 
 namespace Reader_UI
 {
     static class Program
     {
+
+
         public class NativeMethods
+
         {
             //MSDN said to use intptr and the anaylzer is still complaining :\
             public const int HWND_BROADCAST = 0xffff;
@@ -48,12 +55,33 @@ namespace Reader_UI
         {
             if (mutex.WaitOne(TimeSpan.Zero, true))
             {
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
-                var lastPage = Properties.Settings.Default.lastPage;
-                new DatabaseLogin().Show();
-                Application.Run();       
-                mutex.ReleaseMutex();
+                try
+                {
+                    if (Properties.Settings.Default.savePassword)
+                        try
+                        {
+                            Properties.Settings.Default.password = ToInsecureString(DecryptString(Properties.Settings.Default.password));
+                        }
+                        catch {
+                            Properties.Settings.Default.savePassword = false;
+                        }
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault(false);
+                    var lastPage = Properties.Settings.Default.lastReadPage;
+                    new DatabaseLogin().Show();
+                    Application.Run();
+                    mutex.ReleaseMutex();
+                }
+                catch
+                {
+                    throw;
+                }
+                finally
+                {
+                    if(Properties.Settings.Default.savePassword)
+                        Properties.Settings.Default.password = EncryptString(ToSecureString(Properties.Settings.Default.password));
+                    Properties.Settings.Default.Save();
+                }
             }
             else
             {
@@ -66,6 +94,7 @@ namespace Reader_UI
                     IntPtr.Zero);
             }     
         }
+
         public static void Shutdown(Form window, Database db)
         {
             if (dbr == null && dbw == null)
@@ -91,7 +120,7 @@ namespace Reader_UI
             if (writer)
             {
                 if (dbw == null)
-                    dbw = new DatabaseWriter(db,immediate);
+                    dbw = new DatabaseWriter(db, immediate);
                 dbw.Show();
                 dbw.Focus();
             }
@@ -101,7 +130,64 @@ namespace Reader_UI
                     dbr = new Reader(db);
                 dbr.Show();
                 dbr.Focus();
-            } 
+            }
+        }
+
+        //saved password encryption
+        //http://weblogs.asp.net/jongalloway//encrypting-passwords-in-a-net-app-config-file
+        //less so encryption and more obfuscation?
+        //all in all, someone needs to review this
+        static byte[] entropy = System.Reflection.Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId.ToByteArray(); //not exactly the most secure string, but it's unique per build
+
+        public static string EncryptString(System.Security.SecureString input)
+        {
+            byte[] encryptedData = System.Security.Cryptography.ProtectedData.Protect(
+                System.Text.Encoding.Unicode.GetBytes(ToInsecureString(input)),
+                entropy,
+                System.Security.Cryptography.DataProtectionScope.CurrentUser);
+            return Convert.ToBase64String(encryptedData);
+        }
+
+        public static SecureString DecryptString(string encryptedData)
+        {
+            try
+            {
+                byte[] decryptedData = System.Security.Cryptography.ProtectedData.Unprotect(
+                    Convert.FromBase64String(encryptedData),
+                    entropy,
+                    System.Security.Cryptography.DataProtectionScope.CurrentUser);
+                return ToSecureString(System.Text.Encoding.Unicode.GetString(decryptedData));
+            }
+            catch
+            {
+                return new SecureString();
+            }
+        }
+
+        public static SecureString ToSecureString(string input)
+        {
+            SecureString secure = new SecureString();
+            foreach (char c in input)
+            {
+                secure.AppendChar(c);
+            }
+            secure.MakeReadOnly();
+            return secure;
+        }
+
+        public static string ToInsecureString(SecureString input)
+        {
+            string returnValue = string.Empty;
+            IntPtr ptr = System.Runtime.InteropServices.Marshal.SecureStringToBSTR(input);
+            try
+            {
+                returnValue = System.Runtime.InteropServices.Marshal.PtrToStringBSTR(ptr);
+            }
+            finally
+            {
+                System.Runtime.InteropServices.Marshal.ZeroFreeBSTR(ptr);
+            }
+            return returnValue;
         }
     }
 }

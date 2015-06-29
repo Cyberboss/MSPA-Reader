@@ -17,7 +17,18 @@ namespace Reader_UI
             InitializeComponent();
             dataSourceInput.Items.Add("SQL Server");
             dataSourceInput.Items.Add("SQL LocalDB");
-            dataSourceInput.SelectedIndex = 1;
+            dataSourceInput.SelectedIndex = Properties.Settings.Default.serverType;
+            dataSourceInput_SelectedIndexChanged(null, null);
+            saveUsername.Checked = Properties.Settings.Default.saveUsername;
+            savePassword.Checked = Properties.Settings.Default.savePassword;
+
+            if (Properties.Settings.Default.saveUsername)
+            {
+                usernameInput.Text = Properties.Settings.Default.username;
+                if (Properties.Settings.Default.savePassword)
+                    passwordInput.Text = Properties.Settings.Default.password;
+            }
+
             AcceptButton = okButton;
             FormClosed += DatabaseLogin_Closed;
         }
@@ -61,20 +72,48 @@ namespace Reader_UI
                 Hide();
                 if (resetDatabase.Checked)
                 {
-                    Properties.Settings.Default.lastPage = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
-                    Properties.Settings.Default.Save();
+                    Properties.Settings.Default.lastReadPage = (int)Database.PagesOfImportance.HOMESTUCK_PAGE_ONE;
                 }
                 if(checkBox1.Checked)
                     Program.Open(db, false,true);
                 if (checkBox2.Checked)
                     Program.Open(db, true,true);
+
+                if (dataSourceInput.SelectedIndex != 1)
+                    Properties.Settings.Default.ip = ipInput.Text;
+
+                if (saveUsername.Checked)
+                {
+                    Properties.Settings.Default.saveUsername = true;
+                    Properties.Settings.Default.username = usernameInput.Text;
+                    if (savePassword.Checked)
+                    {
+                        Properties.Settings.Default.savePassword = true;
+                        Properties.Settings.Default.password = passwordInput.Text;
+                    }
+                    else {
+                        Properties.Settings.Default.savePassword = false;
+                        Properties.Settings.Default.password = "";
+                    }
+                }
+                else
+                {
+                    Properties.Settings.Default.saveUsername = false;
+                    Properties.Settings.Default.username = "";
+                    Properties.Settings.Default.savePassword = false;
+                    Properties.Settings.Default.password = "";
+                }
+
+
                 Close();
             }
             catch
             {
                 Cursor.Current = Cursors.Default;
                 MessageBox.Show("Can not open connection to " + ipInput.Text + "! Check that the database MSPAArchive exists on the specified server and the user you entered has to dbo role.");
+                var oldIp = ipInput.Text;
                 dataSourceInput_SelectedIndexChanged(null, null);
+                ipInput.Text = oldIp;
             }
         }
 
@@ -82,6 +121,7 @@ namespace Reader_UI
         {
             dbPathSelect.Visible = false;
             ipPathLabel.Text = "IP Address";
+            Properties.Settings.Default.serverType = dataSourceInput.SelectedIndex;
             switch (dataSourceInput.SelectedIndex)
             {
                 case 0:
@@ -89,7 +129,7 @@ namespace Reader_UI
                     {
                         c.Enabled = true;
                     }
-                    ipInput.Text = "";
+                    ipInput.Text = Properties.Settings.Default.ip == "" ? "127.0.0.1" : Properties.Settings.Default.ip;
                     ipInput.ReadOnly = false;
                     break;
                 case 1:
@@ -135,6 +175,17 @@ namespace Reader_UI
                 ipInput.Text = oFD.SelectedPath;
             }
         }
+
+        private void savePassword_CheckedChanged(object sender, EventArgs e)
+        {
+            saveUsername.Checked |= savePassword.Checked;
+        }
+
+        private void saveUsername_CheckedChanged(object sender, EventArgs e)
+        {
+            savePassword.Checked &= saveUsername.Checked;
+        }
+
 
 
 

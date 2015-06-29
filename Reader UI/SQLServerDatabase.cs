@@ -128,7 +128,7 @@ namespace Reader_UI
                 connectionString = GetLocalDB("MSPAArchive", false, serverName);
             }
 
-            sqlsRConn = new SqlConnection(connectionString + "MultipleActiveResultSets=True;");
+            sqlsRConn = new SqlConnection(connectionString + ";MultipleActiveResultSets=True;");
             sqlsWConn = new SqlConnection(connectionString);
             sqlsRConn.Open();
             sqlsWConn.Open();
