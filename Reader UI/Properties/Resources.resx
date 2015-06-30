@@ -217,4 +217,7 @@ CREATE TABLE PagesArchived (page_id INTEGER, x2 BOOLEAN, PRIMARY KEY (page_id, x
 CREATE TABLE Resources (id INTEGER PRIMARY KEY AUTOINCREMENT, page_id INTEGER, x2 BOOLEAN, data BLOB, original_filename TEXT, title_text TEXT, isInPesterLog BOOLEAN);
 CREATE TABLE SpecialText (id INTEGER PRIMARY KEY AUTOINCREMENT, dialog_id INTEGER, underline BOOLEAN, colour TEXT, sbegin INTEGER, length INTEGER, isImg BOOLEAN);</value>
   </data>
+  <data name="greenPepper" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\greenPepper.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

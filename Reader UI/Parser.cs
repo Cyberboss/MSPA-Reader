@@ -529,8 +529,20 @@ namespace Reader_UI
         {
             var reg = Regex.Match(url, linkNumberRegex);
             if (!reg.Success)
+            {
+                Debugger.Break();
                 return 0;
+            }
             return Convert.ToInt32(reg.Value);
+        }
+        public static bool IsHomosuck(int pageno)
+        {
+            //ty based wiki http://mspaintadventures.wikia.com/wiki/Homestuck:_Act_6_Act_6
+            return ((pageno >= 8143 && pageno <= 8177)
+                || (pageno >= 8375 && pageno <= 8430)
+                || (pageno >= 8753 && pageno <= 8800)   //8801 is GAMEOVER
+                || (pageno >= 8821 && pageno <= 8843)
+                || (pageno >= 9309 && pageno <= 9348));
         }
         public Link[] GetLinks()
         {

@@ -15,15 +15,8 @@ SHESBACK (DONE)
 Caliborn's page smash (DONE)
 LOWAS in void fireflies
 
-Primary: Flash redirection
-Some pages (6000) have flash handling page advancement, we need to intercept the link somehow and load that page (hard i know, will take some research)
-Second option is to diff the flash somehow and do something else when its clicked
-Temp solution TODO: Include link to next page
-UPDATE: By going to webbroswer based flashes we could intercept the page requst somehow maybe?...
-
 Primary: Openbound solution
 Main problem is figuring out where all the configuration xmls are and fixing them so that we can load resources locally
-
 
 Generic TODO list(no particular order)
 
@@ -32,7 +25,7 @@ Generic TODO list(no particular order)
 -- Check if it works with older MSPA works(Jailbreak, problem sleuth), if we're lucky it will jst work with the regular style and we can just lower the minimum page cap
 -- Implement archive page
 -- Review password saving code
--- Implement ads taken straight from the website in comic footer, legal? (trying to help out hussie here)
+-- Implement ads taken straight from the website in comic footer, legal? (trying to help out hussie here, and I'm pretty sure they all go to whatpumpkin anyway)
 (DONE??? I SERIOUSLY CAN'T TELL) -- Figure out how to load Cascade properly (only multipart flash, as of right now I have no idea how it's loading).
 -- Support for archival and serial reading modes (x.gif vs x_retcon.gif, activate retcon once past a certain page)
 -- Handle pages with inline images such as 4943
@@ -44,7 +37,7 @@ Generic TODO list(no particular order)
 -- Add funtionality to the header (direct to mspa)
 -- Read through and mark down problem pages
 -- Fix problem pages
-(DONE? lack of integrity check may make it buggy) -- Support Sqlite
+(DONE? lack of integrity check may make it buggy, no idea how transactions are handled either) -- Support Sqlite
 -- Support Mysql
 -- Better parsing techniques?
 (DONE?) -- Support *nix (Theoretically we could as it's .NET, we do have a bunch of native methods however...)

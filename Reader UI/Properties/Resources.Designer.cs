@@ -81,6 +81,16 @@ namespace Reader_UI.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap greenPepper {
+            get {
+                object obj = ResourceManager.GetObject("greenPepper", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CREATE TABLE PageMeta (page_id INTEGER, x2 BOOLEAN, title TEXT, promptType TEXT, headerAltText TEXT, PRIMARY KEY (page_id, x2));
         ///CREATE TABLE Dialog (id INTEGER PRIMARY KEY AUTOINCREMENT, page_id INTEGER REFERENCES PageMeta (page_id), x2 BOOLEAN, isNarrative BOOLEAN, isImg BOOLEAN, text TEXT, colour TEXT, precedingLineBreaks INTEGER);
         ///CREATE TABLE Links (id INTEGER PRIMARY KEY AUTOINCREMENT, page_id INTEGER, x2 BOOLEAN, linked_page_id INTEGER, link_text TEXT);

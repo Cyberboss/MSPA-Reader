@@ -270,6 +270,7 @@ namespace Reader_UI
 
             comicPanel.BackColor = Color.FromArgb(SCRATCH_COMIC_PANEL_COLOUR_R, SCRATCH_COMIC_PANEL_COLOUR_G, SCRATCH_COMIC_PANEL_COLOUR_B);
             title.BackColor = Color.FromArgb(SCRATCH_COMIC_PANEL_COLOUR_R, SCRATCH_COMIC_PANEL_COLOUR_G, SCRATCH_COMIC_PANEL_COLOUR_B);
+            title.ForeColor = Color.White;
 
             if (page.meta.narr != null)
             {
@@ -324,8 +325,39 @@ namespace Reader_UI
                 tempPB.gif.MouseEnter += ShowLEText;
                 tempPB.gif.MouseLeave += HideLEText;
             }
+            linkPrefix.ForeColor = Color.White;
+            next.LinkColor = Color.FromArgb(44, 255, 75);   //TODO:
         }
 
+        void LoadHomosuckPage()
+        {
+            LoadRegularPage();
+
+            //set colours
+
+            //TODO Loads of MGNs
+            comicPanel.BackColor = Color.FromArgb(7, 60, 0);
+            title.BackColor = Color.FromArgb(7, 60, 0);
+            title.ForeColor = Color.FromArgb(46, 215, 58);
+
+            if (page.meta.narr != null)
+            {
+                narrative.BackColor = Color.FromArgb(7, 60, 0);
+            }
+            else
+            {
+                pesterlog.BackColor = Color.FromArgb(7, 60, 0);
+                foreach (var line in conversations)
+                {
+                    line.GetControl().BackColor = Color.FromArgb(7, 60, 0);
+                }
+            }
+            linkPrefix.BackColor = Color.FromArgb(7, 60, 0);
+            next.BackColor = Color.FromArgb(7, 60, 0);
+            next.LinkColor = Color.FromArgb(46, 215, 58);
+
+            
+        }
         void HideLEText(object sender, EventArgs e)
         {
             gifs[gifs.Count - 2].gif.Visible = false;
@@ -370,10 +402,14 @@ namespace Reader_UI
                     case Writer.Style.CASCADE:
                         LoadCascade();
                         break;
+                    case Writer.Style.HOMOSUCK:
+                        LoadHomosuckPage();
+                        break;
+                    case Writer.Style.GAMEOVER:
                     case Writer.Style.SHES8ACK:
                     case Writer.Style.DOTA:
                     case Writer.Style.SMASH:
-                        LoadSmash();    //also works for dota and Shesback
+                        LoadSmash();    //also works for dota, gameover, and Shesback, curtains up will set the bg
                         break;
                     default:
                         Debugger.Break();
@@ -419,6 +455,10 @@ namespace Reader_UI
         void SetFlashDimensions()
         {
             switch (page.number) { 
+                case (int)Writer.PagesOfImportance.GAMEOVER:
+                    flash.Width = 950;
+                    flash.Height = 786;
+                    break;
                 case (int)Writer.PagesOfImportance.CALIBORN_PAGE_SMASH:
                     flash.Width = 950;
                     flash.Height = 1160;
@@ -1044,7 +1084,7 @@ namespace Reader_UI
                     mainPanel = new Panel();
                     mainPanel.AutoSize = true;
                     mainPanel.MaximumSize = new System.Drawing.Size(REGULAR_PANEL_WIDTH, Int32.MaxValue);
-                    mainPanel.Width = CASCADE_PANEL_WIDTH;
+                    mainPanel.Width = REGULAR_PANEL_WIDTH;
                     mainPanel.Location = new Point(this.Width / 2 - mainPanel.Width / 2, 0);
                     mainPanel.BackColor = Color.FromArgb(CASCADE_PANEL_COLOUR_R, CASCADE_PANEL_COLOUR_G, CASCADE_PANEL_COLOUR_B);
                     Controls.Add(mainPanel);
@@ -1060,7 +1100,7 @@ namespace Reader_UI
                     mainPanel = new Panel();
                     mainPanel.AutoSize = true;
                     mainPanel.MaximumSize = new System.Drawing.Size(REGULAR_PANEL_WIDTH, Int32.MaxValue);
-                    mainPanel.Width = CASCADE_PANEL_WIDTH;
+                    mainPanel.Width = REGULAR_PANEL_WIDTH;
                     mainPanel.Location = new Point(this.Width / 2 - mainPanel.Width / 2, 0);
                     mainPanel.BackColor = Color.FromArgb(CASCADE_PANEL_COLOUR_R, CASCADE_PANEL_COLOUR_G, CASCADE_PANEL_COLOUR_B);
                     Controls.Add(mainPanel);
@@ -1099,7 +1139,7 @@ namespace Reader_UI
                     mainPanel = new Panel();
                     mainPanel.BackColor = Color.Black;
                     mainPanel.MaximumSize = new System.Drawing.Size(REGULAR_PANEL_WIDTH, Int32.MaxValue);
-                    mainPanel.Width = CASCADE_PANEL_WIDTH;
+                    mainPanel.Width = REGULAR_PANEL_WIDTH;
                     mainPanel.Location = new Point(this.Width / 2 - mainPanel.Width / 2, 0);
                     Controls.Add(mainPanel);
                     break;
@@ -1109,15 +1149,50 @@ namespace Reader_UI
                     mainPanel = new Panel();
                     mainPanel.BackColor = Color.White;
                     mainPanel.MaximumSize = new System.Drawing.Size(REGULAR_PANEL_WIDTH, Int32.MaxValue);
-                    mainPanel.Width = CASCADE_PANEL_WIDTH;
+                    mainPanel.Width = REGULAR_PANEL_WIDTH;
                     mainPanel.Location = new Point(this.Width / 2 - mainPanel.Width / 2, 0);
                     Controls.Add(mainPanel);
+                    break;
+
+                case Writer.Style.HOMOSUCK:
+                case Writer.Style.GAMEOVER:
+                    BackColor = Color.FromArgb(4, 35, 0);
+                    mainPanel = new Panel();
+                    mainPanel.BackColor = Color.FromArgb(4, 35, 0);
+                    mainPanel.MaximumSize = new System.Drawing.Size(REGULAR_PANEL_WIDTH, Int32.MaxValue);
+                    mainPanel.Width = REGULAR_PANEL_WIDTH;
+                    mainPanel.Location = new Point(this.Width / 2 - mainPanel.Width / 2, 0);
+                    Controls.Add(mainPanel);
+
+                    if (s == Writer.Style.HOMOSUCK)
+                        StyleHomosuck();
                     break;
                 default:
                     Debugger.Break();
                     break;
             }
 
+        }
+        void StyleHomosuck()
+        {
+            mainPanel.BackColor = Color.FromArgb(22, 133, 0);
+            mainPanel.Location = new Point(mainPanel.Location.X, HEADER_HEIGHT);
+
+            SetupHeader();
+            //color header approprately
+            headerPanel.BackColor = Color.FromArgb(4, 35, 0);
+            foreach (Control con in headerPanel.Controls)
+                con.BackColor = Color.FromArgb(4, 35, 0);
+            headerPanel.BringToFront();
+
+            for (int i = 0; i < mspaHeaderLink.Count(); ++i)
+            {
+                mspaHeaderLink[i].ForeColor = Color.FromArgb(46, 215, 58);  //im so done with constants but w/e TODO:
+            }
+            for (int i = 0; i < candyCorn.Count(); ++i)
+            {
+                candyCorn[i].Image = Properties.Resources.greenPepper;
+            }
         }
         void ShowLoadingScreen()
         {

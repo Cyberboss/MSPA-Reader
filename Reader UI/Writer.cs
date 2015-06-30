@@ -36,7 +36,8 @@ namespace Reader_UI
             CASCADE,
             DOTA,
             SHES8ACK,
-            SMASH
+            SMASH,
+            GAMEOVER,
         }
         public class Page
         {
@@ -156,6 +157,7 @@ namespace Reader_UI
             CALIBORN_PAGE_SMASH = 007395,
             DOTA = 006715,
             SHES8ACK = 009305,
+            GAMEOVER = 008801,
         }
         float totalMegabytesDownloaded = 0;
 
@@ -199,10 +201,14 @@ namespace Reader_UI
                 return Style.DOTA;
             if (pageno == (int)PagesOfImportance.SHES8ACK)
                 return Style.SHES8ACK;
+            if (Parser.IsHomosuck(pageno))
+                return Style.HOMOSUCK;
             if (parser.Is2x(pageno))
                 return Style.X2;
             if (parser.IsScratch(pageno))
                 return Style.SCRATCH;
+            if (pageno == (int)PagesOfImportance.GAMEOVER)
+                return Style.GAMEOVER;
             
             return Style.REGULAR;
         }
@@ -229,11 +235,13 @@ namespace Reader_UI
                         }
                     }
                     else
+                    {
                         archivedPages.Request(pageno);
                         do
                         {
                             System.Threading.Thread.Sleep(1000);
                         } while (!archivedPages.IsPageArchived(pageno));
+                    }
                 }
                 return GetPage(pageno, parser.Is2x(pageno));
             }
@@ -382,6 +390,30 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             ArchivePageNumber((int)PagesOfImportance.SHES8ACK, false);
             Commit();
         }
+        void FailMiserably(System.ComponentModel.BackgroundWorker bgw, int progress)
+        {
+            if (bgw != null)
+                bgw.ReportProgress(progress, "Now parsing death.");
+            Parser.Resource[] FUCKYOU = new Parser.Resource[1];
+            FUCKYOU[0] = new Parser.Resource(parser.DownloadFile("http://cdn.mspaintadventures.com/storyfiles/hs2/GAMEOVER/06898.swf"), "06898.swf");
+
+            var fileSize2 = FUCKYOU[0].data.Count();
+            totalMegabytesDownloaded += (float)fileSize2 / (1024.0f * 1024.0f);
+            if (bgw != null)
+                bgw.ReportProgress(progress, FUCKYOU[0].originalFileName + ": " + fileSize2 / 1024 + "KB");
+
+            Transact();
+            WriteResource(FUCKYOU, (int)PagesOfImportance.GAMEOVER, false);
+            Parser.Text asdf = new Parser.Text();
+            asdf.narr = new Parser.Text.ScriptLine("#000000", "", 0);
+            asdf.title = "";
+            Parser.Link[] lnk = new Parser.Link[1];
+            lnk[0] = new Parser.Link("", (int)PagesOfImportance.GAMEOVER + 1);
+            WriteLinks(lnk, (int)PagesOfImportance.GAMEOVER, false);
+            WriteText(asdf, (int)PagesOfImportance.GAMEOVER, false);
+            ArchivePageNumber((int)PagesOfImportance.GAMEOVER, false);
+            Commit();
+        }
         public void ResumeWork(System.ComponentModel.BackgroundWorker bgw)
         {
 
@@ -476,6 +508,9 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                             break;
                         case PagesOfImportance.SHES8ACK:
                             FailToHandleVriska(bgw, currentProgress);
+                            break;
+                        case PagesOfImportance.GAMEOVER:
+                            FailMiserably(bgw, currentProgress);
                             break;
                     }
                 }
