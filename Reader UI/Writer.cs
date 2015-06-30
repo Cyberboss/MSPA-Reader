@@ -262,7 +262,8 @@ namespace Reader_UI
                 return Style.GAMEOVER;
             if (Parser.IsTrickster(pageno))
                 return Style.TRICKSTER;
-            
+            if (pageno == 5982)
+                return Style.SBAHJ;
             return Style.REGULAR;
         }
         public Page WaitPage(int pageno)

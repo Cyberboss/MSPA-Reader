@@ -451,6 +451,44 @@ namespace Reader_UI
             next.BackColor = Color.FromArgb(255, 155, 253); ;
             next.LinkColor = Color.FromArgb(251, 6, 11);
         }
+        void LoadSBAHJPage()
+        {
+            LoadRegularPage();
+
+            var newFont = new System.Drawing.Font("Comic Sans MS", 7F, System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+
+            foreach (var l in mspaHeaderLink)
+            {
+                l.Font = newFont;
+                l.BackColor = Color.Black;
+            }
+            foreach (var c in candyCorn)
+            {
+                c.BackColor = Color.Black;
+            }
+            comicPanel.BackColor = Color.FromArgb(20, 255, 35);
+
+            //TODO Loads of MGNs
+            title.BackColor = Color.FromArgb(20, 255, 35);
+
+            if (page.meta.narr != null)
+            {
+                narrative.BackColor = Color.FromArgb(20, 255, 35);
+            }
+            else
+            {
+                pesterlog.BackColor = Color.FromArgb(20, 255, 35);
+                foreach (var line in conversations)
+                {
+                    line.GetControl().BackColor = Color.FromArgb(20, 255, 35);
+                }
+            }
+
+            newFont = new System.Drawing.Font("Comic Sans MS", title.Font.Size, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            title.Font = newFont;
+            linkPrefix.Font = newFont;
+            next.Font = newFont;
+        }
         void LoadPage()
         {
             try
@@ -479,6 +517,9 @@ namespace Reader_UI
                         break;
                     case Writer.Style.HOMOSUCK:
                         LoadHomosuckPage();
+                        break;
+                    case Writer.Style.SBAHJ:
+                        LoadSBAHJPage();
                         break;
                     case Writer.Style.GAMEOVER:
                         flash = null;//prevent progress report from changing colours
@@ -1290,6 +1331,21 @@ namespace Reader_UI
 
                     trick = new TricksterShit(this,db.GetTricksterShit());
                     break;
+                case Writer.Style.SBAHJ:
+                    BackColor = Color.FromArgb(7,7,236);
+
+                    mainPanel = new Panel();
+                    mainPanel.BackColor = Color.FromArgb(244, 0, 236);
+                    mainPanel.MaximumSize = new System.Drawing.Size(REGULAR_PANEL_WIDTH, Int32.MaxValue);
+                    mainPanel.Width = REGULAR_PANEL_WIDTH;
+                    mainPanel.Location = new Point(this.Width / 2 - mainPanel.Width / 2, 24);
+                    Controls.Add(mainPanel);
+
+                    SetupHeader();
+
+                    headerPanel.BackColor = Color.Black;
+                    break;
+
                 default:
                     Debugger.Break();
                     break;
