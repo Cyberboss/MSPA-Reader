@@ -86,7 +86,7 @@ namespace Reader_UI
 
 
                     DetachDatabase(dbName);
-                    cmd.CommandText = "CREATE DATABASE " + dbName + " ON (NAME = N'" + dbName + "', FILENAME = " + dbFileName + ")";
+                    cmd.CommandText = "CREATE DATABASE " + dbName + " ON (NAME = N'" + dbName + "', FILENAME = '" + dbFileName + "')";
                     cmd.ExecuteNonQuery();
                 }
 
@@ -124,8 +124,8 @@ namespace Reader_UI
         {
             resetFlag = reset;
 
-            switch (databaseType) { 
-                case DBType.SQLLOCALDB:
+            switch (databaseType) {
+                case DBType.SQLSERVER:
                 {
                     connectionString = "Server=" + serverName + ";Initial Catalog=MSPAArchive;";
                     if (username != "")
@@ -134,17 +134,17 @@ namespace Reader_UI
                         connectionString += "Integrated Security=True;";
                     break;
                 }
-                case DBType.SQLSERVER:
+                case DBType.SQLLOCALDB:
                 {
                     connectionString = GetLocalDB("MSPAArchive", false, serverName);
                     break;
                 }
                 case DBType.SQLITE:
-                connectionString = "data source=" + serverName + @"\MSPAArchive.sqlite3; Version=3";
-            sqlsRConn = new SQLiteConnection(connectionString + ";MultipleActiveResultSets=True;");
-            sqlsWConn = new SQLiteConnection(connectionString);
-            sqlsRConn.Open();
-            sqlsWConn.Open();
+                    connectionString = "data source=" + serverName + @"\MSPAArchive.sqlite3; Version=3";
+                    sqlsRConn = new SQLiteConnection(connectionString + ";MultipleActiveResultSets=True;");
+                    sqlsWConn = new SQLiteConnection(connectionString);
+                    sqlsRConn.Open();
+                    sqlsWConn.Open();
                     return;
             }
             sqlsRConn = new SqlConnection(connectionString + ";MultipleActiveResultSets=True;");

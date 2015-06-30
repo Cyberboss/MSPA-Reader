@@ -33,9 +33,7 @@ Generic TODO list(no particular order)
 -- Implement archive page
 -- Review password saving code
 -- Implement ads taken straight from the website in comic footer, legal? (trying to help out hussie here)
--- Figure out how to load Cascade properly (only multipart flash, as of right now I have no idea how it's loading while I'm not connected to the internet, motherfucking miracles? 
-	It's probably sitting in some cache that I, for the life of me, cannot find. Easiest option is to write the parts to the temp directory and load it from there. But if we can get away with
-	loading it directly into the state somehow that'd be grate.)
+(DONE??? I SERIOUSLY CAN'T TELL) -- Figure out how to load Cascade properly (only multipart flash, as of right now I have no idea how it's loading).
 -- Support for archival and serial reading modes (x.gif vs x_retcon.gif, activate retcon once past a certain page)
 -- Handle pages with inline images such as 4943
 -- Better narrative/dialog parsing

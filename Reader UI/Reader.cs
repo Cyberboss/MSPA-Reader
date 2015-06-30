@@ -79,7 +79,7 @@ namespace Reader_UI
         //page stuff
         GrowRich title = null;
         List<GifStream> gifs = new List<GifStream>();
-        //AxShockwaveFlashObjects.AxShockwaveFlash flash = null;
+        WebBrowser flash = null;
         GrowRich narrative = null;
         Label linkPrefix = null;
         LinkLabel next = null, tereziPassword = null;
@@ -202,18 +202,13 @@ namespace Reader_UI
             //nothing but the flash
             //for some reason the y offset is wrong
 
-            /*
-            flash = new AxShockwaveFlashObjects.AxShockwaveFlash();
+            //*
+            flash = new WebBrowser();
             mainPanel.Controls.Add(flash);
-            flash.Enabled = true;
-            flash.ScaleMode = 1;
-            flash.AlignMode = 0;
-            InitFlashMovie(flash, page.resources[0].data);
-            SetFlashDimensions();
+            InitFlashMovie(page.resources[0]);
             mainPanel.Height = flash.Height;
             flash.Location = new Point(0, 0);
-            flash.Play();
-             * */
+             //* */
             pageContainsFlash = true;
 
             RemoveControl(pageLoadingProgress);
@@ -404,38 +399,23 @@ namespace Reader_UI
             }
         }
         //https://stackoverflow.com/questions/1874077/loading-a-flash-movie-from-a-memory-stream-or-a-byte-array
-        /*
-        private void InitFlashMovie(AxShockwaveFlashObjects.AxShockwaveFlash flashObj, byte[] swfFile)
+        //*
+        private void InitFlashMovie(Parser.Resource swfFile)
         {
-                System.IO.MemoryStream stm = new MemoryStream();
-            
-                using (System.IO.BinaryWriter writer = new System.IO.BinaryWriter(stm))
-                {
-                    // Write length of stream for AxHost.State
-                    writer.Write(8 + swfFile.Length);
-                    // Write Flash magic 'fUfU' 
-                    writer.Write(0x55665566);
-                    // Length of swf file 
-                    writer.Write(swfFile.Length);
-                    writer.Write(swfFile);
-                    stm.Seek(0, System.IO.SeekOrigin.Begin);
-                    // 1 == IPeristStreamInit 
-                    flashObj.OcxState = new AxHost.State(stm, 1, false, null);
-                    
-                    
-                }
+            SetFlashDimensions();
+            flash.Navigate(WriteTempResource(swfFile));
         }
         
         void SetFlashDimensions()
         {
             switch (page.number) { 
-                case (int)Database.PagesOfImportance.CALIBORN_PAGE_SMASH:
+                case (int)Writer.PagesOfImportance.CALIBORN_PAGE_SMASH:
                     flash.Width = 950;
                     flash.Height = 1160;
                     break;
-                case (int)Database.PagesOfImportance.CASCADE:
-                case (int)Database.PagesOfImportance.SHES8ACK:
-                case (int)Database.PagesOfImportance.DOTA:
+                case (int)Writer.PagesOfImportance.CASCADE:
+                case (int)Writer.PagesOfImportance.SHES8ACK:
+                case (int)Writer.PagesOfImportance.DOTA:
                     flash.Width = 950;
                     flash.Height = 650;
                     break;
@@ -444,7 +424,7 @@ namespace Reader_UI
                     flash.Height = REGULAR_FLASH_MOVIE_HEIGHT;
                     break;
             }
-        }*/
+        }//*/
         void LoadCascade()
         {
 
@@ -467,17 +447,23 @@ namespace Reader_UI
             comicPanel.Controls.Add(tempPB.gif);
             gifs.Add(tempPB);
 
-            /*
-            flash = new AxShockwaveFlashObjects.AxShockwaveFlash();
+            //*
+
+            //first write the segments
+            WriteTempResource(page.resources[1]);
+            WriteTempResource(page.resources[2]);
+            WriteTempResource(page.resources[3]);
+            WriteTempResource(page.resources[4]);
+            WriteTempResource(page.resources[5]);
+
+            flash = new WebBrowser();
             comicPanel.Controls.Add(flash);
-            flash.Enabled = true;
-            flash.ScaleMode = 1;
-            flash.AlignMode = 0;
-            InitFlashMovie(flash, page.resources[0].data);
-            SetFlashDimensions();
+
+
+            InitFlashMovie(page.resources[0]);
             flash.Location = new Point(comicPanel.Width / 2 - flash.Width / 2, CASCADE_PANEL_Y_OFFSET + REGULAR_PANEL_Y_OFFSET + 40);
-            flash.Play();
-             * */
+            
+            // * */
             pageContainsFlash = true;
 
 
@@ -486,7 +472,7 @@ namespace Reader_UI
             linkPrefix.AutoSize = true;
             linkPrefix.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             linkPrefix.Text = REGULAR_LINK_PREFIX;
-            //linkPrefix.Location = new Point(REGULAR_PANEL_WIDTH / 2  - REGULAR_PESTERLOG_WIDTH/2, flash.Location.Y + flash.Height + 23);
+            linkPrefix.Location = new Point(REGULAR_PANEL_WIDTH / 2  - REGULAR_PESTERLOG_WIDTH/2, flash.Location.Y + flash.Height + 23);
             comicPanel.Controls.Add(linkPrefix);
 
             next = new GrowLinkLabel();
@@ -500,12 +486,18 @@ namespace Reader_UI
             linkPrefix.BringToFront();
 
 
-            mainPanel.Height = //flash.Location.Y + flash.Height +
+            mainPanel.Height = flash.Location.Y + flash.Height +
                 CASCADE_BOTTOM_Y_OFFSET;
 
             headerPanel.BringToFront();
 
             RemoveControl(pageLoadingProgress);
+        }
+        string WriteTempResource(Parser.Resource res)
+        {
+            string path = System.IO.Path.GetTempPath() + res.originalFileName;
+            File.WriteAllBytes(path, res.data); //let the throw fall through and fail the page load (problems beyond our scope)
+            return path;
         }
         void LoadRegularPage()
         {
@@ -535,19 +527,12 @@ namespace Reader_UI
                     continue;
                 if (!pageContainsFlash && !Parser.IsGif(page.resources[i].originalFileName))
                 {
-                    /*
-                    flash = new AxShockwaveFlashObjects.AxShockwaveFlash();
+                    flash = new WebBrowser();
                     comicPanel.Controls.Add(flash);
-                    flash.Enabled = true;
-                    flash.ScaleMode = 1;
-                    flash.AlignMode = 0;
-                    InitFlashMovie(flash, page.resources[i].data);
-                    SetFlashDimensions();
+                    InitFlashMovie(page.resources[i]);
 
                     flash.Location = new Point(comicPanel.Width / 2 - flash.Width / 2, currentHeight);
                     currentHeight += flash.Height;
-                    flash.Play();
-                     * */
                     pageContainsFlash = true;
                 }
                 else if (Parser.IsGif(page.resources[i].originalFileName))
@@ -1000,7 +985,7 @@ namespace Reader_UI
             RemoveControl(linkPrefix);
             RemoveControl(next);
             RemoveControl(tereziPassword);
-            //RemoveControl(flash);
+            RemoveControl(flash);
             RemoveControl(pesterHideShow);
             foreach (var line in conversations)
                 line.Dispose();
