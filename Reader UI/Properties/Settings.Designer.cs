@@ -118,5 +118,29 @@ namespace Reader_UI.Properties {
                 this["ip"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool maximized {
+            get {
+                return ((bool)(this["maximized"]));
+            }
+            set {
+                this["maximized"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool fullscreen {
+            get {
+                return ((bool)(this["fullscreen"]));
+            }
+            set {
+                this["fullscreen"] = value;
+            }
+        }
     }
 }

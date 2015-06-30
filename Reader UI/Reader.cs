@@ -64,7 +64,6 @@ namespace Reader_UI
         Writer.Page page = null;
         Writer.Style previousStyle;
         Button pesterHideShow = null;
-        bool fullscreen = true;
 
 
         List<LineOrPB> conversations = new List<LineOrPB>();
@@ -92,7 +91,6 @@ namespace Reader_UI
             fullscreen = false;
 #endif
             InitializeComponent();
-            WindowState = FormWindowState.Maximized;
             FormClosed += Reader_Closed;
             numericUpDown1.Maximum = db.lastPage;
             numericUpDown1.Minimum = (int)Writer.PagesOfImportance.HOMESTUCK_PAGE_ONE;
@@ -113,10 +111,15 @@ namespace Reader_UI
 
         void Reader_ResizeEnd(object sender, EventArgs e)
         {
+            if(mainPanel != null)
+                mainPanel.Location = new Point(Width / 2 - mainPanel.Width / 2, mainPanel.Location.Y);
+            if(headerPanel != null)
+                headerPanel.Location = new Point(Width / 2 - headerPanel.Width / 2, headerPanel.Location.Y);
+            /*
             CurtainsUp();
             Update();
             if(page != null)
-                WakeUpMr(page.number);
+                WakeUpMr(page.number);*/
         }
        
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -162,7 +165,7 @@ namespace Reader_UI
 
         void Reader_Resize(object sender, EventArgs e)
         {
-            if (fullscreen)
+            if (Properties.Settings.Default.fullscreen)
                 return;
             if (WindowState == FormWindowState.Minimized)
                 return;
@@ -177,6 +180,7 @@ namespace Reader_UI
 
         void Reader_FormClosing(object sender, FormClosingEventArgs e)
         {
+            Properties.Settings.Default.maximized = WindowState == FormWindowState.Maximized;
             CleanControls();
         }
 
@@ -826,7 +830,8 @@ namespace Reader_UI
         }
         void Reader_Shown(object sender, EventArgs e)
         {
-            WindowState = FormWindowState.Maximized;
+            Properties.Settings.Default.fullscreen =! Properties.Settings.Default.fullscreen;
+            toggleFullscreen_Click(null, null);
             Reader_Resize(null, null);
             CurtainsUp();
             int pr;
@@ -1071,6 +1076,8 @@ namespace Reader_UI
             previousStyle = s;
 
             CleanControls();
+
+            headerPanel = null;
 
             switch (s)
             {
@@ -1347,8 +1354,8 @@ namespace Reader_UI
 #if linux
             return;
 #endif
-            fullscreen = !fullscreen;
-            if (fullscreen)
+            Properties.Settings.Default.fullscreen = !Properties.Settings.Default.fullscreen;
+            if (Properties.Settings.Default.fullscreen)
             {
 
                 FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
@@ -1358,8 +1365,11 @@ namespace Reader_UI
 
                 FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
             }
+            exitButton.Visible = Properties.Settings.Default.fullscreen;
+            minimizeButton.Visible = Properties.Settings.Default.fullscreen;
             WindowState = FormWindowState.Normal;
             WindowState = FormWindowState.Maximized;
+            
             Reader_ResizeEnd(null, null);
         }
 
