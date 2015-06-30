@@ -192,6 +192,8 @@ namespace Reader_UI
             + @"|.*v2_blanksquare2"
             + @"|.*v2_blanksquare3"
             + @"|.*spacer"
+            //the trickster comic bg
+            + @"|.*bluetile"
             + @")(.*)\.gif";
         const string scratchHeaderImageRegex = "src=\\\"(.*?\\.gif)\\\"";
         const string scratchHeaderImageFilenameRegex = @".*\/(.*)";
@@ -249,6 +251,13 @@ namespace Reader_UI
                 System.Windows.Forms.MessageBox.Show("Error retrieving lastest MSPA page. Range locked to currently archived pages");
                 return 0;
             }
+        }
+        public void LoadTricksterResources(bool serial)
+        {
+            resources.Clear();
+            resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/trickster_sitegraphics/Z2.gif", serial), "Z2.gif"));
+            resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/trickster_sitegraphics/menu.swf", serial), "menu.swf"));
+            resources.Add(new Resource(DownloadFile("http://mspaintadventures.com/images/trickster_sitegraphics/bluetile.gif", serial), "bluetile.gif"));
         }
         public Text GetText()
         {
@@ -509,6 +518,10 @@ namespace Reader_UI
             ParseResources(true);
             ParseLinks();
             ParseText();
+        }
+        public static bool IsTrickster(int pageno)
+        {
+            return (pageno >= 7614 && pageno <= 7677);
         }
         void ParseLinks()
         {

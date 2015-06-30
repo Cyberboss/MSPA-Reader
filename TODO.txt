@@ -21,6 +21,7 @@ Main problem is figuring out where all the configuration xmls are and fixing the
 
 Generic TODO list(no particular order)
 
+-- Fix page 7680
 -- Download the candy corns and cueballs and green peppers dynamically as I don't think we should be distributing them
 -- On that note, find some way to permanently remove the test resources from the repository
 -- Database name as a variable

@@ -70,6 +70,44 @@ namespace Reader_UI
         Writer.Style previousStyle;
         Button pesterHideShow = null;
         ImageStream currentIcon = null;
+        class TricksterShit : IDisposable
+        {
+            MemoryStream[] bytes = new MemoryStream[2];
+            public Image bg, fg;
+            public WebBrowser flashHeader;
+            Reader parent;
+            public TricksterShit(Reader p,Parser.Resource[] shit)
+            {
+                parent = p;
+                bytes[0] = new MemoryStream(shit[0].data);
+                bytes[1] = new MemoryStream(shit[2].data);
+                bg = Image.FromStream(bytes[0]);
+                fg = Image.FromStream(bytes[1]);
+                parent.BackgroundImage = bg;
+                parent.mainPanel.BackgroundImage = fg;
+                flashHeader = new WebBrowser();
+                parent.Controls.Add(flashHeader);
+                flashHeader.Width = 950;
+                flashHeader.Height = 24;
+                parent.InitFlashMovie(flashHeader,shit[1]);
+                FixAlign();
+            }
+            public void Dispose()
+            {
+                parent.BackgroundImage = null;
+                parent.mainPanel.BackgroundImage = null;
+                bg.Dispose();
+                fg.Dispose();
+                flashHeader.Dispose();
+                bytes[0].Dispose();
+                bytes[1].Dispose();
+            }
+            public void FixAlign()
+            {
+                flashHeader.Location = new Point(parent.Width / 2 - flashHeader.Width / 2, 0);
+            }
+        }
+        TricksterShit trick = null;
 
         List<LineOrPB> conversations = new List<LineOrPB>();
         Label errorLabel = null;
@@ -120,11 +158,8 @@ namespace Reader_UI
                 mainPanel.Location = new Point(Width / 2 - mainPanel.Width / 2, mainPanel.Location.Y);
             if(headerPanel != null)
                 headerPanel.Location = new Point(Width / 2 - headerPanel.Width / 2, headerPanel.Location.Y);
-            /*
-            CurtainsUp();
-            Update();
-            if(page != null)
-                WakeUpMr(page.number);*/
+            if (trick != null)
+                trick.FixAlign();
         }
        
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -138,6 +173,7 @@ namespace Reader_UI
                         uiToggleButton_Click(null, null);
                         return true;
                     case Keys.F5:
+                        CurtainsUp();
                         WakeUpMr(page.number);
                         return true;
                     case Keys.F11:
@@ -215,7 +251,7 @@ namespace Reader_UI
             //*
             flash = new WebBrowser();
             mainPanel.Controls.Add(flash);
-            InitFlashMovie(page.resources[0]);
+            InitFlashMovie(flash, page.resources[0]);
             mainPanel.Height = flash.Height;
             flash.Location = new Point(0, 0);
              //* */
@@ -389,6 +425,32 @@ namespace Reader_UI
             else
                 theLEText.Visible = false;
         }
+        void LoadTricksterPage()
+        {
+            LoadRegularPage();
+            comicPanel.BackColor = Color.FromArgb(255, 155, 253);
+            title.ForeColor = Color.FromArgb(249, 253, 99);
+
+            //TODO Loads of MGNs
+            title.BackColor = Color.FromArgb(255, 155, 253);
+
+            if (page.meta.narr != null)
+            {
+                narrative.BackColor = Color.FromArgb(255, 155, 253);
+            }
+            else
+            {
+                pesterlog.BackColor = Color.FromArgb(255, 155, 253);
+                foreach (var line in conversations)
+                {
+                    line.GetControl().BackColor = Color.FromArgb(255, 155, 253); ;
+                }
+            }
+            linkPrefix.BackColor = Color.FromArgb(255, 155, 253);
+            linkPrefix.ForeColor = Color.FromArgb(249, 253, 99);
+            next.BackColor = Color.FromArgb(255, 155, 253); ;
+            next.LinkColor = Color.FromArgb(251, 6, 11);
+        }
         void LoadPage()
         {
             try
@@ -403,6 +465,9 @@ namespace Reader_UI
                 saveButton.Enabled = true;
                 switch (db.GetStyle(pageRequest))
                 {
+                    case Writer.Style.TRICKSTER:
+                        LoadTricksterPage();
+                        break;
                     case Writer.Style.REGULAR:
                         LoadRegularPage();
                         break;
@@ -449,11 +514,12 @@ namespace Reader_UI
         }
         //https://stackoverflow.com/questions/1874077/loading-a-flash-movie-from-a-memory-stream-or-a-byte-array
         //*
-        private void InitFlashMovie(Parser.Resource swfFile)
+        private void InitFlashMovie(WebBrowser f ,Parser.Resource swfFile, bool setDimensions = true)
         {
-            SetFlashDimensions();
-            flash.Navigate(WriteTempResource(swfFile));
-            flash.Navigating += flash_Navigating;
+            if(setDimensions)
+                SetFlashDimensions();
+            f.Navigate(WriteTempResource(swfFile));
+            f.Navigating += flash_Navigating;
         }
 
         //ITS SO SIMPLE :D
@@ -467,6 +533,8 @@ namespace Reader_UI
         
         void SetFlashDimensions()
         {
+            if (flash == null || flash.Disposing || flash.IsDisposed)
+                return;
             switch (page.number) { 
                 case (int)Writer.PagesOfImportance.GAMEOVER:
                     flash.Width = 950;
@@ -523,7 +591,7 @@ namespace Reader_UI
             comicPanel.Controls.Add(flash);
 
 
-            InitFlashMovie(page.resources[0]);
+            InitFlashMovie(flash, page.resources[0]);
             flash.Location = new Point(comicPanel.Width / 2 - flash.Width / 2, CASCADE_PANEL_Y_OFFSET + REGULAR_PANEL_Y_OFFSET + 40);
             
             // * */
@@ -592,7 +660,7 @@ namespace Reader_UI
                 {
                     flash = new WebBrowser();
                     comicPanel.Controls.Add(flash);
-                    InitFlashMovie(page.resources[i]);
+                    InitFlashMovie(flash, page.resources[i]);
 
                     flash.Location = new Point(comicPanel.Width / 2 - flash.Width / 2, currentHeight);
                     currentHeight += flash.Height;
@@ -1075,11 +1143,16 @@ namespace Reader_UI
             conversations.Clear();
             RemoveControl(pesterlog);
             RemoveControl(comicPanel);
+            
         }
         void CleanControls()
         {
             CleanComic();
-
+            if (trick != null)
+            {
+                trick.Dispose();
+                trick = null;
+            }
             RemoveControl(mainPanel);
             for (int i = 0; i < mspaHeaderLink.Count(); ++i)
                 RemoveControl(mspaHeaderLink[i]);
@@ -1203,6 +1276,18 @@ namespace Reader_UI
 
                     if (s == Writer.Style.HOMOSUCK)
                         StyleHomosuck();
+                    break;
+                case Writer.Style.TRICKSTER:
+                    BackColor = Color.White;
+
+                    mainPanel = new Panel();
+                    mainPanel.BackColor = Color.White;
+                    mainPanel.MaximumSize = new System.Drawing.Size(REGULAR_PANEL_WIDTH, Int32.MaxValue);
+                    mainPanel.Width = REGULAR_PANEL_WIDTH;
+                    mainPanel.Location = new Point(this.Width / 2 - mainPanel.Width / 2, 24);
+                    Controls.Add(mainPanel);
+
+                    trick = new TricksterShit(this,db.GetTricksterShit());
                     break;
                 default:
                     Debugger.Break();

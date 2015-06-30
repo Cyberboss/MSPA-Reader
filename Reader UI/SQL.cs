@@ -257,7 +257,7 @@ namespace Reader_UI
             try
             {
                 DbCommand selector = sqlsRConn.CreateCommand();
-                selector.CommandText = "SELECT data FROM Resources WHERE page_id = 1";
+                selector.CommandText = "SELECT data FROM Resources WHERE page_id = 100000";
                 reader = selector.ExecuteReader();
 
                 List<byte[]> res = new List<byte[]>();
@@ -296,6 +296,17 @@ namespace Reader_UI
             {
                 reader.Close();
             }
+        }
+        public override bool TricksterParsed()
+        {
+            DbCommand selector = sqlsRConn.CreateCommand();
+            selector.CommandText = "SELECT COUNT(*) FROM RESOURCES WHERE page_id = 100001";
+            return Convert.ToInt32(selector.ExecuteScalar()) != 0;
+        }
+        public override Parser.Resource[] GetTricksterShit()
+        {
+            ParseTrickster(true);
+            return GetResources(100001, false);
         }
         public Parser.Resource[] GetResources(int pageno, bool x2)
         {

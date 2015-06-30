@@ -11,7 +11,7 @@ namespace Reader_UI
     public abstract class Writer : IDisposable
     {
         protected enum DB{
-            Version = 0 //update with every commit that affects db layout
+            Version = 1 //update with every commit that affects db layout
         }
         void Dispose(bool mgd)
         {
@@ -187,7 +187,7 @@ namespace Reader_UI
                     try
                     {
                         parser.LoadIcons();
-                        WriteResource(parser.GetResources(), 1, false);
+                        WriteResource(parser.GetResources(), 100000, false);
                         Commit();
                     }
                     catch
@@ -219,6 +219,27 @@ namespace Reader_UI
         public abstract void Rollback();
         public abstract void Commit();
         public abstract void Close();
+        public abstract bool TricksterParsed();
+
+        public abstract Parser.Resource[] GetTricksterShit();
+        protected void ParseTrickster(bool serial)
+        {
+            if (!TricksterParsed())
+            {
+                Transact();
+                try
+                {
+                    parser.LoadTricksterResources(serial);
+                    WriteResource(parser.GetResources(), 100001, false);
+                    Commit();
+                }
+                catch
+                {
+                    Rollback();
+                    throw;
+                }
+            }
+        }
 
         public abstract Page GetPage(int pageno,bool x2);
         public Style GetStyle(int pageno){
@@ -236,6 +257,8 @@ namespace Reader_UI
                 return Style.SCRATCH;
             if (pageno == (int)PagesOfImportance.GAMEOVER)
                 return Style.GAMEOVER;
+            if (Parser.IsTrickster(pageno))
+                return Style.TRICKSTER;
             
             return Style.REGULAR;
         }
@@ -553,6 +576,8 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             if (archivedPages.IsPageArchived(currentPage) || (bgw != null && bgw.CancellationPending))
                 return 0;
 
+            if (Parser.IsTrickster(currentPage))
+                ParseTrickster(bgw != null);
 
             if (parser.LoadPage(currentPage))
             {
