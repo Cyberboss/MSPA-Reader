@@ -194,7 +194,7 @@ namespace Reader_UI
             + @"|.*spacer"
             //the trickster comic bg
             + @"|.*bluetile"
-            + @")(.*)\.gif";
+            + @")(.*?)\.gif";
         const string scratchHeaderImageRegex = "src=\\\"(.*?\\.gif)\\\"";
         const string scratchHeaderImageFilenameRegex = @".*\/(.*)";
         const string scratchTitleRegex = "title=\\\"(.*?)\\\"";

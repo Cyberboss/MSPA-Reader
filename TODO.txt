@@ -14,6 +14,7 @@ GAMEOVER (DONE, with extra ;D)
 LOWAS in void fireflies
 
 Primary: Fix Hussie - Caliborn conversation boxes
+Primary: Get inline images working eg 7980, 4943
 
 Primary: Openbound solution
 Main problem is figuring out where all the configuration xmls are and fixing them so that we can load resources locally
@@ -31,7 +32,6 @@ Generic TODO list(no particular order)
 -- Implement ads taken straight from the website in comic footer, legal? (trying to help out hussie here, and I'm pretty sure they all go to whatpumpkin anyway)
 (DONE??? I SERIOUSLY CAN'T TELL) -- Figure out how to load Cascade properly (only multipart flash, as of right now I have no idea how it's loading).
 -- Support for archival and serial reading modes (x.gif vs x_retcon.gif, activate retcon once past a certain page)
--- Handle pages with inline images such as 4943
 -- Better narrative/dialog parsing
 -- Support line breaks in pesterlogs
 (DONE? Does this happen anywhere besides x2?) -- Note side by side longways images so the reader doesn't arrange them turnways (*horizontal, *vertical)
