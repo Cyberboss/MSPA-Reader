@@ -17,7 +17,7 @@ namespace Reader_UI
             InitializeComponent();
             dataSourceInput.Items.Add("SQL Server");
             dataSourceInput.Items.Add("SQL LocalDB");
-            dataSourceInput.Items.Add("SQLite");
+            dataSourceInput.Items.Add("SQLite (Warning: Data Races)");
             dataSourceInput.SelectedIndex = Properties.Settings.Default.serverType;
             dataSourceInput_SelectedIndexChanged(null, null);
             saveUsername.Checked = Properties.Settings.Default.saveUsername;

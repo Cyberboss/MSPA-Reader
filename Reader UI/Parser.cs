@@ -381,7 +381,7 @@ namespace Reader_UI
 
                                 //find the resource that matches this image and mark it as pesterlogged
                                 resources.Find(x => x.originalFileName == scriptLine.text).isInPesterLog = true;
-                                
+                                j++;
 
                                 continue;
                             }else{

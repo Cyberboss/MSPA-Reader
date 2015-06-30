@@ -16,11 +16,15 @@ Caliborn's page smash (DONE)
 GAMEOVER (DONE, whith a twist ;D)
 LOWAS in void fireflies
 
+Primary: Fix Hussie - Caliborn conversation boxes
+
 Primary: Openbound solution
 Main problem is figuring out where all the configuration xmls are and fixing them so that we can load resources locally
 
 Generic TODO list(no particular order)
 
+-- Verify the functionality of the go back button
+-- Make a not that sqlite isn't save for asynchronous operations on the connection screen (correct me if I'm wrong)
 -- Fix page 7680
 -- Download the candy corns and cueballs and green peppers dynamically as I don't think we should be distributing them
 -- On that note, find some way to permanently remove the test resources from the repository
