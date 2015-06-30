@@ -45,6 +45,7 @@
             this.deleteButton = new System.Windows.Forms.Button();
             this.uiToggleButton = new System.Windows.Forms.Button();
             this.toggleFullscreen = new System.Windows.Forms.Button();
+            this.monitorGameOver = new System.ComponentModel.BackgroundWorker();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -233,6 +234,12 @@
             this.toggleFullscreen.UseVisualStyleBackColor = true;
             this.toggleFullscreen.Click += new System.EventHandler(this.toggleFullscreen_Click);
             // 
+            // monitorGameOver
+            // 
+            this.monitorGameOver.WorkerReportsProgress = true;
+            this.monitorGameOver.WorkerSupportsCancellation = true;
+            this.monitorGameOver.DoWork += new System.ComponentModel.DoWorkEventHandler(this.monitorGameOver_DoWork);
+            // 
             // Reader
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -283,6 +290,7 @@
         private System.Windows.Forms.Button deleteButton;
         private System.Windows.Forms.Button uiToggleButton;
         private System.Windows.Forms.Button toggleFullscreen;
+        private System.ComponentModel.BackgroundWorker monitorGameOver;
 
     }
 }

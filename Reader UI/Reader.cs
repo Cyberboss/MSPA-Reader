@@ -108,6 +108,7 @@ namespace Reader_UI
             Resize += Reader_Resize;
             autoSave.Checked = Properties.Settings.Default.autoSave;
             ResizeEnd += Reader_ResizeEnd;
+            monitorGameOver.ProgressChanged += monitorGameOver_ProgressChanged;
         }
 
         void Reader_ResizeEnd(object sender, EventArgs e)
@@ -406,6 +407,9 @@ namespace Reader_UI
                         LoadHomosuckPage();
                         break;
                     case Writer.Style.GAMEOVER:
+                        flash = null;//prevent progress report from changing colours
+                        monitorGameOver.RunWorkerAsync();
+                        goto case Writer.Style.SMASH;
                     case Writer.Style.SHES8ACK:
                     case Writer.Style.DOTA:
                     case Writer.Style.SMASH:
@@ -1035,13 +1039,19 @@ namespace Reader_UI
             RemoveControl(linkPrefix);
             RemoveControl(next);
             RemoveControl(tereziPassword);
-            RemoveControl(flash);
+            if (monitorGameOver.IsBusy)
+            {
+                var tmp = flash;
+                flash = null; //prevent progress report from changing colours
+                RemoveControl(tmp);
+                monitorGameOver.CancelAsync();
+            }else
+                RemoveControl(flash);
             RemoveControl(pesterHideShow);
             foreach (var line in conversations)
                 line.Dispose();
             conversations.Clear();
             RemoveControl(pesterlog);
-
             RemoveControl(comicPanel);
         }
         void CleanControls()
@@ -1352,5 +1362,24 @@ namespace Reader_UI
             WindowState = FormWindowState.Maximized;
             Reader_ResizeEnd(null, null);
         }
+
+        private void monitorGameOver_DoWork(object sender, DoWorkEventArgs e)
+        {
+            while (!monitorGameOver.CancellationPending)
+            {
+                System.Threading.Thread.Sleep(100);
+                monitorGameOver.ReportProgress(0);
+            }
+        }
+
+        void monitorGameOver_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            if (flash == null)
+                return;
+            Bitmap pix = new Bitmap(1, 1);
+            mainPanel.DrawToBitmap(pix, new Rectangle(0, 0, 1, 1));
+            BackColor = pix.GetPixel(0, 0);
+        }
+
     }
 }
