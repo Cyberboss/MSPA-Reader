@@ -203,6 +203,7 @@ namespace Reader_UI
                 return Style.X2;
             if (parser.IsScratch(pageno))
                 return Style.SCRATCH;
+            
             return Style.REGULAR;
         }
         public Page WaitPage(int pageno)

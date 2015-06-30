@@ -88,6 +88,9 @@ namespace Reader_UI
         public Reader(Writer idb)
         {
             db = idb;
+#if linux
+            fullscreen = false;
+#endif
             InitializeComponent();
             WindowState = FormWindowState.Maximized;
             FormClosed += Reader_Closed;
@@ -260,7 +263,7 @@ namespace Reader_UI
 
             //decrease Y of all comicPanel Items and header by height except title
             foreach (Control con in comicPanel.Controls)
-                if(con != title)
+                if (con != title)
                     con.Location = new Point(con.Location.X, con.Location.Y - shiftHeight);
 
             //recalculate bottoms
@@ -271,7 +274,7 @@ namespace Reader_UI
             //set colours
 
             comicPanel.BackColor = Color.FromArgb(SCRATCH_COMIC_PANEL_COLOUR_R, SCRATCH_COMIC_PANEL_COLOUR_G, SCRATCH_COMIC_PANEL_COLOUR_B);
-            title.BackColor = Color.FromArgb(SCRATCH_COMIC_PANEL_COLOUR_R, SCRATCH_COMIC_PANEL_COLOUR_G, SCRATCH_COMIC_PANEL_COLOUR_B); 
+            title.BackColor = Color.FromArgb(SCRATCH_COMIC_PANEL_COLOUR_R, SCRATCH_COMIC_PANEL_COLOUR_G, SCRATCH_COMIC_PANEL_COLOUR_B);
 
             if (page.meta.narr != null)
             {
@@ -1261,6 +1264,9 @@ namespace Reader_UI
 
         private void toggleFullscreen_Click(object sender, EventArgs e)
         {
+#if linux
+            return;
+#endif
             fullscreen = !fullscreen;
             if (fullscreen)
             {
