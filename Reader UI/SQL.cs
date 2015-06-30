@@ -176,7 +176,7 @@ namespace Reader_UI
 
                 var meta = new Parser.Text();
                 if (!reader1.HasRows || !reader1.Read())
-                    throw new Exception();  //should never happen if called using waitpage
+                    return null;  //should never happen if called using waitpage
 
                 if (!reader1.IsDBNull(0))
                     meta.title = reader1.GetString(0);

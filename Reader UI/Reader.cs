@@ -541,6 +541,7 @@ namespace Reader_UI
                     flash.Height = 786;
                     break;
                 case (int)Writer.PagesOfImportance.CALIBORN_PAGE_SMASH:
+                case (int)Writer.PagesOfImportance.CALIBORN_PAGE_SMASH2:
                     flash.Width = 950;
                     flash.Height = 1160;
                     break;

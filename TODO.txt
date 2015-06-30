@@ -1,19 +1,16 @@
 ﻿Primary: Style sheet support.
-Doesn't need to be dynamic, just needs to work
-
-List of known different styles of the top of my head
 
 Regular (DONE)
-Scratch (mostly done except for LE alt-text);
+Scratch (mostly done except for LE alt-text transparency);
 Homosuck (DONE)
 Sbahj
-Trickster
-2x (not so much a different style as two pages next to each other)
+Trickster (DONE)
+2x 
 Cascade (DONE)
 DOTA, (DONE)
 SHESBACK (DONE)
 Caliborn's page smash (DONE)
-GAMEOVER (DONE, whith a twist ;D)
+GAMEOVER (DONE, with extra ;D)
 LOWAS in void fireflies
 
 Primary: Fix Hussie - Caliborn conversation boxes
@@ -24,8 +21,7 @@ Main problem is figuring out where all the configuration xmls are and fixing the
 Generic TODO list(no particular order)
 
 -- Verify the functionality of the go back button
--- Make a not that sqlite isn't save for asynchronous operations on the connection screen (correct me if I'm wrong)
--- Fix page 7680
+(DONE) -- Make a note that sqlite isn't save for asynchronous operations on the connection screen (correct me if I'm wrong)
 -- Download the candy corns and cueballs and green peppers dynamically as I don't think we should be distributing them
 -- On that note, find some way to permanently remove the test resources from the repository
 -- Database name as a variable
@@ -38,7 +34,7 @@ Generic TODO list(no particular order)
 -- Handle pages with inline images such as 4943
 -- Better narrative/dialog parsing
 -- Support line breaks in pesterlogs
--- Note side by side longways images so the reader doesn't arrange them turnways (*horizontal, *vertical)
+(DONE? Does this happen anywhere besides x2?) -- Note side by side longways images so the reader doesn't arrange them turnways (*horizontal, *vertical)
 (NOT NEEDED?) -- Support fonts via parsing instead of statically
 -- Fix pesterlog system message regex?
 -- Add funtionality to the header (direct to mspa)
@@ -47,7 +43,7 @@ Generic TODO list(no particular order)
 (DONE? lack of integrity check may make it buggy, no idea how transactions are handled either) -- Support Sqlite
 -- Support Mysql
 -- Better parsing techniques?
-(DONE?) -- Support *nix (Theoretically we could as it's .NET, we do have a bunch of native methods however...)
+(DONE? Looks like crap on my box) -- Support *nix (Theoretically we could as it's .NET, we do have a bunch of native methods however...)
 (Dismissed as Impossible) -- S̶u̶p̶p̶o̶r̶t̶ ̶V̶r̶i̶s̶k̶a̶  
 while(true)
 	-- More Horses

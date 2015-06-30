@@ -157,6 +157,7 @@ namespace Reader_UI
             HOMESTUCK_PAGE_ONE = 001901,
             CASCADE = 006009,
             CALIBORN_PAGE_SMASH = 007395,
+            CALIBORN_PAGE_SMASH2 = 007680,
             DOTA = 006715,
             SHES8ACK = 009305,
             GAMEOVER = 008801,
@@ -253,6 +254,8 @@ namespace Reader_UI
                 return Style.HOMOSUCK;
             if (parser.Is2x(pageno))
                 return Style.X2;
+            if (pageno == (int)PagesOfImportance.CALIBORN_PAGE_SMASH || pageno == (int)PagesOfImportance.CALIBORN_PAGE_SMASH2)
+                return Style.SMASH;
             if (parser.IsScratch(pageno))
                 return Style.SCRATCH;
             if (pageno == (int)PagesOfImportance.GAMEOVER)
@@ -366,7 +369,6 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             if (bgw != null)
                 bgw.ReportProgress(progress, "Cascade committed!");
         }
-        //eventually we'll have to apply a diff on these to get the flash to do what we want it to do when the link is clicked
         void HandlePageSmash(System.ComponentModel.BackgroundWorker bgw, int progress)
         {
             if (bgw != null)
@@ -380,15 +382,40 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 bgw.ReportProgress(progress, FUCKYOU[0].originalFileName + ": " + fileSize2 / 1024 + "KB");
 
             Transact();
-            WriteResource(FUCKYOU, 7395, false);
+            WriteResource(FUCKYOU, (int)PagesOfImportance.CALIBORN_PAGE_SMASH, false);
             Parser.Link[] lnk = new Parser.Link[1];
             lnk[0] = new Parser.Link("", (int)PagesOfImportance.CALIBORN_PAGE_SMASH + 1);
             WriteLinks(lnk, (int)PagesOfImportance.CALIBORN_PAGE_SMASH, false);
             Parser.Text asdf = new Parser.Text();
-            asdf.narr = new Parser.Text.ScriptLine("#000000", "",0);
+            asdf.narr = new Parser.Text.ScriptLine("#000000", "", 0);
             asdf.title = "[S] Cascade.";
             WriteText(asdf, (int)PagesOfImportance.CALIBORN_PAGE_SMASH, false);
             ArchivePageNumber((int)PagesOfImportance.CALIBORN_PAGE_SMASH, false);
+            Commit();
+
+        }
+        void HandlePageSmash2(System.ComponentModel.BackgroundWorker bgw, int progress)
+        {
+            if (bgw != null)
+                bgw.ReportProgress(progress, "Now parsing Caliborn's hissy fit.");
+            Parser.Resource[] FUCKYOU = new Parser.Resource[1];
+            FUCKYOU[0] = new Parser.Resource(parser.DownloadFile("http://www.mspaintadventures.com/007680/05777_2.swf"), "05777_2.swf");
+
+            var fileSize2 = FUCKYOU[0].data.Count();
+            totalMegabytesDownloaded += (float)fileSize2 / (1024.0f * 1024.0f);
+            if (bgw != null)
+                bgw.ReportProgress(progress, FUCKYOU[0].originalFileName + ": " + fileSize2 / 1024 + "KB");
+
+            Transact();
+            WriteResource(FUCKYOU, (int)PagesOfImportance.CALIBORN_PAGE_SMASH2, false);
+            Parser.Link[] lnk = new Parser.Link[1];
+            lnk[0] = new Parser.Link("", (int)PagesOfImportance.CALIBORN_PAGE_SMASH2 + 1);
+            WriteLinks(lnk, (int)PagesOfImportance.CALIBORN_PAGE_SMASH2, false);
+            Parser.Text asdf = new Parser.Text();
+            asdf.narr = new Parser.Text.ScriptLine("#000000", "", 0);
+            asdf.title = "[S] Cascade.";
+            WriteText(asdf, (int)PagesOfImportance.CALIBORN_PAGE_SMASH2, false);
+            ArchivePageNumber((int)PagesOfImportance.CALIBORN_PAGE_SMASH2, false);
             Commit();
 
         }
@@ -552,6 +579,9 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                             break;
                         case PagesOfImportance.CALIBORN_PAGE_SMASH:
                             HandlePageSmash(bgw, currentProgress);
+                            break;
+                        case PagesOfImportance.CALIBORN_PAGE_SMASH2:
+                            HandlePageSmash2(bgw, currentProgress);
                             break;
                         case PagesOfImportance.DOTA:
                             HandleDota(bgw, currentProgress);
