@@ -196,6 +196,7 @@ namespace Reader_UI
         //TODO: the above regex is way too vague
         const string chumhandleRegex = @"\[[G|C|A|T]{2}\]|\[EB\]";
         const string gifFileRegex = @".+\.gif";
+        
 
         public bool x2Flag;
 
@@ -523,6 +524,13 @@ namespace Reader_UI
                     linkListForTextParse.Add(link);
                 }
             }
+        }
+        public static int GetPageNumberFromURL(string url)
+        {
+            var reg = Regex.Match(url, linkNumberRegex);
+            if (!reg.Success)
+                return 0;
+            return Convert.ToInt32(reg.Value);
         }
         public Link[] GetLinks()
         {

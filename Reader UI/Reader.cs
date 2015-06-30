@@ -404,6 +404,16 @@ namespace Reader_UI
         {
             SetFlashDimensions();
             flash.Navigate(WriteTempResource(swfFile));
+            flash.Navigating += flash_Navigating;
+        }
+
+        //ITS SO SIMPLE :D
+        void flash_Navigating(object sender, WebBrowserNavigatingEventArgs e)
+        {
+            e.Cancel = true;
+            var res = Parser.GetPageNumberFromURL(e.Url.OriginalString);
+            if (res != 0)
+                WakeUpMr(res);
         }
         
         void SetFlashDimensions()
