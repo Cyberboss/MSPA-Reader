@@ -10,7 +10,9 @@ namespace Reader_UI
 {
     public abstract class Writer : IDisposable
     {
-        
+        protected enum DB{
+            Version = 0 //update with every commit that affects db layout
+        }
         void Dispose(bool mgd)
         {
             if(parser != null)

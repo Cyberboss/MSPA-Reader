@@ -61,10 +61,10 @@ namespace Reader_UI.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CREATE TABLE PageMeta (page_id INTEGER, x2 BOOLEAN, title TEXT, promptType TEXT, headerAltText TEXT, PRIMARY KEY (page_id, x2));
+        ///   Looks up a localized string similar to CREATE TABLE DBVersion (dbverison INTEGER PRIMARY KEY);
+        ///CREATE TABLE PageMeta (page_id INTEGER, x2 BOOLEAN, title TEXT, promptType TEXT, headerAltText TEXT, PRIMARY KEY (page_id, x2));
         ///CREATE TABLE Dialog (id INTEGER PRIMARY KEY AUTOINCREMENT, page_id INTEGER REFERENCES PageMeta (page_id), x2 BOOLEAN, isNarrative BOOLEAN, isImg BOOLEAN, text TEXT, colour TEXT, precedingLineBreaks INTEGER);
-        ///CREATE TABLE Links (id INTEGER PRIMARY KEY AUTOINCREMENT, page_id INTEGER, x2 BOOLEAN, linked_page_id INTEGER, link_text TEXT);
-        ///CREATE TABLE PagesArchived (page_id INTEGER, [rest of string was truncated]&quot;;.
+        ///CREATE TABLE Links (id INTEGER PRIMARY KEY AUTOINCREMENT, page_id INTEGER, x2 BOOLEAN, linked_page_id INTEGER, link_ [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLiteDBCreationScript {
             get {
@@ -75,19 +75,21 @@ namespace Reader_UI.Properties {
         /// <summary>
         ///   Looks up a localized string similar to SET ANSI_NULLS ON;
         ///SET QUOTED_IDENTIFIER ON;
+        ///CREATE TABLE [dbo].[DBVersion](
+        ///	[dbverison] [int] NOT NULL,
+        /// CONSTRAINT [PK_DBVersion] PRIMARY KEY CLUSTERED 
+        ///(
+        ///	[dbverison] ASC
+        ///)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+        ///) ON [PRIMARY];
+        ///
         ///CREATE TABLE [dbo].[Dialog](
         ///	[id] [int] IDENTITY(1,1) NOT NULL,
         ///	[page_id] [int] NOT NULL,
         ///	[x2] [bit] NOT NULL,
         ///	[isNarrative] [bit] NOT NULL,
         ///	[isImg] [bit] NOT NULL,
-        ///	[text] [nvarchar](max) NULL,
-        ///	[colour] [nchar](7) NULL,
-        ///	[precedingLineBreaks] [int] NOT NULL
-        /// CONSTRAINT [PK_Dialog] PRIMARY KEY CLUSTERED 
-        ///(
-        ///	[id] ASC
-        ///)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIM [rest of string was truncated]&quot;;.
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLSDBCreationScript {
             get {

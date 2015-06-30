@@ -5,26 +5,6 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSPA Reader", "Reader UI\MSPA Reader.csproj", "{F71D9181-0318-45D4-864B-B72A5E934986}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test Resources", "Test Resources", "{592A67F2-1B5F-41E2-BA21-609E9B4FFA28}"
-	ProjectSection(SolutionItems) = preProject
-		Test Resources\00001.gif = Test Resources\00001.gif
-		Test Resources\02926.swf = Test Resources\02926.swf
-		Test Resources\2xExample.html = Test Resources\2xExample.html
-		Test Resources\cascade_loaderExt.swf = Test Resources\cascade_loaderExt.swf
-		Test Resources\cascade_segment1.swf = Test Resources\cascade_segment1.swf
-		Test Resources\cascade_segment2.swf = Test Resources\cascade_segment2.swf
-		Test Resources\cascade_segment3.swf = Test Resources\cascade_segment3.swf
-		Test Resources\cascade_segment4.swf = Test Resources\cascade_segment4.swf
-		Test Resources\cascade_segment5.swf = Test Resources\cascade_segment5.swf
-		Test Resources\edgeCase1.html = Test Resources\edgeCase1.html
-		Test Resources\edgeCase2.html = Test Resources\edgeCase2.html
-		Test Resources\typicalConversation.html = Test Resources\typicalConversation.html
-		Test Resources\typicalConversation2.html = Test Resources\typicalConversation2.html
-		Test Resources\typicalConversation3.html = Test Resources\typicalConversation3.html
-		Test Resources\typicalNarrative.html = Test Resources\typicalNarrative.html
-		Test Resources\typicalNarrative2.html = Test Resources\typicalNarrative2.html
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SQL Scripts (Requires update of string resources)", "SQL Scripts (Requires update of string resources)", "{4E3AF806-31F8-4AC8-A46C-E70352F422DB}"
 	ProjectSection(SolutionItems) = preProject
 		DBCreation Scripts\SQLiteDBCreation.sql = DBCreation Scripts\SQLiteDBCreation.sql
