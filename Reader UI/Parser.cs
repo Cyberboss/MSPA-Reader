@@ -104,6 +104,13 @@ namespace Reader_UI
             public ScriptLine[] lines = null;
             public string altText = null;
         }
+        public void LoadIcons()
+        {
+            resources.Clear();
+            resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/candycorn.gif",true), "candycorn.gif"));
+            resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/candycorn_scratch.png", true), "candycorn_scratch.gif"));
+            resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/a6a6_tooth2.gif", true), "a6a6_tooth2.gif"));
+        }
         public class Link
         {
             readonly public string originalText;
@@ -127,7 +134,7 @@ namespace Reader_UI
 
             public int Timeout { get; set; }
 
-            public WebDownload() : this(10000) { }
+            public WebDownload() : this(20000) { }
 
             public WebDownload(int timeout)
             {
@@ -148,7 +155,7 @@ namespace Reader_UI
                 }
             }
 
-            public new byte[] DownloadData(string address) 
+            public byte[] DownloadData(string address, bool serial) 
             {
                 res = null;
                 isDownloading = true;
@@ -158,6 +165,8 @@ namespace Reader_UI
                 while (true)
                 {
                     System.Threading.Thread.Sleep(10);
+                    if (serial)
+                        System.Windows.Forms.Application.DoEvents();
                     count+= 10;
                     lock (_sync)
                     {
@@ -548,16 +557,16 @@ namespace Reader_UI
         {
             return links.ToArray();
         }
-        public byte[] DownloadFile(string file)
+        public byte[] DownloadFile(string file, bool serial = false)
         {
             try
             {
-                return web.DownloadData(file);
+                return web.DownloadData(file, serial);
             }
             catch
             {
                 //try the www if the cdn is jank
-                return web.DownloadData(file.Replace("cdn.mspaintadventures.com", "www.mspaintadventures.com"));
+                return web.DownloadData(file.Replace("cdn.mspaintadventures.com", "www.mspaintadventures.com"), serial);
             }
         }
         void ScratchPreParse(HtmlDocument html)

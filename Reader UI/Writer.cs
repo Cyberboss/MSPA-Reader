@@ -178,11 +178,36 @@ namespace Reader_UI
                         return false;
                     }
                 }
+
+                if (!IconsAreParsed())
+                {
+                    Transact();
+                    try
+                    {
+                        parser.LoadIcons();
+                        WriteResource(parser.GetResources(), 1, false);
+                        Commit();
+                    }
+                    catch
+                    {
+                        Rollback();
+                        MessageBox.Show("Unable to load icons above pages! Parsing failure!");
+                        return false;
+                    }
+                }
                 return true;
             }
             MessageBox.Show("Error creating the database!");
             return false;
         }
+        public enum IconTypes{
+            CANDYCORN,
+            CUEBALL,
+            CALIBORNTOOTH,
+        }
+        
+        public abstract byte[] GetIcon(IconTypes ic);
+        public abstract bool IconsAreParsed();
         public abstract bool ReadLastIndexedOrCreateDatabase();
         public abstract void WriteResource(Parser.Resource[] res, int page, bool x2);
         public abstract void WriteLinks(Parser.Link[] res, int page, bool x2);

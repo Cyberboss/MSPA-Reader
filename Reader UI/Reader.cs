@@ -54,6 +54,11 @@ namespace Reader_UI
             public PictureBox gif;
             public System.IO.MemoryStream loc;
         }
+        class ImageStream
+        {
+            public Image gif;
+            public System.IO.MemoryStream loc;
+        }
 
         Writer db;
         Panel mainPanel = null, headerPanel = null, comicPanel = null;
@@ -64,7 +69,7 @@ namespace Reader_UI
         Writer.Page page = null;
         Writer.Style previousStyle;
         Button pesterHideShow = null;
-
+        ImageStream currentIcon = null;
 
         List<LineOrPB> conversations = new List<LineOrPB>();
         Label errorLabel = null;
@@ -869,7 +874,10 @@ namespace Reader_UI
             candyCorn[0].Width = REGULAR_CANDYCORN_WIDTH;
             candyCorn[0].Height = REGULAR_CANDYCORN_HEIGHT;
             candyCorn[0].Location = new Point(mspaHeaderLink[0].Location.X + mspaHeaderLink[0].Width + REGULAR_HEADER_X_OFFSET, REGULAR_CANDYCORN_Y_OFFSET);
-            candyCorn[0].Image = Properties.Resources.candyCorn;
+            candyCorn[0].Image = null;
+            candyCorn[0].SizeMode = PictureBoxSizeMode.StretchImage;
+            candyCorn[0].Width = 16;
+            candyCorn[0].Height = 16;
             headerPanel.Controls.Add(candyCorn[0]);
 
             mspaHeaderLink[1] = new Label();
@@ -900,7 +908,10 @@ namespace Reader_UI
             candyCorn[1].Width = REGULAR_CANDYCORN_WIDTH;
             candyCorn[1].Height = REGULAR_CANDYCORN_HEIGHT;
             candyCorn[1].Location = new Point(mspaHeaderLink[3].Location.X + mspaHeaderLink[3].Width + REGULAR_HEADER_X_OFFSET, REGULAR_CANDYCORN_Y_OFFSET);
-            candyCorn[1].Image = Properties.Resources.candyCorn;
+            candyCorn[1].Image = null;
+            candyCorn[1].SizeMode = PictureBoxSizeMode.StretchImage;
+            candyCorn[1].Width = 16;
+            candyCorn[1].Height = 16;
             headerPanel.Controls.Add(candyCorn[1]);
 
             mspaHeaderLink[4] = new Label();
@@ -948,7 +959,10 @@ namespace Reader_UI
             candyCorn[2].Width = REGULAR_CANDYCORN_WIDTH;
             candyCorn[2].Height = REGULAR_CANDYCORN_HEIGHT;
             candyCorn[2].Location = new Point(mspaHeaderLink[8].Location.X + mspaHeaderLink[8].Width + REGULAR_HEADER_X_OFFSET, REGULAR_CANDYCORN_Y_OFFSET);
-            candyCorn[2].Image = Properties.Resources.candyCorn;
+            candyCorn[2].Image = null;
+            candyCorn[2].SizeMode = PictureBoxSizeMode.StretchImage;
+            candyCorn[2].Width = 16;
+            candyCorn[2].Height = 16;
             headerPanel.Controls.Add(candyCorn[2]);
 
             mspaHeaderLink[9] = new Label();
@@ -980,7 +994,10 @@ namespace Reader_UI
             candyCorn[3].Width = REGULAR_CANDYCORN_WIDTH;
             candyCorn[3].Height = REGULAR_CANDYCORN_HEIGHT;
             candyCorn[3].Location = new Point(mspaHeaderLink[11].Location.X + mspaHeaderLink[11].Width + REGULAR_HEADER_X_OFFSET, REGULAR_CANDYCORN_Y_OFFSET);
-            candyCorn[3].Image = Properties.Resources.candyCorn;
+            candyCorn[3].Image = null;
+            candyCorn[3].SizeMode = PictureBoxSizeMode.StretchImage;
+            candyCorn[3].Width = 16;
+            candyCorn[3].Height = 16;
             headerPanel.Controls.Add(candyCorn[3]);
 
             mspaHeaderLink[12] = new Label();
@@ -1070,6 +1087,12 @@ namespace Reader_UI
                 RemoveControl(candyCorn[i]);
             RemoveControl(headerPanel);
             RemoveControl(pageLoadingProgress);
+            if (currentIcon != null)
+            {
+                currentIcon.gif.Dispose();
+                currentIcon.loc.Dispose();
+                currentIcon = null;
+            }
         }
         void CurtainsUp(Writer.Style s = Writer.Style.REGULAR)
         {
@@ -1144,10 +1167,7 @@ namespace Reader_UI
                     {
                         mspaHeaderLink[i].ForeColor = Color.White;
                     }
-                    for (int i = 0; i < candyCorn.Count(); ++i)
-                    {
-                        candyCorn[i].Image = Properties.Resources.cueBall;
-                    }
+                    SetCandy(Writer.IconTypes.CUEBALL);
 
                     break;
                 case Writer.Style.DOTA:
@@ -1188,7 +1208,23 @@ namespace Reader_UI
                     Debugger.Break();
                     break;
             }
+            if (candyCorn[0].Image == null)
+                SetCandy(Writer.IconTypes.CANDYCORN);
 
+
+        }
+        void SetCandy(Writer.IconTypes ic)
+        {
+
+
+            currentIcon = new ImageStream();
+            currentIcon.loc = new MemoryStream(db.GetIcon(ic));
+            currentIcon.gif = Image.FromStream(currentIcon.loc);
+            foreach (var corn in candyCorn)
+            {
+                corn.Image = currentIcon.gif;
+            }
+            
         }
         void StyleHomosuck()
         {
@@ -1206,10 +1242,7 @@ namespace Reader_UI
             {
                 mspaHeaderLink[i].ForeColor = Color.FromArgb(46, 215, 58);  //im so done with constants but w/e TODO:
             }
-            for (int i = 0; i < candyCorn.Count(); ++i)
-            {
-                candyCorn[i].Image = Properties.Resources.greenPepper;
-            }
+            SetCandy(Writer.IconTypes.CALIBORNTOOTH);
         }
         void ShowLoadingScreen()
         {

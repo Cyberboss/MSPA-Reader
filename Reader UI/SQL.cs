@@ -251,7 +251,53 @@ namespace Reader_UI
                 throw;
             }
         }
-        Parser.Resource[] GetResources(int pageno, bool x2)
+        public override byte[] GetIcon(Writer.IconTypes ic)
+        {
+            DbDataReader reader = null;
+            try
+            {
+                DbCommand selector = sqlsRConn.CreateCommand();
+                selector.CommandText = "SELECT data FROM Resources WHERE page_id = 1";
+                reader = selector.ExecuteReader();
+
+                List<byte[]> res = new List<byte[]>();
+
+                int index;
+                switch (ic)
+                {
+                    case IconTypes.CANDYCORN:
+                        index = 1;
+                        break;
+                    case IconTypes.CUEBALL:
+                        index = 2;
+                        break;
+                    case IconTypes.CALIBORNTOOTH:
+                        index = 3;
+                        break;
+                    default:
+                        System.Diagnostics.Debugger.Break();
+                        throw new Exception();
+                }
+                for (int i = 0; i < index; i++)
+                    if (!reader.Read())
+                    {
+                        System.Diagnostics.Debugger.Break();
+                        throw new Exception();
+                    }
+
+                return (byte[])reader.GetValue(0);
+
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                reader.Close();
+            }
+        }
+        public Parser.Resource[] GetResources(int pageno, bool x2)
         {
             DbDataReader reader = null;
             try
@@ -453,6 +499,12 @@ namespace Reader_UI
                 AddParameterWithValue(resourceWrite, "@iip", res[i].isInPesterLog);
                 resourceWrite.ExecuteNonQuery();
             }
+        }
+        public override bool IconsAreParsed()
+        {
+            DbCommand resourceWrite = sqlsRConn.CreateCommand();
+            resourceWrite.CommandText = "SELECT COUNT(*) FROM Resources WHERE page_id = 1";
+            return Convert.ToInt32(resourceWrite.ExecuteScalar()) != 0;
         }
         override public void WriteLinks(Parser.Link[] res, int page, bool x2)
         {

@@ -117,10 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="candyCorn" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\candyCorn.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="SQLSDBCreationScript" xml:space="preserve">
     <value>SET ANSI_NULLS ON;
 SET QUOTED_IDENTIFIER ON;
@@ -206,9 +202,6 @@ ALTER TABLE [dbo].[SpecialText]  WITH CHECK ADD  CONSTRAINT [FK_SpecialText_Dial
 REFERENCES [dbo].[Dialog] ([id]);
 ALTER TABLE [dbo].[SpecialText] CHECK CONSTRAINT [FK_SpecialText_Dialog];</value>
   </data>
-  <data name="cueBall" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\cueBall.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="SQLiteDBCreationScript" xml:space="preserve">
     <value>CREATE TABLE PageMeta (page_id INTEGER, x2 BOOLEAN, title TEXT, promptType TEXT, headerAltText TEXT, PRIMARY KEY (page_id, x2));
 CREATE TABLE Dialog (id INTEGER PRIMARY KEY AUTOINCREMENT, page_id INTEGER REFERENCES PageMeta (page_id), x2 BOOLEAN, isNarrative BOOLEAN, isImg BOOLEAN, text TEXT, colour TEXT, precedingLineBreaks INTEGER);
@@ -216,8 +209,5 @@ CREATE TABLE Links (id INTEGER PRIMARY KEY AUTOINCREMENT, page_id INTEGER, x2 BO
 CREATE TABLE PagesArchived (page_id INTEGER, x2 BOOLEAN, PRIMARY KEY (page_id, x2));
 CREATE TABLE Resources (id INTEGER PRIMARY KEY AUTOINCREMENT, page_id INTEGER, x2 BOOLEAN, data BLOB, original_filename TEXT, title_text TEXT, isInPesterLog BOOLEAN);
 CREATE TABLE SpecialText (id INTEGER PRIMARY KEY AUTOINCREMENT, dialog_id INTEGER, underline BOOLEAN, colour TEXT, sbegin INTEGER, length INTEGER, isImg BOOLEAN);</value>
-  </data>
-  <data name="greenPepper" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\greenPepper.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>
