@@ -5,7 +5,7 @@ List of known different styles of the top of my head
 
 Regular (DONE)
 Scratch (mostly done except for LE alt-text);
-Homosuck
+Homosuck (DONE)
 Sbahj
 Trickster
 2x (not so much a different style as two pages next to each other)
@@ -20,7 +20,8 @@ Main problem is figuring out where all the configuration xmls are and fixing the
 
 Generic TODO list(no particular order)
 
--- Download the candy corns and cueballs dynamically as I don't think we should be distributing them
+-- Download the candy corns and cueballs and green peppers dynamically as I don't think we should be distributing them
+-- On that note, find some way to permanently remove the test resources from the repository
 -- Database name as a variable
 -- Check if it works with older MSPA works(Jailbreak, problem sleuth), if we're lucky it will jst work with the regular style and we can just lower the minimum page cap
 -- Implement archive page
