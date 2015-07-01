@@ -1599,8 +1599,10 @@ namespace Reader_UI
             if(pageQueue.Count > 0)
                 pageQueue.Pop();
             if (pageQueue.Count == 0)
+            {
                 if (page != null && page.number > (int)Writer.PagesOfImportance.HOMESTUCK_PAGE_ONE)
                     WakeUpMr(page.number - 1);
+            }
             else
                 WakeUpMr(pageQueue.Pop());
         }
