@@ -252,7 +252,7 @@ namespace Reader_UI
                 return Style.SHES8ACK;
             if (Parser.IsHomosuck(pageno))
                 return Style.HOMOSUCK;
-            if (parser.Is2x(pageno))
+            if (Parser.Is2x(pageno))
                 return Style.X2;
             if (pageno == (int)PagesOfImportance.CALIBORN_PAGE_SMASH || pageno == (int)PagesOfImportance.CALIBORN_PAGE_SMASH2)
                 return Style.SMASH;
@@ -297,7 +297,7 @@ namespace Reader_UI
                         } while (!archivedPages.IsPageArchived(pageno));
                     }
                 }
-                return GetPage(pageno, parser.Is2x(pageno));
+                return GetPage(pageno, Parser.Is2x(pageno));
             }
             catch
             {
@@ -620,8 +620,14 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 }
                 else
                 {
-                    if (!(WritePage(bgw, currentPage, currentProgress, 1) && WritePage(bgw, currentPage, currentProgress, 2)))
+                    if (!WritePage(bgw, currentPage, currentProgress, 1))
                         missedPages += 2;
+                    else
+                    {
+                        parser.Reparse();
+                        if (!WritePage(bgw, currentPage, currentProgress, 2))
+                            missedPages += 2;
+                    }
                 }
                 //simple enough, leave it to the reader to decode the multiple pages
                 return missedPages;

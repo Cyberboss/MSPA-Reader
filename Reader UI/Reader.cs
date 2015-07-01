@@ -59,9 +59,95 @@ namespace Reader_UI
             public Image gif;
             public System.IO.MemoryStream loc;
         }
+        class x2Handler
+        {
+            public Panel comicPanel = null;
+            Panel pesterlog = null, mainPanel = null;
+            Label linkPrefix = null;
+            PictureBox next = null;
+            Button pesterHideShow = null;
+            List<LineOrPB> conversations = null;
+            string promptType = null;
 
+            int pLMinHeight, pLMaxHeight;
+            bool pesterLogVisible = false;
+
+
+            public x2Handler(Panel cP)
+            {
+                comicPanel = cP;
+            }
+            public x2Handler(Panel mP, Panel cP, Panel pl, Label lP, PictureBox n, Button pHS, List<LineOrPB> c, string pT, int pLMinH, int pLMaxH){
+
+                comicPanel = cP;
+                mainPanel = mP;
+                pesterlog = pl;
+                linkPrefix = lP;
+                next = n;
+                pesterHideShow = pHS;
+                conversations = c;
+                promptType = pT;
+                pLMinHeight = pLMinH;
+                pLMaxHeight = pLMaxH;
+
+                pesterHideShow.Click += pesterHideShow_Click;
+
+            }
+
+            void pesterHideShow_Click(object sender, EventArgs e)
+            {
+                Toggle();
+            }
+            public void Toggle()
+            {
+                int currentHeight = REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
+                if (pesterLogVisible)
+                    currentHeight += pLMinHeight;
+                else
+                    currentHeight += pLMaxHeight;
+
+                var oldLoc = linkPrefix.Location.Y;
+                linkPrefix.Location = new Point(linkPrefix.Location.X, currentHeight);
+                next.Location = new Point(next.Location.X, next.Location.Y + (linkPrefix.Location.Y - oldLoc));
+                comicPanel.Height = currentHeight + REGULAR_COMIC_PANEL_BOTTOM_PADDING;
+
+                if (!pesterLogVisible)
+                {
+                    pesterHideShow.Text = "Hide " + promptType;
+                    foreach (var line in conversations)
+                        pesterlog.Controls.Add(line.GetControl());
+                    pesterlog.MinimumSize = new Size(REGULAR_PESTERLOG_WIDTH, pesterlog.Height + REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT);
+                }
+                else
+                {
+                    pesterHideShow.Text = "Show " +promptType;
+                    foreach (var line in conversations)
+                        pesterlog.Controls.Remove(line.GetControl());
+                    pesterlog.MinimumSize = new Size(REGULAR_PESTERLOG_WIDTH, REGULAR_PESTERLOG_HEIGHT);
+                }
+                mainPanel.Height = Math.Max(mainPanel.Height,comicPanel.Height + REGULAR_COMIC_PANEL_Y_OFFSET + REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET);
+                pesterLogVisible = !pesterLogVisible;
+
+            }
+            public void Hide()
+            {
+                pesterLogVisible = true;
+                Toggle();
+            }
+            public void Show()
+            {
+                pesterLogVisible = false;
+                Toggle();
+            }
+            public void Kill()
+            {
+                comicPanel.Dispose();
+                //leave most of the garbage for the collector so we don't double dispose
+            }
+        }
         Writer db;
         Panel mainPanel = null, headerPanel = null, comicPanel = null;
+        x2Handler x2Panel = null;
         Label[] mspaHeaderLink = new Label[REGULAR_NUMBER_OF_HEADER_LABELS];
         PictureBox[] candyCorn = new PictureBox[REGULAR_NUMBER_OF_HEADER_CANDY_CORNS];
         ProgressBar pageLoadingProgress = null;
@@ -190,7 +276,15 @@ namespace Reader_UI
                     case Keys.Space:
                         if (page != null && (page.meta.lines != null && page.meta.lines.Count() != 0)
                             || (page.meta2 != null && page.meta2.lines != null && page.meta2.lines.Count() != 0))
+                        {
                             pesterHideShow_Click(null, null);
+                            if (x2Panel != null)
+                                if (pesterLogVisible)
+                                    x2Panel.Show();
+                                else
+                                    x2Panel.Hide();
+
+                        }
                         return true;
                     case Keys.Down:
                         VerticalScroll.Value = Math.Min(VerticalScroll.Value + 50, VerticalScroll.Maximum);
@@ -489,6 +583,31 @@ namespace Reader_UI
             linkPrefix.Font = newFont;
             next.Font = newFont;
         }
+        void LoadX2Page()
+        {
+            LoadRegularPage();
+            var oldMeta = page.meta;
+            page.links = page.links2;
+            page.meta = page.meta2;
+            page.resources = page.resources2;
+
+            var fakeLink = gifs.Last();
+            pesterHideShow.Click -= pesterHideShow_Click;
+
+            if (oldMeta.narr != null)
+                x2Panel = new x2Handler(comicPanel);
+            else
+                x2Panel = new x2Handler(mainPanel,comicPanel, pesterlog, linkPrefix, fakeLink.gif, pesterHideShow, conversations, oldMeta.promptType, pLMinHeight, pLMaxHeight);
+
+            conversations = new List<LineOrPB>();
+            LoadRegularPage();
+            x2Panel.comicPanel.Location = new Point(mainPanel.Width / 2 - (x2Panel.comicPanel.Width * 2 + 29) / 2, x2Panel.comicPanel.Location.Y);
+            comicPanel.Location = new Point(x2Panel.comicPanel.Location.X + x2Panel.comicPanel.Width + 29, comicPanel.Location.Y);
+            fakeLink.gif.Location = new Point(next.Location.X + linkPrefix.Width,next.Location.Y + next.Height);
+            x2Panel.comicPanel.Height = comicPanel.Height;
+
+            mainPanel.Height = comicPanel.Height + REGULAR_COMIC_PANEL_Y_OFFSET + REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET;
+        }
         void LoadPage()
         {
             try
@@ -503,6 +622,9 @@ namespace Reader_UI
                 saveButton.Enabled = true;
                 switch (db.GetStyle(pageRequest))
                 {
+                    case Writer.Style.X2:
+                        LoadX2Page();
+                        break;
                     case Writer.Style.TRICKSTER:
                         LoadTricksterPage();
                         break;
@@ -551,6 +673,7 @@ namespace Reader_UI
                 //fix scroll bar
                 Update();
                 AutoScrollPosition = new Point(0, 0);
+                numericUpDown1.Value = page.number;
             }
         }
         //https://stackoverflow.com/questions/1874077/loading-a-flash-movie-from-a-memory-stream-or-a-byte-array
@@ -696,6 +819,11 @@ namespace Reader_UI
             int currentHeight = title.Location.Y + title.Height + REGULAR_TITLE_Y_OFFSET;
             for (int i = 0; i < page.resources.Count(); i++)
             {
+                if (i == page.resources.Count() - 1 && Parser.Is2x(page.number) && page.resources != page.resources2)
+                {
+                    currentHeight -= REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET;
+                    continue;
+                }
                 if (page.resources[i].isInPesterLog)
                     continue;
                 if (!pageContainsFlash && !Parser.IsGif(page.resources[i].originalFileName))
@@ -860,8 +988,24 @@ namespace Reader_UI
 
             currentHeight += REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
 
+            //add 2x fake link 
+
+            if (Parser.Is2x(page.number) && page.resources != page.resources2)
+            {
+                var tempPB = new GifStream();
+                tempPB.loc = new System.IO.MemoryStream(page.resources[page.resources.Count() - 1].data);
+                tempPB.gif = new PictureBox();
+                tempPB.gif.Image = Image.FromStream(tempPB.loc);
+                tempPB.gif.Width = tempPB.gif.Image.Width;
+                tempPB.gif.Height = tempPB.gif.Image.Height;
+                tempPB.gif.Location = new Point(comicPanel.Width / 2 - tempPB.gif.Width / 2, currentHeight);
+                comicPanel.Controls.Add(tempPB.gif);
+                currentHeight += tempPB.gif.Height;
+                gifs.Add(tempPB);
+            }
+
             //next page
-            if (page.links.Count() > 0 && page.number < numericUpDown1.Maximum)
+            if (page.number < db.lastPage)
             {
 
                 linkPrefix = new Label();
@@ -871,14 +1015,16 @@ namespace Reader_UI
                 linkPrefix.Location = new Point(leftSide, currentHeight);
                 comicPanel.Controls.Add(linkPrefix);
 
-                next = new GrowLinkLabel();
-                next.Width = 600;
-                next.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-                next.Text = "    " + page.links[0].originalText;
-                next.Location = new Point(leftSide, currentHeight);
-                next.LinkClicked += next_LinkClicked;
-                comicPanel.Controls.Add(next);
-
+                if (page.links != null && page.links.Count() > 0)
+                {
+                    next = new GrowLinkLabel();
+                    next.Width = 600;
+                    next.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                    next.Text = "    " + page.links[0].originalText;
+                    next.Location = new Point(leftSide, currentHeight);
+                    next.LinkClicked += next_LinkClicked;
+                    comicPanel.Controls.Add(next);
+                }
                 linkPrefix.BringToFront();
             }
 
@@ -920,6 +1066,7 @@ namespace Reader_UI
             }
             mainPanel.Height = comicPanel.Height + REGULAR_COMIC_PANEL_Y_OFFSET + REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET;
             pesterLogVisible = !pesterLogVisible;
+
         }
 
         void next_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -937,7 +1084,7 @@ namespace Reader_UI
             pageContainsFlash = false;
             numericUpDown1.Value = pg;
             var newStyle = db.GetStyle(pg);
-            if (previousStyle != newStyle)
+            if (previousStyle != newStyle || Parser.Is2x(pg))
                 CurtainsUp(newStyle);
             ShowLoadingScreen();
             pageRequest = pg;
@@ -1185,7 +1332,11 @@ namespace Reader_UI
             conversations.Clear();
             RemoveControl(pesterlog);
             RemoveControl(comicPanel);
-            
+            if (x2Panel != null)
+            {
+                x2Panel.Kill();
+                x2Panel = null;
+            }
         }
         void CleanControls()
         {
@@ -1227,6 +1378,20 @@ namespace Reader_UI
                     mainPanel.MaximumSize = new System.Drawing.Size(REGULAR_PANEL_WIDTH, Int32.MaxValue);
                     mainPanel.Width = REGULAR_PANEL_WIDTH;
                     mainPanel.Location = new Point(this.Width / 2 - mainPanel.Width / 2, REGULAR_PANEL_Y_OFFSET);
+                    mainPanel.BackColor = Color.FromArgb(REGULAR_PANEL_COLOUR_R, REGULAR_PANEL_COLOUR_G, REGULAR_PANEL_COLOUR_B);
+                    Controls.Add(mainPanel);
+
+                    SetupHeader();
+
+                    break;
+                case Writer.Style.X2:
+                    BackColor = Color.FromArgb(REGULAR_BACK_COLOUR_R, REGULAR_BACK_COLOUR_G, REGULAR_BACK_COLOUR_B);
+
+                    mainPanel = new Panel();
+                    mainPanel.AutoSize = true;
+                    mainPanel.MaximumSize = new System.Drawing.Size(1660, Int32.MaxValue);
+                    mainPanel.Width = 1660;
+                    mainPanel.Location = new Point(this.Width / 2 - mainPanel.Width / 2, 66);
                     mainPanel.BackColor = Color.FromArgb(REGULAR_PANEL_COLOUR_R, REGULAR_PANEL_COLOUR_G, REGULAR_PANEL_COLOUR_B);
                     Controls.Add(mainPanel);
 
@@ -1564,6 +1729,7 @@ namespace Reader_UI
             Bitmap pix = new Bitmap(1, 1);
             mainPanel.DrawToBitmap(pix, new Rectangle(0, 0, 1, 1));
             BackColor = pix.GetPixel(0, 0);
+            pix.Dispose();
         }
 
     }

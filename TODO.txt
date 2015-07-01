@@ -3,9 +3,9 @@
 Regular (DONE)
 Scratch (mostly done except for LE alt-text transparency);
 Homosuck (DONE)
-Sbahj
+Sbahj (DONE)
 Trickster (DONE)
-2x 
+2x (DONE)
 Cascade (DONE)
 DOTA, (DONE)
 SHESBACK (DONE)
@@ -22,7 +22,8 @@ Main problem is figuring out where all the configuration xmls are and fixing the
 Generic TODO list(no particular order)
 
 -- Verify the functionality of the go back button
-(DONE) -- Make a note that sqlite isn't save for asynchronous operations on the connection screen (correct me if I'm wrong)
+(DONE) -- Make a note that sqlite isn't safe for asynchronous operations on the connection screen (correct me if I'm wrong)
+-- Disable Simultaneous Archiving and Reading while in Sqlite mode
 -- Download the candy corns and cueballs and green peppers dynamically as I don't think we should be distributing them
 -- On that note, find some way to permanently remove the test resources from the repository
 -- Database name as a variable
