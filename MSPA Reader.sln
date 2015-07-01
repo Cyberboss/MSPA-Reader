@@ -18,14 +18,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{694961
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Redistributables", "Redistributables", "{B8F4E2F9-306B-484F-A2FB-FF69F0B0586D}"
-	ProjectSection(SolutionItems) = preProject
-		Redist\dotNetFx45_Full_setup.exe = Redist\dotNetFx45_Full_setup.exe
-		Redist\NDP46-KB3033091-x86-x64-AllOS-ENU.exe = Redist\NDP46-KB3033091-x86-x64-AllOS-ENU.exe
-		Redist\SqlLocalDBx64.msi = Redist\SqlLocalDBx64.msi
-		Redist\SqlLocalDBx86.msi = Redist\SqlLocalDBx86.msi
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E8E8A41C-C73A-4838-80E3-6BF34E11355E}"
 	ProjectSection(SolutionItems) = preProject
 		TODO.txt = TODO.txt
