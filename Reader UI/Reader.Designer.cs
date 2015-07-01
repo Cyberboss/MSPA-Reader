@@ -264,7 +264,6 @@
             this.Controls.Add(this.jumpButton);
             this.Controls.Add(this.numericUpDown1);
             this.Controls.Add(this.openArchiver);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Reader";
             this.Text = "MS Paint Adventures";

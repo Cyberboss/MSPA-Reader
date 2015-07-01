@@ -17,6 +17,7 @@ Tasks:
 -- Implement archive page
 -- Review password saving code
 -- Implement ads taken straight from the website in comic footer, legal? (trying to help out hussie here, and I'm pretty sure they all go to whatpumpkin anyway)
+	^ thinking about it, also the sidebar ads too, I don't want hussie losing revenue.
 (DONE??? I SERIOUSLY CAN'T TELL) -- Figure out how to load Cascade properly (only multipart flash, as of right now I have no idea how it's loading).
 -- Support for archival and serial reading modes (x.gif vs x_retcon.gif, activate retcon once past a certain page)
 -- Better narrative/dialog parsing
