@@ -1,27 +1,12 @@
-﻿Primary: Style sheet support.
-
-Regular (DONE)
-Scratch (mostly done except for LE alt-text transparency);
-Homosuck (DONE)
-Sbahj (DONE)
-Trickster (DONE)
-2x (DONE)
-Cascade (DONE)
-DOTA, (DONE)
-SHESBACK (DONE)
-Caliborn's page smash (DONE)
-GAMEOVER (DONE, with extra ;D)
-LOWAS in void fireflies
-
-Primary: Fix Hussie - Caliborn conversation boxes
+﻿Primary: Fix Hussie/Caliborn's conversations in the narrative prompt
 Primary: Get inline images working eg 7980, 4943
+Primary: Get Openbound working
 
-Primary: Openbound solution
-Main problem is figuring out where all the configuration xmls are and fixing them so that we can load resources locally
+Tasks:
 
-Generic TODO list(no particular order)
-
--- Verify the functionality of the go back button
+-- LOWAS in void fireflies
+-- Fix Linux styles
+(DONE) -- Verify the functionality of the go back button
 (DONE) -- Make a note that sqlite isn't safe for asynchronous operations on the connection screen (correct me if I'm wrong)
 -- Disable Simultaneous Archiving and Reading while in Sqlite mode
 -- Download the candy corns and cueballs and green peppers dynamically as I don't think we should be distributing them

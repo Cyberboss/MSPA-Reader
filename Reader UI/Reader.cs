@@ -1636,7 +1636,7 @@ namespace Reader_UI
 
         private void helpButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("You can use the arrow keys to navigate! Left and right change pages, Up and down scroll, spacebar toggles pesterlogs. The Go Back button has the functional equivalent of the browser back button. 'H' hides and shows the UI. Use the archiver for mass downloading (Try not to though, it hurts Hussie's horses). Made by Cyberboss (/u/Cyberboss_JHCB). E-mail cyberbossMSPAReader@gmail.com with bugs (Pics/steps to reproduce or it didn't happen). MSPA belongs to Hussie not me, don't take credit for or sell this. Source code coming sometime next week.");
+            MessageBox.Show("You can use the arrow keys to navigate (on pages without flash)! Left and right change pages, Up and down scroll, spacebar toggles pesterlogs. The Go Back button has the functional equivalent of the browser back button. 'H' hides and shows the UI. F5 refreshes the page, F11 toggles windowed fullscreen (disabled on Mono). Use the archiver to download all of Homestuck at once. Made by Cyberboss (/u/Cyberboss_JHCB). Report bugs at https://github.com/cybnetsurfe3011/MSPA-Reader. MSPA belongs to Hussie not me, don't take credit for or sell this.");
         }
 
         private void startOverButton_Click(object sender, EventArgs e)
