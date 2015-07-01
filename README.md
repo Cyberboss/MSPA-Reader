@@ -1,7 +1,7 @@
 # MSPA-Reader
 A parser for the website MSPA that will download comic content into a database for local, forms based, reading. Written in pure .NET.
 
-Simple build with visual studio, or mono`s xbuild with the preprocessor definition linux. Both will require nuget package restore (Nuget is weird on my arch linux, I had to build using monodevelop the first time).
+Simple build the release configuration with visual studio, or mono`s xbuild with the preprocessor definition linux. Both will require nuget package restore (Nuget is weird on my arch linux, I had to build using monodevelop the first time).
 
 Reccommend using SQLLocalDB or SQLServer if possible. Sqlite has shown to run into deadlocks during archive operations. Support for MySQL coming soon.
 

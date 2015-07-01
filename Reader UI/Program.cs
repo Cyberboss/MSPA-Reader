@@ -20,6 +20,10 @@ namespace Reader_UI
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
+        /// 
+
+        const string updateURL = "some github address fill in";
+
         static System.Threading.Mutex mutex = new System.Threading.Mutex(true, System.Reflection.Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId.ToString());//unique per build
         [STAThread]
         static void Main()
@@ -27,24 +31,67 @@ namespace Reader_UI
             if (mutex.WaitOne(TimeSpan.Zero, true))
                 try
                 {
-                    DecryptSavedPassword();
-                    Application.EnableVisualStyles();
-                    Application.SetCompatibleTextRenderingDefault(false);
-                    var lastPage = Properties.Settings.Default.lastReadPage;
-                    new DatabaseLogin().Show();
-                    Application.Run();
+                    string oldUpdatePath = Application.StartupPath + System.AppDomain.CurrentDomain.FriendlyName.Replace(" Update.exe", ".exe");
+                    if(System.IO.File.Exists(oldUpdatePath))
+                        try{
+                            System.Threading.Thread.Sleep(2000);
+                            System.IO.File.Delete(oldUpdatePath);   //delete the old version
+                        }catch{}
+
+                    try
+                    {
+                        if (Parser.CheckIfUpdateIsAvailable())
+                        {
+                            if (MessageBox.Show("Download now?",
+                                             "Update Available",
+                                             MessageBoxButtons.YesNo) == DialogResult.Yes)
+                            {
+                                Parser p = new Parser();
+                                try{
+                                    string path = (Application.StartupPath + System.AppDomain.CurrentDomain.FriendlyName).Replace(".exe","") + " Update.exe";
+                                    System.IO.File.WriteAllBytes(path, p.DownloadFile(updateURL,true));
+                                    System.Diagnostics.Process.Start(path);
+                                    return;
+                                }
+                                catch {
+                                    MessageBox.Show("Error downloading/saving the update!");
+                                }
+                                finally
+                                {
+                                    p.Dispose();
+                                }
+                            }
+                        }
+
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Unable to check for updates!");
+                    }
+                    try
+                    {
+                        DecryptSavedPassword();
+                        Application.EnableVisualStyles();
+                        Application.SetCompatibleTextRenderingDefault(false);
+                        var lastPage = Properties.Settings.Default.lastReadPage;
+                        new DatabaseLogin().Show();
+                        Application.Run();
+                    }
+                    catch
+                    {
+                        throw;
+                    }
+                    finally
+                    {
+                        EncryptSavedPassword();
+                        Properties.Settings.Default.Save();
+                    }
                 }
-                catch
-                {
-                    throw;
-                }
+                catch { throw; }
                 finally
                 {
                     mutex.ReleaseMutex();
-                    EncryptSavedPassword();
-                    Properties.Settings.Default.Save();
                 }
-                
         }
 
         public static void Shutdown(Form window, Writer db)

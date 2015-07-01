@@ -13,7 +13,7 @@ namespace Reader_UI
 {
     public class Parser : IDisposable
     {
-        
+        const string githubRepo = "https://raw.githubusercontent.com/cybnetsurfe3011/MSPA-Reader/master/CurrentVersion.txt";
         public class Resource
         {
             readonly public byte[] data;
@@ -119,6 +119,26 @@ namespace Reader_UI
             {
                 originalText = oT;
                 pageNumber = pN;
+            }
+        }
+        public static bool CheckIfUpdateIsAvailable()
+        {
+            WebClient client = new WebClient();
+            try
+            {
+                byte[] raw = client.DownloadData("http://dimensionalpha.net/test.txt");
+
+                string source = System.Text.Encoding.UTF8.GetString(raw);
+                if (Convert.ToInt32(source) > (int)Writer.Versions.Program)
+                {
+                    return true;
+                }
+                return false;
+            }
+            catch { throw; }
+            finally
+            {
+                client.Dispose();
             }
         }
         //http://stackoverflow.com/questions/1585985/how-to-use-the-webclient-downloaddataasync-method-in-this-context

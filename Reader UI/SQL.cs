@@ -405,7 +405,7 @@ namespace Reader_UI
 
                 //first check that the db version matches ours
                 myCommand.CommandText = "SELECT * FROM DBVersion";
-                if (Convert.ToInt32(myCommand.ExecuteScalar()) != (int)DB.Version)  //if the table doesn't exist assume corrupt and overwrite
+                if (Convert.ToInt32(myCommand.ExecuteScalar()) != (int)Versions.Database)  //if the table doesn't exist assume corrupt and overwrite
                     if (MessageBox.Show("Database version differs from that of the program. Wipe database and create updated version?",
                                      "Version Mismatch",
                                      MessageBoxButtons.YesNo) == DialogResult.Yes)
@@ -489,7 +489,7 @@ namespace Reader_UI
                         creationCommands.CommandText = Properties.Resources.SQLSDBCreationScript;
                     creationCommands.Transaction = sqlsTrans;
                     creationCommands.ExecuteNonQuery();
-                    creationCommands.CommandText = "INSERT INTO DBVersion VALUES (" + (int)DB.Version + ")";
+                    creationCommands.CommandText = "INSERT INTO DBVersion VALUES (" + (int)Versions.Database + ")";
                     creationCommands.ExecuteNonQuery();
                     Commit();
                 }
