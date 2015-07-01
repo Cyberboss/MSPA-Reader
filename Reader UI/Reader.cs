@@ -212,6 +212,7 @@ namespace Reader_UI
         Label linkPrefix = null;
         LinkLabel next = null, tereziPassword = null;
         Panel pesterlog = null;
+        GifStream headerP = null;
 
         public Reader(Writer idb)
         {
@@ -1360,6 +1361,12 @@ namespace Reader_UI
                 currentIcon.loc.Dispose();
                 currentIcon = null;
             }
+            if (headerP != null)
+            {
+                headerP.gif.Dispose();
+                headerP.loc.Dispose();
+                headerP = null;
+            }
         }
         void CurtainsUp(Writer.Style s = Writer.Style.REGULAR)
         {
@@ -1397,6 +1404,18 @@ namespace Reader_UI
                     Controls.Add(mainPanel);
 
                     SetupHeader();
+
+                    headerPanel.Location = new Point(headerPanel.Location.X, headerPanel.Location.Y + 47);
+                    headerP = new GifStream();
+                    headerP.loc = new MemoryStream(db.Getx2Header());
+                    headerP.gif = new PictureBox();
+                    headerP.gif.Image = Image.FromStream(headerP.loc);
+                    headerP.gif.Width = mainPanel.Width;
+                    headerP.gif.Height = 47;
+                    Controls.Add(headerP.gif);
+                    headerP.gif.Location = new Point(mainPanel.Location.X, 0);
+
+
 
                     break;
                 case Writer.Style.CASCADE:

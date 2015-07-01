@@ -1,24 +1,22 @@
-﻿Primary: Database migrations
+﻿
 Primary: Fix Hussie/Caliborn's conversations in the narrative prompt
 Primary: Get inline images working eg 7980, 4943
+Primary: Database migrations for next DB version bump
 Primary: Get Openbound working
 
 Tasks:
 
+-- Allow horizontal scroll to center comic content if window width is too small.
 -- LOWAS in void fireflies
 -- Fix Linux styles
-(DONE) -- Verify the functionality of the go back button
-(DONE) -- Make a note that sqlite isn't safe for asynchronous operations on the connection screen (correct me if I'm wrong)
 -- Disable Simultaneous Archiving and Reading while in Sqlite mode
-(DONE) -- Download the candy corns and cueballs and green peppers dynamically as I don't think we should be distributing them
-(DONE) -- On that note, find some way to permanently remove the test resources from the repository
 -- Database name as a variable
 -- Check if it works with older MSPA works(Jailbreak, problem sleuth), if we're lucky it will jst work with the regular style and we can just lower the minimum page cap
 -- Implement archive page
 -- Review password saving code
 -- Implement ads taken straight from the website in comic footer, legal? (trying to help out hussie here, and I'm pretty sure they all go to whatpumpkin anyway)
 	^ thinking about it, also the sidebar ads too, I don't want hussie losing revenue.
-(DONE??? I SERIOUSLY CAN'T TELL) -- Figure out how to load Cascade properly (only multipart flash, as of right now I have no idea how it's loading).
+(DONE??? I SERIOUSLY CAN'T TELL) -- Figure out how to load Cascade properly (only multipart flash, as of right now I have no idea how if it's loading from the files or the loader is downloading the rest of the segments).
 -- Support for archival and serial reading modes (x.gif vs x_retcon.gif, activate retcon once past a certain page)
 -- Better narrative/dialog parsing
 -- Support line breaks in pesterlogs

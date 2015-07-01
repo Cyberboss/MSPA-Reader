@@ -3,3 +3,5 @@ v1.0
 v1.1
 	-- Added Icon to reader
 	-- Fixed dynamic updates
+	-- Fixed a bug that occurred if an x2 page was loaded before any other page with a pesterlog
+	-- Added the missing x2 header

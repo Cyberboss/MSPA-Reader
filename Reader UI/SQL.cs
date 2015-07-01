@@ -301,6 +301,12 @@ namespace Reader_UI
                 reader.Close();
             }
         }
+        public override byte[] Getx2Header()
+        {
+            DbCommand selector = sqlsRConn.CreateCommand();
+            selector.CommandText = "SELECT data FROM Resources WHERE page_id = 100002";
+            return (byte[])selector.ExecuteScalar();
+        }
         public override bool TricksterParsed()
         {
             DbCommand selector = sqlsRConn.CreateCommand();

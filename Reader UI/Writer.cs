@@ -224,6 +224,7 @@ namespace Reader_UI
         public abstract void Close();
         public abstract bool TricksterParsed();
         public abstract bool x2HeaderParsed();
+        public abstract byte[] Getx2Header();
 
         public abstract Parser.Resource[] GetTricksterShit();
         protected void ParseTrickster(bool serial)
