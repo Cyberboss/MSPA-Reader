@@ -10,8 +10,8 @@ Tasks:
 (DONE) -- Verify the functionality of the go back button
 (DONE) -- Make a note that sqlite isn't safe for asynchronous operations on the connection screen (correct me if I'm wrong)
 -- Disable Simultaneous Archiving and Reading while in Sqlite mode
--- Download the candy corns and cueballs and green peppers dynamically as I don't think we should be distributing them
--- On that note, find some way to permanently remove the test resources from the repository
+(DONE) -- Download the candy corns and cueballs and green peppers dynamically as I don't think we should be distributing them
+(DONE) -- On that note, find some way to permanently remove the test resources from the repository
 -- Database name as a variable
 -- Check if it works with older MSPA works(Jailbreak, problem sleuth), if we're lucky it will jst work with the regular style and we can just lower the minimum page cap
 -- Implement archive page
