@@ -12,7 +12,8 @@ namespace Reader_UI
     {
         public enum Versions{
             Database = 1, //update with every commit that affects db layout
-            Program = 1
+            Program = 2,
+            Release = Program + 1
         }
         void Dispose(bool mgd)
         {

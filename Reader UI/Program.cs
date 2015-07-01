@@ -22,21 +22,40 @@ namespace Reader_UI
         /// </summary>
         /// 
 
-        const string updateURL = "some github address fill in";
+        static string updateURL = "https://github.com/cybnetsurfe3011/MSPA-Reader/releases/download/v1." + (int)Writer.Versions.Program + "/MSPA.Reader.Release." + (int)Writer.Versions.Release + ".Update.exe";
 
         static System.Threading.Mutex mutex = new System.Threading.Mutex(true, System.Reflection.Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId.ToString());//unique per build
         [STAThread]
         static void Main()
         {
-            if (mutex.WaitOne(TimeSpan.Zero, true))
+
+            if (mutex.WaitOne(TimeSpan.Zero, true)) //make sure we're the only instance
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);   //must be done before showing message boxes
                 try
                 {
-                    string oldUpdatePath = Application.StartupPath + System.AppDomain.CurrentDomain.FriendlyName.Replace(" Update.exe", ".exe");
-                    if(System.IO.File.Exists(oldUpdatePath))
-                        try{
-                            System.Threading.Thread.Sleep(2000);
-                            System.IO.File.Delete(oldUpdatePath);   //delete the old version
-                        }catch{}
+                    string oldUpdatePath = Application.StartupPath + System.IO.Path.DirectorySeparatorChar + System.AppDomain.CurrentDomain.FriendlyName.Replace(" Update.exe", ".exe");
+
+                    if (oldUpdatePath != Application.StartupPath + System.IO.Path.DirectorySeparatorChar + System.AppDomain.CurrentDomain.FriendlyName)
+                        try
+                        {
+                            if (System.IO.File.Exists(oldUpdatePath))
+                            {
+                                MessageBox.Show("Update successful!");
+                                System.IO.File.Delete(oldUpdatePath);   //delete the old version
+                            }
+                            else
+                            {
+
+                                oldUpdatePath = oldUpdatePath.Replace(".exe", "");
+                                if (System.IO.File.Exists(oldUpdatePath))
+                                {
+                                    MessageBox.Show("Update successful!");
+                                    System.IO.File.Delete(oldUpdatePath); 
+                                }
+                            }
+                        }
+                        catch { }
 
                     try
                     {
@@ -48,13 +67,15 @@ namespace Reader_UI
                             {
                                 Parser p = new Parser();
                                 try{
-                                    string path = (Application.StartupPath + System.AppDomain.CurrentDomain.FriendlyName).Replace(".exe","") + " Update.exe";
+                                    string path = (Application.StartupPath + System.IO.Path.DirectorySeparatorChar + System.AppDomain.CurrentDomain.FriendlyName).Replace(".exe", " Update.exe");
+                                    if (path == Application.StartupPath + System.IO.Path.DirectorySeparatorChar + System.AppDomain.CurrentDomain.FriendlyName)
+                                        path += "Update.exe";
                                     System.IO.File.WriteAllBytes(path, p.DownloadFile(updateURL,true));
                                     System.Diagnostics.Process.Start(path);
                                     return;
                                 }
                                 catch {
-                                    MessageBox.Show("Error downloading/saving the update!");
+                                    MessageBox.Show("Error downloading/saving the update! You can get it manually at https://github.com/cybnetsurfe3011/MSPA-Reader/releases.");
                                 }
                                 finally
                                 {
@@ -71,8 +92,6 @@ namespace Reader_UI
                     try
                     {
                         DecryptSavedPassword();
-                        Application.EnableVisualStyles();
-                        Application.SetCompatibleTextRenderingDefault(false);
                         var lastPage = Properties.Settings.Default.lastReadPage;
                         new DatabaseLogin().Show();
                         Application.Run();
