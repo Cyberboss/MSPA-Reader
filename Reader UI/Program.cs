@@ -59,9 +59,10 @@ namespace Reader_UI
 
                     try
                     {
-                        if (Parser.CheckIfUpdateIsAvailable())
+                        var res = Parser.CheckIfUpdateIsAvailable();
+                        if (res != 0)
                         {
-                            if (MessageBox.Show("Download now?",
+                            if (MessageBox.Show("Release version "+res+" available. Download now?",
                                              "Update Available",
                                              MessageBoxButtons.YesNo) == DialogResult.Yes)
                             {

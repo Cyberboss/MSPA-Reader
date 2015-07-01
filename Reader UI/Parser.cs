@@ -121,7 +121,7 @@ namespace Reader_UI
                 pageNumber = pN;
             }
         }
-        public static bool CheckIfUpdateIsAvailable()
+        public static int CheckIfUpdateIsAvailable()
         {
             WebClient client = new WebClient();
             try
@@ -131,9 +131,9 @@ namespace Reader_UI
                 string source = System.Text.Encoding.UTF8.GetString(raw);
                 if (Convert.ToInt32(source) > (int)Writer.Versions.Program)
                 {
-                    return true;
+                    return Convert.ToInt32(source);
                 }
-                return false;
+                return 0;
             }
             catch { throw; }
             finally
