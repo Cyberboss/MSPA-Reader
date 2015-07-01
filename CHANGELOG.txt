@@ -2,3 +2,4 @@ v1.0
 	-- Initial Release
 v1.1
 	-- Added Icon to reader
+	-- Fixed dynamic updates
