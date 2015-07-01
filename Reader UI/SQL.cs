@@ -15,6 +15,10 @@ namespace Reader_UI
     class SQL : Writer
     {
 
+        //note candy corn resources are stored at page 100000 in the db
+        //trickster is stored at 100001
+        //x2 header at 100002
+
         DbConnection sqlsRConn = null, sqlsWConn = null;
         DbTransaction sqlsTrans = null;
         string connectionString = null;
@@ -550,6 +554,12 @@ namespace Reader_UI
                 AddParameterWithValue(resourceWrite, "@originalFN", res[i].originalText);
                 resourceWrite.ExecuteNonQuery();
             }
+        }
+        public override bool x2HeaderParsed()
+        {
+            DbCommand selector = sqlsRConn.CreateCommand();
+            selector.CommandText = "SELECT COUNT(*) FROM RESOURCES WHERE page_id = 100002";
+            return Convert.ToInt32(selector.ExecuteScalar()) != 0;
         }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities")]
         override public void WriteText(Parser.Text tex, int page, bool x2)

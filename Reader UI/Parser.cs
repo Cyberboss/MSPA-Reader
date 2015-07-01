@@ -703,5 +703,11 @@ namespace Reader_UI
             }
             return true;
          }
+
+        public void GetX2Header(bool serial)
+        {
+            resources.Clear();
+            resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/act6act5act1x2combo.gif", serial), "act6act5act1x2combo.gif"));
+        }
     }
 }

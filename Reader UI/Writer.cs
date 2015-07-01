@@ -223,6 +223,7 @@ namespace Reader_UI
         public abstract void Commit();
         public abstract void Close();
         public abstract bool TricksterParsed();
+        public abstract bool x2HeaderParsed();
 
         public abstract Parser.Resource[] GetTricksterShit();
         protected void ParseTrickster(bool serial)
@@ -234,6 +235,24 @@ namespace Reader_UI
                 {
                     parser.LoadTricksterResources(serial);
                     WriteResource(parser.GetResources(), 100001, false);
+                    Commit();
+                }
+                catch
+                {
+                    Rollback();
+                    throw;
+                }
+            }
+        }
+        protected void Parsex2Header(bool serial)
+        {
+            if (!x2HeaderParsed())
+            {
+                Transact();
+                try
+                {
+                    parser.GetX2Header(serial);
+                    WriteResource(parser.GetResources(), 100002, false);
                     Commit();
                 }
                 catch
@@ -611,6 +630,8 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
 
             if (Parser.IsTrickster(currentPage))
                 ParseTrickster(bgw != null);
+            if (Parser.Is2x(currentPage))
+                Parsex2Header(bgw != null);
 
             if (parser.LoadPage(currentPage))
             {

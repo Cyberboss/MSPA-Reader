@@ -592,7 +592,8 @@ namespace Reader_UI
             page.resources = page.resources2;
 
             var fakeLink = gifs.Last();
-            pesterHideShow.Click -= pesterHideShow_Click;
+            if(pesterHideShow != null)
+                pesterHideShow.Click -= pesterHideShow_Click;
 
             if (oldMeta.narr != null)
                 x2Panel = new x2Handler(comicPanel);
