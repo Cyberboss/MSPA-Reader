@@ -98,51 +98,60 @@ namespace Reader_UI
                     return;
                 }
                 Hide();
-                if (resetDatabase.Checked)
+                try
                 {
-                    Properties.Settings.Default.lastReadPage = (int)Writer.PagesOfImportance.HOMESTUCK_PAGE_ONE;
-                }
-                if(checkBox1.Checked)
-                    Program.Open(db, false,true);
-                if (checkBox2.Checked)
-                    Program.Open(db, true,true);
-
-                if (dataSourceInput.SelectedIndex == 0)
-                    Properties.Settings.Default.ip = ipInput.Text;
-
-                if (dataSourceInput.SelectedIndex == 0)
-                {
-                    Properties.Settings.Default.dbName = databaseNameInput.Text;
-                }
-                else
-                {
-                    Properties.Settings.Default.dbFileName = System.IO.Path.GetDirectoryName(databaseNameInput.Text) + System.IO.Path.GetFileNameWithoutExtension(databaseNameInput.Text);
-                }
-
-                if (saveUsername.Checked)
-                {
-                    Properties.Settings.Default.saveUsername = true;
-                    Properties.Settings.Default.username = usernameInput.Text;
-                    if (savePassword.Checked)
+                    if (resetDatabase.Checked)
                     {
-                        Properties.Settings.Default.savePassword = true;
-                        Properties.Settings.Default.password = passwordInput.Text;
+                        Properties.Settings.Default.lastReadPage = (int)Writer.PagesOfImportance.HOMESTUCK_PAGE_ONE;
                     }
-                    else {
+                    if (checkBox1.Checked)
+                        Program.Open(db, false, true);
+                    if (checkBox2.Checked)
+                        Program.Open(db, true, true);
+
+                    if (dataSourceInput.SelectedIndex == 0)
+                        Properties.Settings.Default.ip = ipInput.Text;
+
+                    if (dataSourceInput.SelectedIndex == 0)
+                    {
+                        Properties.Settings.Default.dbName = databaseNameInput.Text;
+                    }
+                    else
+                    {
+                        Properties.Settings.Default.dbFileName = System.IO.Path.GetDirectoryName(databaseNameInput.Text) + System.IO.Path.GetFileNameWithoutExtension(databaseNameInput.Text);
+                    }
+
+                    if (saveUsername.Checked)
+                    {
+                        Properties.Settings.Default.saveUsername = true;
+                        Properties.Settings.Default.username = usernameInput.Text;
+                        if (savePassword.Checked)
+                        {
+                            Properties.Settings.Default.savePassword = true;
+                            Properties.Settings.Default.password = passwordInput.Text;
+                        }
+                        else
+                        {
+                            Properties.Settings.Default.savePassword = false;
+                            Properties.Settings.Default.password = "";
+                        }
+                    }
+                    else
+                    {
+                        Properties.Settings.Default.saveUsername = false;
+                        Properties.Settings.Default.username = "";
                         Properties.Settings.Default.savePassword = false;
                         Properties.Settings.Default.password = "";
                     }
+
+
+                    Close();
                 }
-                else
+                catch
                 {
-                    Properties.Settings.Default.saveUsername = false;
-                    Properties.Settings.Default.username = "";
-                    Properties.Settings.Default.savePassword = false;
-                    Properties.Settings.Default.password = "";
+                    Show();
+                    throw;
                 }
-
-
-                Close();
             }
             catch
             {
