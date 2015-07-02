@@ -59,7 +59,9 @@ namespace Reader_UI
 
                     try
                     {
-                        var res = Parser.CheckIfUpdateIsAvailable();
+                        var tmpParser = new Parser();
+                        var res = tmpParser.CheckIfUpdateIsAvailable();
+                        tmpParser.Dispose();
                         if (res != 0)
                         {
                             if (MessageBox.Show("Release version "+res+" available. Download now?",

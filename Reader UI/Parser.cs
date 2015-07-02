@@ -121,25 +121,19 @@ namespace Reader_UI
                 pageNumber = pN;
             }
         }
-        public static int CheckIfUpdateIsAvailable()
+        public int CheckIfUpdateIsAvailable()
         {
-            WebClient client = new WebClient();
             try
             {
-                byte[] raw = client.DownloadData("http://dimensionalpha.net/test.txt");
+                byte[] raw = DownloadFile("https://raw.githubusercontent.com/cybnetsurfe3011/MSPA-Reader/master/CurrentVersion.txt");
 
                 string source = System.Text.Encoding.UTF8.GetString(raw);
                 if (Convert.ToInt32(source) > (int)Writer.Versions.Program)
-                {
                     return Convert.ToInt32(source);
-                }
-                return 0;
+                
             }
-            catch { throw; }
-            finally
-            {
-                client.Dispose();
-            }
+            catch { }
+            return 0;
         }
         //http://stackoverflow.com/questions/1585985/how-to-use-the-webclient-downloaddataasync-method-in-this-context
         class WebDownload : WebClient

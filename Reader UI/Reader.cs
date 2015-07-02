@@ -217,10 +217,11 @@ namespace Reader_UI
         public Reader(Writer idb)
         {
             db = idb;
-#if linux
-            fullscreen = false;
-#endif
             InitializeComponent();
+#if linux
+            Properties.Settings.Default.fullscreen = false;
+            toggleFullscreen.Visible = false;
+#endif
             FormClosed += Reader_Closed;
             numericUpDown1.Maximum = db.lastPage;
             numericUpDown1.Minimum = (int)Writer.PagesOfImportance.HOMESTUCK_PAGE_ONE;
@@ -1701,7 +1702,9 @@ namespace Reader_UI
                 openArchiver.Visible = true;
                 loadButton.Visible = true;
                 startOverButton.Visible = true;
+#if !linux
                 toggleFullscreen.Visible = true;
+#endif
                 if (pageContainsFlash)
                 {
                     flashWarning.Visible = true;
@@ -1713,9 +1716,6 @@ namespace Reader_UI
 
         private void toggleFullscreen_Click(object sender, EventArgs e)
         {
-#if linux
-            return;
-#endif
             Properties.Settings.Default.fullscreen = !Properties.Settings.Default.fullscreen;
             if (Properties.Settings.Default.fullscreen)
             {

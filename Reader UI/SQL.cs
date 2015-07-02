@@ -8,8 +8,12 @@ using System.Data.Common;
 using System.Windows.Forms;
 using System.IO;
 using System.Reflection;
+#if linux
+using Mono.Data.Sqlite;
+using SQLiteConnection = Mono.Data.Sqlite.SqliteConnection;
+#else
 using System.Data.SQLite;
-
+#endif
 namespace Reader_UI
 {
     class SQL : Writer
