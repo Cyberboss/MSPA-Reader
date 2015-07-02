@@ -17,8 +17,7 @@ namespace Reader_UI
             InitializeComponent();
             dataSourceInput.Items.Add("SQL Server");
             dataSourceInput.Items.Add("SQLite (Warning: Data Races)");
-#if linux
-#else
+#if !linux
             dataSourceInput.Items.Add("SQL LocalDB");
 #endif
             if (Properties.Settings.Default.serverType != 3)
@@ -219,6 +218,8 @@ namespace Reader_UI
         private void dbPathSelect_Click(object sender, EventArgs e)
         {
             var oFD = new SaveFileDialog();
+            oFD.OverwritePrompt = false;
+            oFD.Title = "Open or Create Database";
             if (dataSourceInput.SelectedIndex == 2)
             {
                 oFD.Filter = "SQL Server Databases (*.mdf)|*.mdf";
@@ -231,7 +232,7 @@ namespace Reader_UI
             }
             if (oFD.ShowDialog() == DialogResult.OK)
             {
-                databaseNameInput.Text = oFD.FileName.Replace(oFD.DefaultExt, "");
+                databaseNameInput.Text = oFD.FileName;
             }
         }
 
