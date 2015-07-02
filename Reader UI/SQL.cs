@@ -8,6 +8,7 @@ using System.Data.Common;
 using System.Windows.Forms;
 using System.IO;
 using System.Reflection;
+using MySql.Data.MySqlClient;
 #if linux
 using Mono.Data.Sqlite;
 using SQLiteConnection = Mono.Data.Sqlite.SqliteConnection;
@@ -32,6 +33,7 @@ namespace Reader_UI
             SQLSERVER,
             SQLLOCALDB,
             SQLITE,
+            MYSQL
         }
 
         readonly DBType databaseType;
@@ -132,8 +134,6 @@ namespace Reader_UI
         {
             resetFlag = reset;
 
-
-
             switch (databaseType) {
                 case DBType.SQLSERVER:
                 {
@@ -142,23 +142,28 @@ namespace Reader_UI
                         connectionString += "User ID=" + username + ";Password=" + password;
                     else
                         connectionString += "Integrated Security=True;";
+                    sqlsRConn = new SqlConnection(connectionString + ";MultipleActiveResultSets=True;");
+                    sqlsWConn = new SqlConnection(connectionString);
                     break;
                 }
                 case DBType.SQLLOCALDB:
                 {
                     connectionString = GetLocalDB(databaseName, false, serverFolderName);
+                    sqlsRConn = new SqlConnection(connectionString + ";MultipleActiveResultSets=True;");
+                    sqlsWConn = new SqlConnection(connectionString);
                     break;
                 }
                 case DBType.SQLITE:
-                connectionString = "data source=" + serverFolderName + System.IO.Path.DirectorySeparatorChar + databaseName + ".sqlite3; Version=3";
-                    sqlsRConn = new SQLiteConnection(connectionString + ";MultipleActiveResultSets=True;");
+                    connectionString = "data source=" + serverFolderName + System.IO.Path.DirectorySeparatorChar + databaseName + ".sqlite3; Version=3";
+                    sqlsRConn = new SQLiteConnection(connectionString);
                     sqlsWConn = new SQLiteConnection(connectionString);
-                    sqlsRConn.Open();
-                    sqlsWConn.Open();
-                    return;
+                    break;
+                case DBType.MYSQL:
+                    connectionString = "Server="+serverFolderName+";Database="+databaseName+";User ID="+username+";Password="+password+";Pooling=true";
+                    sqlsRConn = new MySqlConnection(connectionString);
+                    sqlsWConn = new MySqlConnection(connectionString);
+                    break;
             }
-            sqlsRConn = new SqlConnection(connectionString + ";MultipleActiveResultSets=True;");
-            sqlsWConn = new SqlConnection(connectionString);
             sqlsRConn.Open();
             sqlsWConn.Open();
         }
@@ -497,7 +502,7 @@ namespace Reader_UI
                     Transact();
                     DbCommand creationCommands = sqlsWConn.CreateCommand();
 
-                    if (databaseType == DBType.SQLITE)
+                    if (databaseType == DBType.SQLITE || databaseType == DBType.MYSQL)
                     {
                         creationCommands.CommandText = Properties.Resources.SQLiteDBCreationScript;
                     }

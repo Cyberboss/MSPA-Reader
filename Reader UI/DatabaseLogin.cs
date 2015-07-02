@@ -16,18 +16,19 @@ namespace Reader_UI
         {
             InitializeComponent();
             dataSourceInput.Items.Add("SQL Server");
+            dataSourceInput.Items.Add("MySQL");
             dataSourceInput.Items.Add("SQLite (Warning: Data Races)");
 #if !linux
             dataSourceInput.Items.Add("SQL LocalDB");
 #endif
-            if (Properties.Settings.Default.serverType != 3)
+            if (Properties.Settings.Default.serverType != 4)
                 dataSourceInput.SelectedIndex = Properties.Settings.Default.serverType;
             else
             {
 #if linux
-                dataSourceInput.SelectedIndex = 1;
-#else
                 dataSourceInput.SelectedIndex = 2;
+#else
+                dataSourceInput.SelectedIndex = 3;
 #endif
             }
             dataSourceInput_SelectedIndexChanged(null, null);
@@ -66,15 +67,20 @@ namespace Reader_UI
                     dbFName = ipInput.Text;
                     db = new SQL(SQL.DBType.SQLSERVER);
                     break;
+                case 1:
+                    dbName = databaseNameInput.Text;
+                    dbFName = ipInput.Text;
+                    db = new SQL(SQL.DBType.MYSQL);
+                    break;
                 case 2:
                     dbName = System.IO.Path.GetFileNameWithoutExtension(databaseNameInput.Text);
                     dbFName = System.IO.Path.GetDirectoryName(databaseNameInput.Text);
-                    db = new SQL(SQL.DBType.SQLLOCALDB);
+                    db = new SQL(SQL.DBType.SQLITE);
                     break;
-                case 1:
+                case 3:
                     dbName = System.IO.Path.GetFileNameWithoutExtension(databaseNameInput.Text);
                     dbFName = System.IO.Path.GetDirectoryName(databaseNameInput.Text);
-                    db = new SQL(SQL.DBType.SQLITE);
+                    db = new SQL(SQL.DBType.SQLLOCALDB);
                     break;
                 default:
                     MessageBox.Show("Invalid database selection.... How???");
@@ -109,11 +115,11 @@ namespace Reader_UI
                     if (checkBox2.Checked)
                         Program.Open(db, true, true);
 
-                    if (dataSourceInput.SelectedIndex == 0)
-                        Properties.Settings.Default.ip = ipInput.Text;
 
-                    if (dataSourceInput.SelectedIndex == 0)
+                    if (dataSourceInput.SelectedIndex == 0
+                        || dataSourceInput.SelectedIndex == 1)
                     {
+                        Properties.Settings.Default.ip = ipInput.Text;
                         Properties.Settings.Default.dbName = databaseNameInput.Text;
                     }
                     else
@@ -171,6 +177,7 @@ namespace Reader_UI
             switch (dataSourceInput.SelectedIndex)
             {
                 case 0:
+                case 1:
                     foreach (Control c in Controls)
                     {
                         c.Enabled = true;
@@ -179,8 +186,8 @@ namespace Reader_UI
                     databaseNameInput.Text = Properties.Settings.Default.dbName;
                     databaseNameInput.ReadOnly = false;
                     break;
-                case 1:
                 case 2:
+                case 3:
                     foreach (Control c in Controls)
                     {
                         c.Enabled = false;
@@ -229,7 +236,7 @@ namespace Reader_UI
             var oFD = new SaveFileDialog();
             oFD.OverwritePrompt = false;
             oFD.Title = "Open or Create Database";
-            if (dataSourceInput.SelectedIndex == 2)
+            if (dataSourceInput.SelectedIndex == 3)
             {
                 oFD.Filter = "SQL Server Databases (*.mdf)|*.mdf";
                 oFD.DefaultExt = ".mdf";

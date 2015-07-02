@@ -27,6 +27,7 @@ Tasks:
 -- Fix problem pages
 (DONE? lack of integrity check may make it buggy, no idea how transactions are handled either) -- Support Sqlite
 -- Support Mysql
+-- Support Oracle (Can I get access to a db for testing?)
 -- Better parsing techniques?
 (DONE? Looks like crap on my box) -- Support *nix (Theoretically we could as it's .NET, we do have a bunch of native methods however...)
 (Dismissed as Impossible) -- S̶u̶p̶p̶o̶r̶t̶ ̶V̶r̶i̶s̶k̶a̶  
