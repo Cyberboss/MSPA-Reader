@@ -44,6 +44,8 @@
             this.dbPathSelect = new System.Windows.Forms.Button();
             this.savePassword = new System.Windows.Forms.CheckBox();
             this.saveUsername = new System.Windows.Forms.CheckBox();
+            this.dbNameLabel = new System.Windows.Forms.Label();
+            this.databaseNameInput = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // dataSourceInput
@@ -68,7 +70,7 @@
             // ipPathLabel
             // 
             this.ipPathLabel.AutoSize = true;
-            this.ipPathLabel.Location = new System.Drawing.Point(12, 56);
+            this.ipPathLabel.Location = new System.Drawing.Point(12, 100);
             this.ipPathLabel.Name = "ipPathLabel";
             this.ipPathLabel.Size = new System.Drawing.Size(58, 13);
             this.ipPathLabel.TabIndex = 2;
@@ -76,7 +78,7 @@
             // 
             // ipInput
             // 
-            this.ipInput.Location = new System.Drawing.Point(112, 53);
+            this.ipInput.Location = new System.Drawing.Point(112, 97);
             this.ipInput.Name = "ipInput";
             this.ipInput.Size = new System.Drawing.Size(285, 20);
             this.ipInput.TabIndex = 3;
@@ -84,7 +86,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 98);
+            this.label3.Location = new System.Drawing.Point(12, 142);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(55, 13);
             this.label3.TabIndex = 4;
@@ -92,14 +94,14 @@
             // 
             // usernameInput
             // 
-            this.usernameInput.Location = new System.Drawing.Point(112, 98);
+            this.usernameInput.Location = new System.Drawing.Point(112, 142);
             this.usernameInput.Name = "usernameInput";
             this.usernameInput.Size = new System.Drawing.Size(285, 20);
             this.usernameInput.TabIndex = 5;
             // 
             // passwordInput
             // 
-            this.passwordInput.Location = new System.Drawing.Point(112, 143);
+            this.passwordInput.Location = new System.Drawing.Point(112, 187);
             this.passwordInput.Name = "passwordInput";
             this.passwordInput.Size = new System.Drawing.Size(285, 20);
             this.passwordInput.TabIndex = 6;
@@ -108,7 +110,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(12, 141);
+            this.label4.Location = new System.Drawing.Point(12, 185);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(53, 13);
             this.label4.TabIndex = 7;
@@ -116,7 +118,7 @@
             // 
             // okButton
             // 
-            this.okButton.Location = new System.Drawing.Point(165, 178);
+            this.okButton.Location = new System.Drawing.Point(165, 222);
             this.okButton.Name = "okButton";
             this.okButton.Size = new System.Drawing.Size(75, 23);
             this.okButton.TabIndex = 8;
@@ -127,7 +129,7 @@
             // resetDatabase
             // 
             this.resetDatabase.AutoSize = true;
-            this.resetDatabase.Location = new System.Drawing.Point(15, 182);
+            this.resetDatabase.Location = new System.Drawing.Point(15, 226);
             this.resetDatabase.Name = "resetDatabase";
             this.resetDatabase.Size = new System.Drawing.Size(103, 17);
             this.resetDatabase.TabIndex = 10;
@@ -139,7 +141,7 @@
             this.checkBox1.AutoSize = true;
             this.checkBox1.Checked = true;
             this.checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox1.Location = new System.Drawing.Point(273, 182);
+            this.checkBox1.Location = new System.Drawing.Point(273, 226);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(90, 17);
             this.checkBox1.TabIndex = 11;
@@ -150,7 +152,7 @@
             // checkBox2
             // 
             this.checkBox2.AutoSize = true;
-            this.checkBox2.Location = new System.Drawing.Point(382, 182);
+            this.checkBox2.Location = new System.Drawing.Point(382, 226);
             this.checkBox2.Name = "checkBox2";
             this.checkBox2.Size = new System.Drawing.Size(90, 17);
             this.checkBox2.TabIndex = 12;
@@ -160,7 +162,7 @@
             // 
             // dbPathSelect
             // 
-            this.dbPathSelect.Location = new System.Drawing.Point(403, 52);
+            this.dbPathSelect.Location = new System.Drawing.Point(403, 55);
             this.dbPathSelect.Name = "dbPathSelect";
             this.dbPathSelect.Size = new System.Drawing.Size(31, 20);
             this.dbPathSelect.TabIndex = 13;
@@ -172,7 +174,7 @@
             // savePassword
             // 
             this.savePassword.AutoSize = true;
-            this.savePassword.Location = new System.Drawing.Point(403, 146);
+            this.savePassword.Location = new System.Drawing.Point(403, 190);
             this.savePassword.Name = "savePassword";
             this.savePassword.Size = new System.Drawing.Size(77, 17);
             this.savePassword.TabIndex = 14;
@@ -183,7 +185,7 @@
             // saveUsername
             // 
             this.saveUsername.AutoSize = true;
-            this.saveUsername.Location = new System.Drawing.Point(403, 101);
+            this.saveUsername.Location = new System.Drawing.Point(403, 145);
             this.saveUsername.Name = "saveUsername";
             this.saveUsername.Size = new System.Drawing.Size(77, 17);
             this.saveUsername.TabIndex = 15;
@@ -191,11 +193,29 @@
             this.saveUsername.UseVisualStyleBackColor = true;
             this.saveUsername.CheckedChanged += new System.EventHandler(this.saveUsername_CheckedChanged);
             // 
+            // dbNameLabel
+            // 
+            this.dbNameLabel.AutoSize = true;
+            this.dbNameLabel.Location = new System.Drawing.Point(12, 55);
+            this.dbNameLabel.Name = "dbNameLabel";
+            this.dbNameLabel.Size = new System.Drawing.Size(84, 13);
+            this.dbNameLabel.TabIndex = 16;
+            this.dbNameLabel.Text = "Database Name";
+            // 
+            // databaseNameInput
+            // 
+            this.databaseNameInput.Location = new System.Drawing.Point(112, 55);
+            this.databaseNameInput.Name = "databaseNameInput";
+            this.databaseNameInput.Size = new System.Drawing.Size(285, 20);
+            this.databaseNameInput.TabIndex = 17;
+            // 
             // DatabaseLogin
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(499, 213);
+            this.ClientSize = new System.Drawing.Size(499, 257);
+            this.Controls.Add(this.databaseNameInput);
+            this.Controls.Add(this.dbNameLabel);
             this.Controls.Add(this.saveUsername);
             this.Controls.Add(this.savePassword);
             this.Controls.Add(this.dbPathSelect);
@@ -238,5 +258,7 @@
         private System.Windows.Forms.Button dbPathSelect;
         private System.Windows.Forms.CheckBox savePassword;
         private System.Windows.Forms.CheckBox saveUsername;
+        private System.Windows.Forms.Label dbNameLabel;
+        private System.Windows.Forms.TextBox databaseNameInput;
     }
 }

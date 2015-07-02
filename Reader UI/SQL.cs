@@ -124,14 +124,16 @@ namespace Reader_UI
             }
         }
 
-        override public void Connect(string serverName, string username, string password,bool reset)
+        override public void Connect(string databaseName,string serverFolderName, string username, string password,bool reset)
         {
             resetFlag = reset;
+
+
 
             switch (databaseType) {
                 case DBType.SQLSERVER:
                 {
-                    connectionString = "Server=" + serverName + ";Initial Catalog=MSPAArchive;";
+                    connectionString = "Server=" + serverFolderName + ";Initial Catalog=" + databaseName + ";";
                     if (username != "")
                         connectionString += "User ID=" + username + ";Password=" + password;
                     else
@@ -140,11 +142,11 @@ namespace Reader_UI
                 }
                 case DBType.SQLLOCALDB:
                 {
-                    connectionString = GetLocalDB("MSPAArchive", false, serverName);
+                    connectionString = GetLocalDB(databaseName, false, serverFolderName);
                     break;
                 }
                 case DBType.SQLITE:
-                    connectionString = "data source=" + serverName + @"\MSPAArchive.sqlite3; Version=3";
+                connectionString = "data source=" + serverFolderName + System.IO.Path.DirectorySeparatorChar + databaseName + ".sqlite3; Version=3";
                     sqlsRConn = new SQLiteConnection(connectionString + ";MultipleActiveResultSets=True;");
                     sqlsWConn = new SQLiteConnection(connectionString);
                     sqlsRConn.Open();

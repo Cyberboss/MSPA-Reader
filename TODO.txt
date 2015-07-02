@@ -10,7 +10,6 @@ Tasks:
 -- LOWAS in void fireflies
 -- Fix Linux styles
 -- Disable Simultaneous Archiving and Reading while in Sqlite mode
--- Database name as a variable
 -- Check if it works with older MSPA works(Jailbreak, problem sleuth), if we're lucky it will jst work with the regular style and we can just lower the minimum page cap
 -- Implement archive page
 -- Review password saving code

@@ -16,9 +16,21 @@ namespace Reader_UI
         {
             InitializeComponent();
             dataSourceInput.Items.Add("SQL Server");
-            dataSourceInput.Items.Add("SQL LocalDB");
             dataSourceInput.Items.Add("SQLite (Warning: Data Races)");
-            dataSourceInput.SelectedIndex = Properties.Settings.Default.serverType;
+#if linux
+#else
+            dataSourceInput.Items.Add("SQL LocalDB");
+#endif
+            if (Properties.Settings.Default.serverType != 3)
+                dataSourceInput.SelectedIndex = Properties.Settings.Default.serverType;
+            else
+            {
+#if linux
+                dataSourceInput.SelectedIndex = 1;
+#else
+                dataSourceInput.SelectedIndex = 2;
+#endif
+            }
             dataSourceInput_SelectedIndexChanged(null, null);
             saveUsername.Checked = Properties.Settings.Default.saveUsername;
             savePassword.Checked = Properties.Settings.Default.savePassword;
@@ -40,16 +52,29 @@ namespace Reader_UI
 
         private void okButton_Click(object sender, EventArgs e)
         {
+            if (String.IsNullOrWhiteSpace(databaseNameInput.Text))
+            {
+                MessageBox.Show("Database name can't be empty!");
+                return;
+            }
+
+            string dbName,dbFName;
             Writer db;
             switch (dataSourceInput.SelectedIndex)
             {
                 case 0:
+                    dbName = databaseNameInput.Text;
+                    dbFName = ipInput.Text;
                     db = new SQL(SQL.DBType.SQLSERVER);
                     break;
-                case 1:
+                case 2:
+                    dbName = System.IO.Path.GetFileNameWithoutExtension(databaseNameInput.Text);
+                    dbFName = System.IO.Path.GetDirectoryName(databaseNameInput.Text);
                     db = new SQL(SQL.DBType.SQLLOCALDB);
                     break;
-                case 2:
+                case 1:
+                    dbName = System.IO.Path.GetFileNameWithoutExtension(databaseNameInput.Text);
+                    dbFName = System.IO.Path.GetDirectoryName(databaseNameInput.Text);
                     db = new SQL(SQL.DBType.SQLITE);
                     break;
                 default:
@@ -65,7 +90,7 @@ namespace Reader_UI
             Update();
             try
             {
-                db.Connect(ipInput.Text, usernameInput.Text, passwordInput.Text, resetDatabase.Checked);
+                db.Connect(dbName,dbFName, usernameInput.Text, passwordInput.Text, resetDatabase.Checked);
                 if (!db.Initialize())
                 {
                     db.Close();
@@ -83,8 +108,17 @@ namespace Reader_UI
                 if (checkBox2.Checked)
                     Program.Open(db, true,true);
 
-                if (dataSourceInput.SelectedIndex != 1)
+                if (dataSourceInput.SelectedIndex == 0)
                     Properties.Settings.Default.ip = ipInput.Text;
+
+                if (dataSourceInput.SelectedIndex == 0)
+                {
+                    Properties.Settings.Default.dbName = databaseNameInput.Text;
+                }
+                else
+                {
+                    Properties.Settings.Default.dbFileName = System.IO.Path.GetDirectoryName(databaseNameInput.Text) + System.IO.Path.GetFileNameWithoutExtension(databaseNameInput.Text);
+                }
 
                 if (saveUsername.Checked)
                 {
@@ -114,7 +148,7 @@ namespace Reader_UI
             catch
             {
                 Cursor.Current = Cursors.Default;
-                MessageBox.Show("Can not open connection to " + ipInput.Text + "! Check that the database MSPAArchive exists on the specified server and the user you entered has to dbo role.");
+                MessageBox.Show("Can not open connection to \"" + ipInput.Text + "\"! Check that the database MSPAArchive exists on the specified server and the user you entered has to dbo role.");
                 var oldIp = ipInput.Text;
                 dataSourceInput_SelectedIndexChanged(null, null);
                 ipInput.Text = oldIp;
@@ -134,7 +168,8 @@ namespace Reader_UI
                         c.Enabled = true;
                     }
                     ipInput.Text = Properties.Settings.Default.ip == "" ? "127.0.0.1" : Properties.Settings.Default.ip;
-                    ipInput.ReadOnly = false;
+                    databaseNameInput.Text = Properties.Settings.Default.dbName;
+                    databaseNameInput.ReadOnly = false;
                     break;
                 case 1:
                 case 2:
@@ -146,11 +181,20 @@ namespace Reader_UI
                     okButton.Enabled = true;
                     dbPathSelect.Visible = true;
                     dbPathSelect.Enabled = true;
-                    ipPathLabel.Enabled = true;
-                    ipPathLabel.Text = "Database Folder";
-                    ipInput.Text = Application.StartupPath;
-                    ipInput.ReadOnly = true;
-                    ipInput.Enabled = true;
+
+                    dbNameLabel.Enabled = true;
+                    databaseNameInput.Text = Properties.Settings.Default.dbFileName == "" ? Application.StartupPath + System.IO.Path.DirectorySeparatorChar + "MSPAArchive" : Properties.Settings.Default.dbName;
+                    databaseNameInput.ReadOnly = true;
+                    if (dataSourceInput.SelectedIndex == 2)
+                    {
+                        databaseNameInput.Text += ".mdf";
+                    }
+                    else
+                    {
+                        databaseNameInput.Text += ".sqlite3";
+                    }
+                    databaseNameInput.ReadOnly = true;
+                    databaseNameInput.Enabled = true;
                     label1.Enabled = true;
                     break;
                 default:
@@ -174,10 +218,20 @@ namespace Reader_UI
 
         private void dbPathSelect_Click(object sender, EventArgs e)
         {
-            FolderBrowserDialog oFD = new FolderBrowserDialog();
+            var oFD = new SaveFileDialog();
+            if (dataSourceInput.SelectedIndex == 2)
+            {
+                oFD.Filter = "SQL Server Databases (*.mdf)|*.mdf";
+                oFD.DefaultExt = ".mdf";
+            }
+            else
+            {
+                oFD.Filter = "SQLite3 Databases (*.sqlite3)|*.sqlite3";
+                oFD.DefaultExt = ".sqlite3";
+            }
             if (oFD.ShowDialog() == DialogResult.OK)
             {
-                ipInput.Text = oFD.SelectedPath;
+                databaseNameInput.Text = oFD.FileName.Replace(oFD.DefaultExt, "");
             }
         }
 

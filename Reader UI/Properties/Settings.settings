@@ -15,7 +15,7 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="serverType" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">1</Value>
+      <Value Profile="(Default)">3</Value>
     </Setting>
     <Setting Name="saveUsername" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
@@ -31,6 +31,12 @@
     </Setting>
     <Setting Name="fullscreen" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="dbName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">MSPAArchive</Value>
+    </Setting>
+    <Setting Name="dbFileName" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>
