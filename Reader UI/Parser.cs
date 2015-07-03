@@ -108,7 +108,7 @@ namespace Reader_UI
         {
             resources.Clear();
             resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/candycorn.gif",true), "candycorn.gif"));
-            resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/candycorn_scratch.png", true), "candycorn_scratch.gif"));
+            resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/candycorn_scratch.png", true), "candycorn_scratch.png"));
             resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/a6a6_tooth2.gif", true), "a6a6_tooth2.gif"));
         }
         public class Link
@@ -244,7 +244,7 @@ namespace Reader_UI
             //if this fails we need to check the database
             try
             {
-                var response = client.GetByteArrayAsync(new Uri("http://www.mspaintadventures.com/?viewlog=6")).Result;
+                var response = DownloadFile("http://www.mspaintadventures.com/?viewlog=6",true);
                 String source = Encoding.GetEncoding("utf-8").GetString(response, 0, response.Length - 1);
                 source = WebUtility.HtmlDecode(source);
                 var html = new HtmlDocument();
@@ -294,7 +294,7 @@ namespace Reader_UI
                     bool underlined = Regex.Match(currentSpecialSubtext.OuterHtml, underlineRegex).Success;
                     var colourReg = Regex.Match(currentSpecialSubtext.OuterHtml, hexColourRegex);
                     string colour = colourReg.Success ? colourReg.Value : scriptLine.hexColour;
-                    int begin = currentLine.InnerHtml.IndexOf(currentSpecialSubtext.OuterHtml);
+                    int begin = currentLine.InnerText.IndexOf(currentSpecialSubtext.InnerText);
                     int length = currentSpecialSubtext.InnerText.Length;
                     sTs.Add(new Text.ScriptLine.SpecialSubText(begin, length, underlined, colour));
                 }
