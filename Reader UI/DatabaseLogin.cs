@@ -91,81 +91,67 @@ namespace Reader_UI
             {
                 c.Enabled = false;
             }
-            Cursor.Current = Cursors.WaitCursor;
-            Update();
-            try
+            UseWaitCursor = true;
+            new Initializing(db, dbName, dbFName, usernameInput.Text, passwordInput.Text, resetDatabase.Checked, OnInitilializerClose).Show();
+        }
+        void OnInitilializerClose(object sender, FormClosedEventArgs e)
+        {
+            UseWaitCursor = false;
+            dataSourceInput_SelectedIndexChanged(null, null);
+            var db = ((Initializing)sender).db;
+            if (!((Initializing)sender).Good())
             {
-                db.Connect(dbName,dbFName, usernameInput.Text, passwordInput.Text, resetDatabase.Checked);
-                if (!db.Initialize())
+
+                MessageBox.Show("Can not open connection to \"" + ipInput.Text + "\"! Check that the database MSPAArchive exists on the specified server and the user you entered has to dbo role.");
+            }
+            else
+            {
+                if (resetDatabase.Checked)
                 {
-                    db.Close();
-                    Cursor.Current = Cursors.Default;
-                    dataSourceInput_SelectedIndexChanged(null, null);
-                    return;
+                    Properties.Settings.Default.lastReadPage = (int)Writer.PagesOfImportance.HOMESTUCK_PAGE_ONE;
                 }
-                Hide();
-                try
+                if (checkBox1.Checked)
+                    Program.Open(db, false, true);
+                if (checkBox2.Checked)
+                    Program.Open(db, true, true);
+
+
+                if (dataSourceInput.SelectedIndex == 0
+                    || dataSourceInput.SelectedIndex == 1)
                 {
-                    if (resetDatabase.Checked)
-                    {
-                        Properties.Settings.Default.lastReadPage = (int)Writer.PagesOfImportance.HOMESTUCK_PAGE_ONE;
-                    }
-                    if (checkBox1.Checked)
-                        Program.Open(db, false, true);
-                    if (checkBox2.Checked)
-                        Program.Open(db, true, true);
+                    Properties.Settings.Default.ip = ipInput.Text;
+                    Properties.Settings.Default.dbName = databaseNameInput.Text;
+                }
+                else
+                {
+                    Properties.Settings.Default.dbFileName = System.IO.Path.GetDirectoryName(databaseNameInput.Text) + System.IO.Path.GetFileNameWithoutExtension(databaseNameInput.Text);
+                }
 
-
-                    if (dataSourceInput.SelectedIndex == 0
-                        || dataSourceInput.SelectedIndex == 1)
+                if (saveUsername.Checked)
+                {
+                    Properties.Settings.Default.saveUsername = true;
+                    Properties.Settings.Default.username = usernameInput.Text;
+                    if (savePassword.Checked)
                     {
-                        Properties.Settings.Default.ip = ipInput.Text;
-                        Properties.Settings.Default.dbName = databaseNameInput.Text;
+                        Properties.Settings.Default.savePassword = true;
+                        Properties.Settings.Default.password = passwordInput.Text;
                     }
                     else
                     {
-                        Properties.Settings.Default.dbFileName = System.IO.Path.GetDirectoryName(databaseNameInput.Text) + System.IO.Path.GetFileNameWithoutExtension(databaseNameInput.Text);
-                    }
-
-                    if (saveUsername.Checked)
-                    {
-                        Properties.Settings.Default.saveUsername = true;
-                        Properties.Settings.Default.username = usernameInput.Text;
-                        if (savePassword.Checked)
-                        {
-                            Properties.Settings.Default.savePassword = true;
-                            Properties.Settings.Default.password = passwordInput.Text;
-                        }
-                        else
-                        {
-                            Properties.Settings.Default.savePassword = false;
-                            Properties.Settings.Default.password = "";
-                        }
-                    }
-                    else
-                    {
-                        Properties.Settings.Default.saveUsername = false;
-                        Properties.Settings.Default.username = "";
                         Properties.Settings.Default.savePassword = false;
                         Properties.Settings.Default.password = "";
                     }
-
-
-                    Close();
                 }
-                catch
+                else
                 {
-                    Show();
-                    throw;
+                    Properties.Settings.Default.saveUsername = false;
+                    Properties.Settings.Default.username = "";
+                    Properties.Settings.Default.savePassword = false;
+                    Properties.Settings.Default.password = "";
                 }
-            }
-            catch
-            {
-                Cursor.Current = Cursors.Default;
-                MessageBox.Show("Can not open connection to \"" + ipInput.Text + "\"! Check that the database MSPAArchive exists on the specified server and the user you entered has to dbo role.");
-                var oldIp = ipInput.Text;
-                dataSourceInput_SelectedIndexChanged(null, null);
-                ipInput.Text = oldIp;
+
+
+                Close();
             }
         }
 

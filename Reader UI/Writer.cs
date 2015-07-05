@@ -168,11 +168,12 @@ namespace Reader_UI
 
 
         public abstract void Connect(string DatabaseName, string serverName, string username, string password, bool resetDatabase);
-        public bool Initialize()
+        public bool Initialize(System.ComponentModel.BackgroundWorker bgw)
         {
-            if (ReadLastIndexedOrCreateDatabase())
+            if (ReadLastIndexedOrCreateDatabase(bgw))
             {
                 parser = new Parser();
+                bgw.ReportProgress(0, "Checking MSPA for latest page...");
                 lastPage = parser.GetLatestPage();
                 if (lastPage == 0)
                 {
@@ -186,6 +187,7 @@ namespace Reader_UI
 
                 if (!IconsAreParsed())
                 {
+                    bgw.ReportProgress(0, "Downloading header icons...");
                     Transact();
                     try
                     {
@@ -213,7 +215,7 @@ namespace Reader_UI
         
         public abstract byte[] GetIcon(IconTypes ic);
         public abstract bool IconsAreParsed();
-        public abstract bool ReadLastIndexedOrCreateDatabase();
+        public abstract bool ReadLastIndexedOrCreateDatabase(System.ComponentModel.BackgroundWorker bgw);
         public abstract void WriteResource(Parser.Resource[] res, int page, bool x2);
         public abstract void WriteLinks(Parser.Link[] res, int page, bool x2);
         public abstract void WriteText(Parser.Text tex, int page, bool x2);

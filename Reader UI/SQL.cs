@@ -415,13 +415,14 @@ namespace Reader_UI
             return page;
         }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities")]
-        override public bool ReadLastIndexedOrCreateDatabase()
+        override public bool ReadLastIndexedOrCreateDatabase(System.ComponentModel.BackgroundWorker bgw)
         {
             DbDataReader myReader = null;
             try
             {
                 if (resetFlag)
                     throw new Exception();
+                bgw.ReportProgress(0, "Checking database version...");
                 DbCommand myCommand = sqlsWConn.CreateCommand();
 
                 //first check that the db version matches ours
@@ -434,6 +435,7 @@ namespace Reader_UI
                     else
                         return false;
 
+                bgw.ReportProgress(0, "Listing previously archived pages...");
                 myCommand.CommandText = "SELECT DISTINCT page_id FROM PagesArchived";
                 myReader = myCommand.ExecuteReader();
                 while (myReader.Read())
@@ -453,7 +455,7 @@ namespace Reader_UI
                 //c) hasn't parsed page 1
 
                 //drop any tables that may exist
-
+                bgw.ReportProgress(0, "Creating Database: Dropping tables...");
                 DbCommand dropCommands = sqlsWConn.CreateCommand();
                 dropCommands.CommandText = "DROP TABLE DBVersion";
                 try
@@ -499,6 +501,7 @@ namespace Reader_UI
                 catch { }
                 try
                 {
+                    bgw.ReportProgress(0, "Creating Database: Creating new tables...");
                     Transact();
                     DbCommand creationCommands = sqlsWConn.CreateCommand();
 
@@ -510,6 +513,7 @@ namespace Reader_UI
                         creationCommands.CommandText = Properties.Resources.SQLSDBCreationScript;
                     creationCommands.Transaction = sqlsTrans;
                     creationCommands.ExecuteNonQuery();
+                    bgw.ReportProgress(0, "Creating Database: Setting version...");
                     creationCommands.CommandText = "INSERT INTO DBVersion VALUES (" + (int)Versions.Database + ")";
                     creationCommands.ExecuteNonQuery();
                     Commit();
