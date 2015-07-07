@@ -17,12 +17,10 @@ using System.Data.SQLite;
 #endif
 namespace Reader_UI
 {
-    class SQL : Writer
+    class DatabaseManager : Writer
     {
 
-        //note candy corn resources are stored at page 100000 in the db
-        //trickster is stored at 100001
-        //x2 header at 100002
+
 
         DbConnection sqlsRConn = null, sqlsWConn = null;
         MSPADatabase writer = null;
@@ -39,7 +37,7 @@ namespace Reader_UI
         readonly DBType databaseType;
         bool resetFlag = false;
 
-        public SQL(DBType com)
+        public DatabaseManager(DBType com)
         {
             databaseType = com;
         }
@@ -129,11 +127,11 @@ namespace Reader_UI
                 return false;
             }
         }
-
+        string dbNameForServers;
         override public void Connect(string databaseName,string serverFolderName, string username, string password,bool reset)
         {
             resetFlag = reset;
-
+            dbNameForServers = databaseName;
             switch (databaseType) {
                 case DBType.SQLSERVER:
                 {
@@ -143,7 +141,7 @@ namespace Reader_UI
                     else
                         connectionString += "Integrated Security=True;";
                     sqlsRConn = new SqlConnection(connectionString);
-                    sqlsWConn = new SqlConnection(connectionString);
+                    sqlsWConn = new SqlConnection(connectionString.Replace("Initial Catalog=" + databaseName + ";",""));
                     break;
                 }
                 case DBType.SQLLOCALDB:
@@ -161,12 +159,12 @@ namespace Reader_UI
                 case DBType.MYSQL:
                     connectionString = "Server="+serverFolderName+";Database="+databaseName+";User ID="+username+";Password="+password+";Pooling=true";
                     sqlsRConn = new MySqlConnection(connectionString);
-                    sqlsWConn = new MySqlConnection(connectionString);
+                    sqlsWConn = new MySqlConnection(connectionString.Replace("Database=" + databaseName + ";", ""));
                     break;
             }
             sqlsWConn.Open();
 
-        }
+                }
         public override byte[] GetIcon(Writer.IconTypes ic)
         {
             var reader = new MSPADatabase(sqlsRConn);
@@ -176,31 +174,31 @@ namespace Reader_UI
 
 
             byte[] res;
-            switch (ic)
-            {
-                case IconTypes.CANDYCORN:
+                switch (ic)
+                {
+                    case IconTypes.CANDYCORN:
                     var theone = from b in icos
                           where b.originalFileName == "candyCorn.gif"
                           select b;
                     var test = theone.Count();
                     res = theone.First().data;
-                    break;
-                case IconTypes.CUEBALL:
+                        break;
+                    case IconTypes.CUEBALL:
                     var theone2 = from b in icos
                                   where b.originalFileName == "candycorn_scratch.png"
                                  select b;
                     res = theone2.First().data;
-                    break;
-                case IconTypes.CALIBORNTOOTH:
+                        break;
+                    case IconTypes.CALIBORNTOOTH:
                     var theone3 = from b in icos
                                   where b.originalFileName == "a6a6_tooth2.gif"
                                  select b;
                     res = theone3.First().data;
-                    break;
-                default:
-                    System.Diagnostics.Debugger.Break();
-                    throw new Exception();
-            }
+                        break;
+                    default:
+                        System.Diagnostics.Debugger.Break();
+                        throw new Exception();
+                }
             reader.Dispose();
             return res;
         }
@@ -219,7 +217,7 @@ namespace Reader_UI
         public override bool TricksterParsed()
         {
             var icos = from b in writer.Resources
-                       where b.pageId == 100001
+                       where b.pageId == (int)SpecialResources.TRICKSTER_HEADER
                        select b;
             return icos.Count() != 0;
         }
@@ -227,7 +225,7 @@ namespace Reader_UI
         {
             var reader = new MSPADatabase(sqlsRConn);
             var selection = from b in reader.Resources
-                            where b.pageId == 100001
+                            where b.pageId == (int)SpecialResources.TRICKSTER_HEADER
                             select b;
             Parser.Resource[] res = new Parser.Resource[selection.Count()];
             for (int i = 0; i < selection.Count(); ++i){
@@ -246,34 +244,44 @@ namespace Reader_UI
             return res;
         }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities")]
-        override public bool ReadLastIndexedOrCreateDatabase()
+        override public bool ReadLastIndexedOrCreateDatabase(System.ComponentModel.BackgroundWorker bgw)
         {
             try
             {
 
+                bgw.ReportProgress(0, "Checking database version...");
                 DbCommand myCommand = sqlsWConn.CreateCommand();
                 bool autoDrop = false;
                 //first check that the db version matches ours it's fine since we haven't initialized any EF models yet and we don't want it auto dropping
-                myCommand.CommandText = "SELECT DatabaseVersion FROM Versions";
+                if (databaseType == DBType.MYSQL || databaseType == DBType.SQLSERVER)
+                    myCommand.CommandText = "USE " + dbNameForServers + ";";
+                myCommand.CommandText += "SELECT DatabaseVersion FROM Versions";
                 try
                 {
                     if (!resetFlag && Convert.ToInt32(myCommand.ExecuteScalar()) != (int)Versions.Database)
                     { //if the table doesn't exist assume corrupt and overwrite
                         autoDrop = (MessageBox.Show("Database version differs from that of the program. Wipe database and create updated version?",
-                                         "Version Mismatch",
+                                     "Version Mismatch",
                                          MessageBoxButtons.YesNo) == DialogResult.Yes);
                         if (!autoDrop)
-                            return false;
-                    }
+                        return false;
                 }
-                catch
-                {
+            }
+            catch
+            {
                     autoDrop = true;
                 }
                 sqlsWConn.Close();  //we have to close the connection or entity framework can't figure out how to unlock the db for dropping
-
+                sqlsWConn.ConnectionString = connectionString;  //reset connection string
+                if (resetFlag || autoDrop)
+                    bgw.ReportProgress(0, "Creating Entity Framework (This may take some time)...");
+                else
+                    bgw.ReportProgress(0, "Initializing Entity Framework...");
                 //will drop if model is different/deprecated and user said yes
                 writer = new MSPADatabase(sqlsWConn, resetFlag || autoDrop, databaseType == DBType.SQLITE);
+
+                writer.Database.Initialize(false);   //explicitly run initialization
+
                 if(writer.Versions.Count() == 0){
                     var tmp = new MSPADatabase.Version();
                     tmp.DatabaseVersion = (int)Versions.Database;
@@ -281,49 +289,50 @@ namespace Reader_UI
                 }
                 sqlsRConn.Open();
 
+                bgw.ReportProgress(0, "Listing archived pages...");
                 foreach (var page in writer.ArchivedPages)
                     archivedPages.Add(page.pageId);
 
                 return true;
-            }
-            catch
-            {
+                    }
+                catch
+                {
                 if (databaseType == DBType.SQLLOCALDB)
-                    MessageBox.Show("Error creating database, make sure the application has read/write permissions in the working directory.");
-                else
-                    MessageBox.Show("Error creating database, make sure the specified account has read/write permissions.");
-                return false;
+                        MessageBox.Show("Error creating database, make sure the application has read/write permissions in the working directory.");
+                    else
+                        MessageBox.Show("Error creating database, make sure the specified account has read/write permissions.");
+                    return false;
+                }
             }
-        }
         override public void WriteResource(Parser.Resource[] res, int page, bool x2)
         {
             foreach (var link in res)
-            {
+        {
                 writer.Resources.Add(new MSPADatabase.Resource(link,page,x2));
             }
         }
         public override bool IconsAreParsed()
         {
             var icos = from b in writer.Resources
-                        where b.pageId == 100000
+                        where b.pageId == (int)SpecialResources.CANDYCORNS
                         select b;
             return icos.Count() != 0;
         }
-        
+
         public override bool x2HeaderParsed()
-        {
+            {
             var icos = from b in writer.Resources
                        where b.pageId == 100002
                        select b;
             return icos.Count() != 0;
-        }
-        override public void WriteLinks(Parser.Link[] res, int pageno)
-        {
-            foreach(var link in res)
-            {
-                writer.Links.Add(new MSPADatabase.Link(link,pageno));
             }
-        }
+        override public void WriteLinks(Parser.Link[] res, int pageno)
+                {
+            foreach(var link in res)
+                        {
+                writer.Links.Add(new MSPADatabase.Link(link,pageno));
+                }
+            }
         override public void WriteText(Parser.Text tex, int pageno, bool x2)
         {
             writer.PageMeta.Add(new MSPADatabase.Text(tex,pageno,x2));
