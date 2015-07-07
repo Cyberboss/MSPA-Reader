@@ -99,6 +99,7 @@
             // 
             // mrAjax
             // 
+            this.mrAjax.WorkerReportsProgress = true;
             this.mrAjax.DoWork += new System.ComponentModel.DoWorkEventHandler(this.mrAjax_DoWork);
             // 
             // goBack

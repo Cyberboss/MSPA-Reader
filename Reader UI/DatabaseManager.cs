@@ -20,9 +20,7 @@ namespace Reader_UI
     class DatabaseManager : Writer
     {
 
-        //note candy corn resources are stored at page 100000 in the db
-        //trickster is stored at 100001
-        //x2 header at 100002
+
 
         DbConnection sqlsRConn = null, sqlsWConn = null;
         DbTransaction sqlsTrans = null;
@@ -314,21 +312,20 @@ namespace Reader_UI
         }
         public override byte[] Getx2Header()
         {
+            Parsex2Header(true);
             DbCommand selector = sqlsRConn.CreateCommand();
-            selector.CommandText = "SELECT data FROM Resources WHERE page_id = 100002";
+            selector.CommandText = "SELECT data FROM Resources WHERE page_id = " + (int)SpecialResources.X2_HEADER;
             return (byte[])selector.ExecuteScalar();
         }
         public override bool TricksterParsed()
         {
             DbCommand selector = sqlsRConn.CreateCommand();
-            selector.CommandText = "SELECT COUNT(*) FROM RESOURCES WHERE page_id = 100001";
+            selector.CommandText = "SELECT COUNT(*) FROM RESOURCES WHERE page_id = " + (int)SpecialResources.TRICKSTER_HEADER;
             return Convert.ToInt32(selector.ExecuteScalar()) != 0;
         }
         public override Parser.Resource[] GetTricksterShit()
         {
-            //serial check because this is called by curtains up
-            ParseTrickster(true);
-            return GetResources(100001, false);
+            return GetResources((int)SpecialResources.TRICKSTER_HEADER, false);
         }
         public Parser.Resource[] GetResources(int pageno, bool x2)
         {
@@ -580,7 +577,7 @@ namespace Reader_UI
         public override bool x2HeaderParsed()
         {
             DbCommand selector = sqlsRConn.CreateCommand();
-            selector.CommandText = "SELECT COUNT(*) FROM RESOURCES WHERE page_id = 100002";
+            selector.CommandText = "SELECT COUNT(*) FROM RESOURCES WHERE page_id = " + (int)SpecialResources.X2_HEADER;
             return Convert.ToInt32(selector.ExecuteScalar()) != 0;
         }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities")]

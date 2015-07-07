@@ -10,6 +10,15 @@ namespace Reader_UI
 {
     public abstract class Writer : IDisposable
     {
+        //candy at 100000
+        //trickster is stored at 100001
+        //x2 header at 100002
+        public enum SpecialResources
+        {
+            CANDYCORNS = 100000,
+            TRICKSTER_HEADER = 100001,
+            X2_HEADER = 100002,
+        }
         public enum Versions{
             Database = 1, //update with every commit that affects db layout
             Program = 2,
@@ -136,11 +145,7 @@ namespace Reader_UI
                 lock (_sync)
                 {
                     ret = request;
-                }
-                if (IsPageArchived(ret))
-                {
-                    Request(0);
-                    return 0;
+                    request = 0;
                 }
                 return ret;
             }
@@ -234,17 +239,20 @@ namespace Reader_UI
             
             if (!TricksterParsed())
             {
-                Transact();
-                try
+                if (!wl.TestAndSet())
                 {
-                    parser.LoadTricksterResources(serial);
-                    WriteResource(parser.GetResources(), 100001, false);
-                    Commit();
-                }
-                catch
-                {
-                    Rollback();
-                    throw;
+                    Transact();
+                    try
+                    {
+                        parser.LoadTricksterResources(serial);
+                        WriteResource(parser.GetResources(), (int)SpecialResources.TRICKSTER_HEADER, false);
+                        Commit();
+                    }
+                    catch
+                    {
+                        Rollback();
+                        throw;
+                    }
                 }
             }
         }
@@ -256,7 +264,7 @@ namespace Reader_UI
                 try
                 {
                     parser.GetX2Header(serial);
-                    WriteResource(parser.GetResources(), 100002, false);
+                    WriteResource(parser.GetResources(), (int)SpecialResources.X2_HEADER, false);
                     Commit();
                 }
                 catch
@@ -291,17 +299,34 @@ namespace Reader_UI
                 return Style.SBAHJ;
             return Style.REGULAR;
         }
-        public Page WaitPage(int pageno)
+        public Page WaitPage(int pageno, System.ComponentModel.BackgroundWorker bgw)
         {
             try
             {
+                if (Enum.IsDefined(typeof(SpecialResources), pageno))
+                {
+                    if (!wl.TestAndSet())
+                    {
+                        SavePage(pageno, bgw);
+                        wl.StopRunning();
+                    }
+                    else
+                    {
+                        do
+                        {
+                            archivedPages.Request(pageno);
+                            System.Threading.Thread.Sleep(1000);
+                        } while (archivedPages.GetRequest() != 0);
+                    }
+                    return null;
+                }
                 if (!archivedPages.IsPageArchived(pageno))
                 {
                     if (!wl.TestAndSet())
                     {
                         try
                         {
-                            if (SavePage(pageno) > 0)
+                            if (SavePage(pageno,bgw) > 0)
                                 return null;
                         }
                         catch
@@ -552,9 +577,10 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                     else
                         return;
 
-                    int oldPage = currentPage;
+                    int oldPage;
                     while (currentPage != lastPage + 1 && !bgw.CancellationPending)
                     {
+                        oldPage = currentPage;
                         var req = (archivedPages.GetRequest());
                         if (req != 0)
                         {
@@ -569,12 +595,9 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                         missedPages += SavePage(currentPage,bgw,currentProgress);
 
                         if (req != 0 && currentPage == req && oldMissedPages == missedPages)
-                        {
-                            currentPage = oldPage;
-                            archivedPages.Request(0);
-                        }
-
-                        currentPage = archivedPages.FindLowestPage(currentPage + 1, lastPage);
+                           currentPage = oldPage;
+                        else
+                            currentPage = archivedPages.FindLowestPage(currentPage + 1, lastPage);
                     }
                     if (!(!bgw.CancellationPending && missedPages != 0))
                         break;
@@ -594,7 +617,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
         }
         int SavePage(int currentPage, System.ComponentModel.BackgroundWorker bgw = null, int currentProgress = 0)
         {
-            if (Enum.IsDefined(typeof(PagesOfImportance), currentPage) && currentPage != (int)PagesOfImportance.HOMESTUCK_PAGE_ONE)
+            if ((Enum.IsDefined(typeof(PagesOfImportance), currentPage)) && currentPage != (int)PagesOfImportance.HOMESTUCK_PAGE_ONE)
             {
                 try
                 {
@@ -623,7 +646,32 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 catch
                 {
                     Rollback();
-                    if(bgw != null)
+                    if (bgw != null)
+                        bgw.ReportProgress(currentProgress, "Error parsing special page " + currentPage);
+                    return 1;
+                }
+                return 0;
+            }
+            if ((Enum.IsDefined(typeof(SpecialResources), currentPage)))
+            {
+                try
+                {
+                    switch ((SpecialResources)currentPage)
+                    {
+                        case SpecialResources.TRICKSTER_HEADER:
+                            ParseTrickster(false);
+                            break;
+                        case SpecialResources.X2_HEADER:
+                            Parsex2Header(false);
+                            break;
+                        default:
+                            Debugger.Break();
+                            throw new Exception();
+                    }
+                }
+                catch
+                {
+                    if (bgw != null)
                         bgw.ReportProgress(currentProgress, "Error parsing special page " + currentPage);
                     return 1;
                 }

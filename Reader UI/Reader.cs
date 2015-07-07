@@ -197,6 +197,7 @@ namespace Reader_UI
 
         List<LineOrPB> conversations = new List<LineOrPB>();
         Label errorLabel = null;
+        TextBox progressLabel = null;
         bool pesterLogVisible;
         int pLMaxHeight, pLMinHeight;
         bool pageContainsFlash = false;
@@ -233,11 +234,19 @@ namespace Reader_UI
             for (int i = 0; i < candyCorn.Count(); ++i)
                 candyCorn[i] = null;
             mrAjax.RunWorkerCompleted += mrAjax_RunWorkerCompleted;
+            mrAjax.ProgressChanged += mrAjax_ProgressChanged;
             FormClosing += Reader_FormClosing;
             Resize += Reader_Resize;
             autoSave.Checked = Properties.Settings.Default.autoSave;
             ResizeEnd += Reader_ResizeEnd;
             monitorGameOver.ProgressChanged += monitorGameOver_ProgressChanged;
+        }
+
+        void mrAjax_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            if (progressLabel == null)
+                return;
+            progressLabel.AppendText((string)e.UserState + Environment.NewLine);
         }
 
         void Reader_ResizeEnd(object sender, EventArgs e)
@@ -327,7 +336,7 @@ namespace Reader_UI
             {
                 page = new Writer.Page(pageRequest);
                 MessageBox.Show("An internal error occurred when retrieving the page. Usually this means you are out of memory or some resource on the page cannot be downloaded. (Yes, I checked both the cdn and www).");
-                RemoveControl(pageLoadingProgress);
+                RemoveControl(pageLoadingProgress);RemoveControl(progressLabel);
                 errorLabel = new Label();
                 errorLabel.AutoSize = true;
                 errorLabel.Text = "Press F5 to try again.";
@@ -353,7 +362,7 @@ namespace Reader_UI
              //* */
             pageContainsFlash = true;
 
-            RemoveControl(pageLoadingProgress);
+            RemoveControl(pageLoadingProgress);RemoveControl(progressLabel);
         }
         void LoadScratchPage()
         {
@@ -790,7 +799,7 @@ namespace Reader_UI
 
             headerPanel.BringToFront();
 
-            RemoveControl(pageLoadingProgress);
+            RemoveControl(pageLoadingProgress);RemoveControl(progressLabel);
         }
         string WriteTempResource(Parser.Resource res)
         {
@@ -1035,7 +1044,7 @@ namespace Reader_UI
 
             mainPanel.Height = comicPanel.Height + REGULAR_COMIC_PANEL_Y_OFFSET + REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET;
 
-            RemoveControl(pageLoadingProgress);
+            RemoveControl(pageLoadingProgress);RemoveControl(progressLabel);
         }
         void RelocateLinks()
         {
@@ -1087,7 +1096,7 @@ namespace Reader_UI
             pageContainsFlash = false;
             numericUpDown1.Value = pg;
             var newStyle = db.GetStyle(pg);
-            if (previousStyle != newStyle || Parser.Is2x(pg))
+            if (previousStyle != newStyle)
                 CurtainsUp(newStyle);
             ShowLoadingScreen();
             pageRequest = pg;
@@ -1356,6 +1365,7 @@ namespace Reader_UI
                 RemoveControl(candyCorn[i]);
             RemoveControl(headerPanel);
             RemoveControl(pageLoadingProgress);
+            RemoveControl(progressLabel);
             if (currentIcon != null)
             {
                 currentIcon.gif.Dispose();
@@ -1581,7 +1591,17 @@ namespace Reader_UI
             pageLoadingProgress.MarqueeAnimationSpeed = 32;
             pageLoadingProgress.Width = mainPanel.Width / 2;
             pageLoadingProgress.Location = new Point(mainPanel.Width / 4, mainPanel.Height / 2 - pageLoadingProgress.Height);
+            progressLabel = new TextBox();
+            progressLabel.Multiline = true;
+            progressLabel.BackColor = mainPanel.BackColor;
+            if (headerPanel != null)
+                progressLabel.ForeColor = mspaHeaderLink[0].ForeColor;
+            progressLabel.TextAlign = HorizontalAlignment.Center;
+            progressLabel.Width = pageLoadingProgress.Width;
+            progressLabel.Height = mainPanel.Height / 3;
             mainPanel.Controls.Add(pageLoadingProgress);
+            mainPanel.Controls.Add(progressLabel);
+            progressLabel.Location = new Point(pageLoadingProgress.Location.X, pageLoadingProgress.Location.Y + pageLoadingProgress.Height);
             Update();
         }
         void Reader_Closed(object sender, System.EventArgs e)
@@ -1612,7 +1632,7 @@ namespace Reader_UI
         private void mrAjax_DoWork(object sender, DoWorkEventArgs e)
         {
             page = null;
-            page = db.WaitPage(pageRequest);
+            page = db.WaitPage(pageRequest,mrAjax);
         }
 
         private void goBack_Click(object sender, EventArgs e)
