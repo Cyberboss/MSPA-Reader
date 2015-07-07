@@ -65,22 +65,22 @@ namespace Reader_UI
                 case 0:
                     dbName = databaseNameInput.Text;
                     dbFName = ipInput.Text;
-                    db = new SQL(SQL.DBType.SQLSERVER);
+                    db = new DatabaseManager(DatabaseManager.DBType.SQLSERVER);
                     break;
                 case 1:
                     dbName = databaseNameInput.Text;
                     dbFName = ipInput.Text;
-                    db = new SQL(SQL.DBType.MYSQL);
+                    db = new DatabaseManager(DatabaseManager.DBType.MYSQL);
                     break;
                 case 2:
                     dbName = System.IO.Path.GetFileNameWithoutExtension(databaseNameInput.Text);
                     dbFName = System.IO.Path.GetDirectoryName(databaseNameInput.Text);
-                    db = new SQL(SQL.DBType.SQLITE);
+                    db = new DatabaseManager(DatabaseManager.DBType.SQLITE);
                     break;
                 case 3:
                     dbName = System.IO.Path.GetFileNameWithoutExtension(databaseNameInput.Text);
                     dbFName = System.IO.Path.GetDirectoryName(databaseNameInput.Text);
-                    db = new SQL(SQL.DBType.SQLLOCALDB);
+                    db = new DatabaseManager(DatabaseManager.DBType.SQLLOCALDB);
                     break;
                 default:
                     MessageBox.Show("Invalid database selection.... How???");

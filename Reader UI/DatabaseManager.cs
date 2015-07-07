@@ -17,7 +17,7 @@ using System.Data.SQLite;
 #endif
 namespace Reader_UI
 {
-    class SQL : Writer
+    class DatabaseManager : Writer
     {
 
         //note candy corn resources are stored at page 100000 in the db
@@ -39,7 +39,7 @@ namespace Reader_UI
         readonly DBType databaseType;
         bool resetFlag = false;
 
-        public SQL(DBType com)
+        public DatabaseManager(DBType com)
         {
             databaseType = com;
         }
@@ -326,6 +326,7 @@ namespace Reader_UI
         }
         public override Parser.Resource[] GetTricksterShit()
         {
+            //serial check because this is called by curtains up
             ParseTrickster(true);
             return GetResources(100001, false);
         }

@@ -231,6 +231,7 @@ namespace Reader_UI
         public abstract Parser.Resource[] GetTricksterShit();
         protected void ParseTrickster(bool serial)
         {
+            
             if (!TricksterParsed())
             {
                 Transact();
