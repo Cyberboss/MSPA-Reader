@@ -1,6 +1,7 @@
 # MSPA-Reader
 A parser for the website MSPA that will download comic content into a database for local, forms based, reading. Written in pure .NET.
 
+This is an unofficial, fan-made program that is in no way associated with MS Paint Adventures, What Pumpkin?, or Andrew Hussie.
 
 Simply build the Release configuration with visual studio, or the MonoRelease configuration in mono. Both will require nuget package restore (Make sure your ssl ceritificates won't block you from nuget.org). You can safely ignore the missing references.
 

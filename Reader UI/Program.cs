@@ -109,7 +109,9 @@ namespace Reader_UI
                         Properties.Settings.Default.Save();
                     }
                 }
-                catch { throw; }
+                catch (Exception e){
+                    MessageBox.Show("An unhandled exception occured. Please file a bug report at https://www.github.com/cybnetsurfe3011/MSPA-Reader containing the following: " + Environment.NewLine + Environment.NewLine + e.ToString(), "Critical Error!");
+                }
                 finally
                 {
                     mutex.ReleaseMutex();

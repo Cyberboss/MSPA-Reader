@@ -75,7 +75,7 @@
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
             // 
-            // DatabaseWriter
+            // ArchiverWindow
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -84,7 +84,7 @@
             this.Controls.Add(this.openReader);
             this.Controls.Add(this.logOutput);
             this.Controls.Add(this.progressBar1);
-            this.Name = "DatabaseWriter";
+            this.Name = "ArchiverWindow";
             this.ResumeLayout(false);
             this.PerformLayout();
 

@@ -22,11 +22,14 @@ namespace Reader_UI
             dataSourceInput.Items.Add("SQL LocalDB");
 #endif
             if (Properties.Settings.Default.serverType != 4)
+            {
                 dataSourceInput.SelectedIndex = Properties.Settings.Default.serverType;
+            }
             else
             {
 #if linux
                 dataSourceInput.SelectedIndex = 2;
+                
 #else
                 dataSourceInput.SelectedIndex = 3;
 #endif
@@ -124,7 +127,7 @@ namespace Reader_UI
                     }
                     else
                     {
-                        Properties.Settings.Default.dbFileName = System.IO.Path.GetDirectoryName(databaseNameInput.Text) + System.IO.Path.GetFileNameWithoutExtension(databaseNameInput.Text);
+                        Properties.Settings.Default.dbFileName = System.IO.Path.GetDirectoryName(databaseNameInput.Text) + System.IO.Path.DirectorySeparatorChar + System.IO.Path.GetFileNameWithoutExtension(databaseNameInput.Text);
                     }
 
                     if (saveUsername.Checked)
@@ -198,9 +201,9 @@ namespace Reader_UI
                     dbPathSelect.Enabled = true;
 
                     dbNameLabel.Enabled = true;
-                    databaseNameInput.Text = Properties.Settings.Default.dbFileName == "" ? Application.StartupPath + System.IO.Path.DirectorySeparatorChar + "MSPAArchive" : Properties.Settings.Default.dbName;
+                    databaseNameInput.Text = Properties.Settings.Default.dbFileName == "" ? Application.StartupPath + System.IO.Path.DirectorySeparatorChar + "MSPAArchive" : Properties.Settings.Default.dbFileName;
                     databaseNameInput.ReadOnly = true;
-                    if (dataSourceInput.SelectedIndex == 2)
+                    if (dataSourceInput.SelectedIndex == 3)
                     {
                         databaseNameInput.Text += ".mdf";
                     }

@@ -13,7 +13,7 @@ namespace Reader_UI
 {
     public class Parser : IDisposable
     {
-        const string githubRepo = "https://raw.githubusercontent.com/cybnetsurfe3011/MSPA-Reader/master/CurrentVersion.txt";
+        public const string githubRepo = "https://raw.githubusercontent.com/cybnetsurfe3011/MSPA-Reader/master/CurrentVersion.txt";
         public class Resource
         {
             readonly public byte[] data;

@@ -11,7 +11,7 @@ namespace Reader_UI
     public abstract class Writer : IDisposable
     {
         public enum Versions{
-            Database = 1, //update with every commit that affects db layout
+            Database = 2, //update with every commit that affects db layout
             Program = 2,
             Release = Program + 1
         }
@@ -87,6 +87,7 @@ namespace Reader_UI
             private List<int> archivedPages = new List<int>();
             private int request = 0;
             private object _sync = new object();
+            private bool ff = false;
 
             public bool IsPageArchived(int page)
             {
@@ -150,6 +151,23 @@ namespace Reader_UI
                 {
                     request = pgno;
                 }
+            }
+            public void FailFlag()
+            {
+                lock (_sync)
+                {
+                    ff = true;
+                }
+            }
+            public bool Failed()
+            {
+                bool ret;
+                lock (_sync)
+                {
+                    ret = ff;
+                    ff = false;
+                }
+                return ret;
             }
         }
 
@@ -215,7 +233,7 @@ namespace Reader_UI
         public abstract bool IconsAreParsed();
         public abstract bool ReadLastIndexedOrCreateDatabase();
         public abstract void WriteResource(Parser.Resource[] res, int page, bool x2);
-        public abstract void WriteLinks(Parser.Link[] res, int page, bool x2);
+        public abstract void WriteLinks(Parser.Link[] res, int page);
         public abstract void WriteText(Parser.Text tex, int page, bool x2);
         public abstract void ArchivePageNumber(int page, bool x2);
         public abstract void Transact();
@@ -316,6 +334,8 @@ namespace Reader_UI
                         do
                         {
                             System.Threading.Thread.Sleep(1000);
+                            if (archivedPages.Failed())
+                                return null;
                         } while (!archivedPages.IsPageArchived(pageno));
                     }
                 }
@@ -346,7 +366,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 bgw.ReportProgress(progress, "Now parsing Cascade, page 6009");
             Parser.Resource[] cascadeSegments = new Parser.Resource[7];
             Parser.Link[] next = new Parser.Link[1];
-            next[0] = new Parser.Link("END OF ACT 5", 6010);
+            next[0] = new Parser.Link("END OF ACT 5", (int)PagesOfImportance.CASCADE + 1);
             try
             {
                 cascadeSegments[0] = new Parser.Resource(parser.DownloadFile("http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_loaderExt.swf"), "cascade_loaderExt.swf");
@@ -379,15 +399,15 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             cascadeSegments[6] = new Parser.Resource(parser.DownloadFile("http://www.mspaintadventures.com/images/header_cascade.gif"), "header_cascade.gif");
             
             Transact();
-            WriteResource(cascadeSegments, 6009,false);
-            WriteLinks(next, 6009,false);
+            WriteResource(cascadeSegments, (int)PagesOfImportance.CASCADE, false);
+            WriteLinks(next, (int)PagesOfImportance.CASCADE);
             Parser.Text asdf = new Parser.Text();
             asdf.narr = new Parser.Text.ScriptLine("#000000","",0);
             asdf.title = "[S] Cascade.";
-            WriteText(asdf, 6009, false);
+            WriteText(asdf, (int)PagesOfImportance.CASCADE, false);
 
             ///BRB
-            ArchivePageNumber(6009,false);
+            ArchivePageNumber((int)PagesOfImportance.CASCADE,false);
             Commit();
             if (bgw != null)
                 bgw.ReportProgress(progress, "Cascade committed!");
@@ -408,7 +428,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             WriteResource(FUCKYOU, (int)PagesOfImportance.CALIBORN_PAGE_SMASH, false);
             Parser.Link[] lnk = new Parser.Link[1];
             lnk[0] = new Parser.Link("", (int)PagesOfImportance.CALIBORN_PAGE_SMASH + 1);
-            WriteLinks(lnk, (int)PagesOfImportance.CALIBORN_PAGE_SMASH, false);
+            WriteLinks(lnk, (int)PagesOfImportance.CALIBORN_PAGE_SMASH);
             Parser.Text asdf = new Parser.Text();
             asdf.narr = new Parser.Text.ScriptLine("#000000", "", 0);
             asdf.title = "[S] Cascade.";
@@ -433,7 +453,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             WriteResource(FUCKYOU, (int)PagesOfImportance.CALIBORN_PAGE_SMASH2, false);
             Parser.Link[] lnk = new Parser.Link[1];
             lnk[0] = new Parser.Link("", (int)PagesOfImportance.CALIBORN_PAGE_SMASH2 + 1);
-            WriteLinks(lnk, (int)PagesOfImportance.CALIBORN_PAGE_SMASH2, false);
+            WriteLinks(lnk, (int)PagesOfImportance.CALIBORN_PAGE_SMASH2);
             Parser.Text asdf = new Parser.Text();
             asdf.narr = new Parser.Text.ScriptLine("#000000", "", 0);
             asdf.title = "[S] Cascade.";
@@ -461,7 +481,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             asdf.title = "";
             Parser.Link[] lnk = new Parser.Link[1];
             lnk[0] = new Parser.Link("", (int)PagesOfImportance.DOTA + 1);
-            WriteLinks(lnk, (int)PagesOfImportance.DOTA, false);
+            WriteLinks(lnk, (int)PagesOfImportance.DOTA);
             WriteText(asdf, (int)PagesOfImportance.DOTA, false);
             ArchivePageNumber((int)PagesOfImportance.DOTA, false);
             Commit();
@@ -485,7 +505,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             asdf.title = "";
             Parser.Link[] lnk = new Parser.Link[1];
             lnk[0] = new Parser.Link("", (int)PagesOfImportance.SHES8ACK + 1);
-            WriteLinks(lnk, (int)PagesOfImportance.SHES8ACK, false);
+            WriteLinks(lnk, (int)PagesOfImportance.SHES8ACK);
             WriteText(asdf, (int)PagesOfImportance.SHES8ACK, false);
             ArchivePageNumber((int)PagesOfImportance.SHES8ACK, false);
             Commit();
@@ -509,7 +529,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             asdf.title = "";
             Parser.Link[] lnk = new Parser.Link[1];
             lnk[0] = new Parser.Link("", (int)PagesOfImportance.GAMEOVER + 1);
-            WriteLinks(lnk, (int)PagesOfImportance.GAMEOVER, false);
+            WriteLinks(lnk, (int)PagesOfImportance.GAMEOVER);
             WriteText(asdf, (int)PagesOfImportance.GAMEOVER, false);
             ArchivePageNumber((int)PagesOfImportance.GAMEOVER, false);
             Commit();
@@ -565,10 +585,13 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
 
                         missedPages += SavePage(currentPage,bgw,currentProgress);
 
-                        if (req != 0 && currentPage == req && oldMissedPages == missedPages)
+                        if (req != 0 && currentPage == req)
+                            
                         {
-                            currentPage = oldPage;
-                            archivedPages.Request(0);
+                            if (oldMissedPages == missedPages)
+                                currentPage = oldPage;
+                            else
+                                archivedPages.FailFlag();
                         }
 
                         currentPage = archivedPages.FindLowestPage(currentPage + 1, lastPage);
@@ -616,6 +639,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                             FailMiserably(bgw, currentProgress);
                             break;
                     }
+                    archivedPages.Add(currentPage);
                 }
                 catch
                 {
@@ -671,7 +695,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 var text = parser.GetText();
 
                 if (bgw != null)
-                    bgw.ReportProgress(currentProgress, "Page " + currentPage + ":" + text.title);
+                    bgw.ReportProgress(currentProgress, "Page " + currentPage + ": " + text.title);
 
                 if (text.narr == null)
                 {
@@ -708,11 +732,14 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 if(x2phase != 2)
                     Transact();
                 WriteResource(res, currentPage, x2phase == 2);
-                WriteLinks(links, currentPage, x2phase == 2);
+                WriteLinks(links, currentPage);
                 WriteText(text, currentPage, x2phase == 2);
                 ArchivePageNumber(currentPage, x2phase == 2);
-                if(x2phase != 1)
+                if (x2phase != 1)
+                {
                     Commit();
+                    archivedPages.Add(currentPage);
+                }
 
             }
             catch
