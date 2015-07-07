@@ -95,10 +95,14 @@ namespace Reader_UI
                 c.Enabled = false;
             }
             UseWaitCursor = true;
-            new Initializing(db, dbName, dbFName, usernameInput.Text, passwordInput.Text, resetDatabase.Checked, OnInitilializerClose).Show();
+            new Initializing(db, dbName, dbFName, usernameInput.Text, passwordInput.Text, resetDatabase.Checked, OnInitilializerClose, this).Show();
         }
+        bool handlingClose = false;
         void OnInitilializerClose(object sender, FormClosedEventArgs e)
         {
+            if (handlingClose)
+                return;
+            handlingClose = true;
             var db = ((Initializing)sender).db;
             if (!((Initializing)sender).Good())
             {
@@ -155,6 +159,7 @@ namespace Reader_UI
 
                 Close();
             }
+            handlingClose = false;
         }
 
         private void dataSourceInput_SelectedIndexChanged(object sender, EventArgs e)

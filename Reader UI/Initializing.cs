@@ -16,8 +16,9 @@ namespace Reader_UI
         readonly string dbName, dbFName, username, password;
         readonly bool reset;
         bool working = true, success = true;
-        public Initializing(Writer idb,string idbName, string idbFName,string  iusernameInput,string ipasswordInput, bool iresetDatabase, FormClosedEventHandler closeHandler)
+        public Initializing(Writer idb,string idbName, string idbFName,string  iusernameInput,string ipasswordInput, bool iresetDatabase, FormClosedEventHandler closeHandler, Form owner)
         {
+            Owner = owner;
             dbName = idbName;
             dbFName = idbFName;
             username = iusernameInput;

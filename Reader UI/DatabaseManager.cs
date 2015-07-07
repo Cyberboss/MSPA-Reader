@@ -128,43 +128,44 @@ namespace Reader_UI
             }
         }
         string dbNameForServers;
-        override public void Connect(string databaseName,string serverFolderName, string username, string password,bool reset)
+        override public void Connect(string databaseName, string serverFolderName, string username, string password, bool reset)
         {
             resetFlag = reset;
             dbNameForServers = databaseName;
-            switch (databaseType) {
+            switch (databaseType)
+            {
                 case DBType.SQLSERVER:
-                {
-                    connectionString = "Server=" + serverFolderName + ";Initial Catalog=" + databaseName + ";";
-                    if (username != "")
-                        connectionString += "User ID=" + username + ";Password=" + password;
-                    else
-                        connectionString += "Integrated Security=True;";
-                    sqlsRConn = new SqlConnection(connectionString);
-                    sqlsWConn = new SqlConnection(connectionString.Replace("Initial Catalog=" + databaseName + ";",""));
-                    break;
-                }
+                    {
+                        connectionString = "Server=" + serverFolderName + ";Initial Catalog=" + databaseName + ";";
+                        if (username != "")
+                            connectionString += "User ID=" + username + ";Password=" + password;
+                        else
+                            connectionString += "Integrated Security=True;";
+                        sqlsRConn = new SqlConnection(connectionString);
+                        sqlsWConn = new SqlConnection(connectionString.Replace("Initial Catalog=" + databaseName + ";", ""));
+                        break;
+                    }
                 case DBType.SQLLOCALDB:
-                {
-                    connectionString = GetLocalDB(databaseName, false, serverFolderName);
-                    sqlsRConn = new SqlConnection(connectionString);
-                    sqlsWConn = new SqlConnection(connectionString);
-                    break;
-                }
+                    {
+                        connectionString = GetLocalDB(databaseName, false, serverFolderName);
+                        sqlsRConn = new SqlConnection(connectionString);
+                        sqlsWConn = new SqlConnection(connectionString);
+                        break;
+                    }
                 case DBType.SQLITE:
                     connectionString = "data source=" + serverFolderName + System.IO.Path.DirectorySeparatorChar + databaseName + ".sqlite3; Version=3";
                     sqlsRConn = new SQLiteConnection(connectionString);
                     sqlsWConn = new SQLiteConnection(connectionString);
                     break;
                 case DBType.MYSQL:
-                    connectionString = "Server="+serverFolderName+";Database="+databaseName+";User ID="+username+";Password="+password+";Pooling=true";
+                    connectionString = "Server=" + serverFolderName + ";Database=" + databaseName + ";User ID=" + username + ";Password=" + password + ";Pooling=true";
                     sqlsRConn = new MySqlConnection(connectionString);
                     sqlsWConn = new MySqlConnection(connectionString.Replace("Database=" + databaseName + ";", ""));
                     break;
             }
             sqlsWConn.Open();
 
-                }
+        }
         public override byte[] GetIcon(Writer.IconTypes ic)
         {
             var reader = new MSPADatabase(sqlsRConn);
