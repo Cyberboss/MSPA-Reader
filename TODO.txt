@@ -1,14 +1,14 @@
 ﻿
 Primary: Fix Hussie/Caliborn's conversations in the narrative prompt
 Primary: Get inline images working eg 7980, 4943
-Primary: Database migrations for next DB version bump
 Primary: Get Openbound working
 
 Tasks:
 
+-- Port support
 -- Allow horizontal scroll to center comic content if window width is too small.
 -- LOWAS in void fireflies
--- Fix Linux styles
+-- Fix Linux styles? or is it not my problem?
 -- Disable Simultaneous Archiving and Reading while in Sqlite mode
 -- Check if it works with older MSPA works(Jailbreak, problem sleuth), if we're lucky it will jst work with the regular style and we can just lower the minimum page cap
 -- Implement archive page
@@ -26,7 +26,6 @@ Tasks:
 -- Read through and mark down problem pages
 -- Fix problem pages
 (DONE? lack of integrity check may make it buggy, no idea how transactions are handled either) -- Support Sqlite
--- Support Mysql
 -- Support Oracle (Can I get access to a db for testing?)
 -- Better parsing techniques?
 (DONE? Looks like crap on my box) -- Support *nix (Theoretically we could as it's .NET, we do have a bunch of native methods however...)
