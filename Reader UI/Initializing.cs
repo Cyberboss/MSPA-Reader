@@ -15,9 +15,11 @@ namespace Reader_UI
         public Writer db;
         readonly string dbName, dbFName, username, password;
         readonly bool reset;
+        readonly int port;
         bool working = true, success = true;
-        public Initializing(Writer idb,string idbName, string idbFName,string  iusernameInput,string ipasswordInput, bool iresetDatabase, FormClosedEventHandler closeHandler, Form owner)
+        public Initializing(Writer idb,string idbName, string idbFName,string  iusernameInput,string ipasswordInput, int p, bool iresetDatabase, FormClosedEventHandler closeHandler, Form owner)
         {
+            port = p;
             Owner = owner;
             dbName = idbName;
             dbFName = idbFName;
@@ -57,7 +59,7 @@ namespace Reader_UI
         {
             try
             {
-                db.Connect(dbName, dbFName, username, password, reset);
+                db.Connect(dbName, dbFName, username, password, port, reset);
                 success = db.Initialize(initializer);
             }
             catch

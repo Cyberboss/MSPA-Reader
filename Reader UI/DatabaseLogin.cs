@@ -95,7 +95,7 @@ namespace Reader_UI
                 c.Enabled = false;
             }
             UseWaitCursor = true;
-            new Initializing(db, dbName, dbFName, usernameInput.Text, passwordInput.Text, resetDatabase.Checked, OnInitilializerClose, this).Show();
+            new Initializing(db, dbName, dbFName, usernameInput.Text, passwordInput.Text,(int)portSelector.Value, resetDatabase.Checked, OnInitilializerClose, this).Show();
         }
         bool handlingClose = false;
         void OnInitilializerClose(object sender, FormClosedEventArgs e)
@@ -170,14 +170,24 @@ namespace Reader_UI
             switch (dataSourceInput.SelectedIndex)
             {
                 case 0:
+                    foreach (Control c in Controls)
+                    {
+                        c.Enabled = true;
+                    }
+                    ipInput.Text = Properties.Settings.Default.ip;
+                    databaseNameInput.Text = Properties.Settings.Default.dbName;
+                    databaseNameInput.ReadOnly = false;
+                    portSelector.Value = 1433;
+                    break;
                 case 1:
                     foreach (Control c in Controls)
                     {
                         c.Enabled = true;
                     }
-                    ipInput.Text = Properties.Settings.Default.ip == "" ? "127.0.0.1" : Properties.Settings.Default.ip;
+                    ipInput.Text = Properties.Settings.Default.ip;
                     databaseNameInput.Text = Properties.Settings.Default.dbName;
                     databaseNameInput.ReadOnly = false;
+                    portSelector.Value = 3306;
                     break;
                 case 2:
                 case 3:

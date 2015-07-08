@@ -46,6 +46,8 @@
             this.saveUsername = new System.Windows.Forms.CheckBox();
             this.dbNameLabel = new System.Windows.Forms.Label();
             this.databaseNameInput = new System.Windows.Forms.TextBox();
+            this.portSelector = new System.Windows.Forms.NumericUpDown();
+            ((System.ComponentModel.ISupportInitialize)(this.portSelector)).BeginInit();
             this.SuspendLayout();
             // 
             // dataSourceInput
@@ -72,9 +74,9 @@
             this.ipPathLabel.AutoSize = true;
             this.ipPathLabel.Location = new System.Drawing.Point(12, 100);
             this.ipPathLabel.Name = "ipPathLabel";
-            this.ipPathLabel.Size = new System.Drawing.Size(58, 13);
+            this.ipPathLabel.Size = new System.Drawing.Size(86, 13);
             this.ipPathLabel.TabIndex = 2;
-            this.ipPathLabel.Text = "IP Address";
+            this.ipPathLabel.Text = "IP Address : Port";
             // 
             // ipInput
             // 
@@ -209,11 +211,25 @@
             this.databaseNameInput.Size = new System.Drawing.Size(285, 20);
             this.databaseNameInput.TabIndex = 17;
             // 
+            // portSelector
+            // 
+            this.portSelector.Location = new System.Drawing.Point(403, 97);
+            this.portSelector.Maximum = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
+            this.portSelector.Name = "portSelector";
+            this.portSelector.Size = new System.Drawing.Size(84, 20);
+            this.portSelector.TabIndex = 18;
+            this.portSelector.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
             // DatabaseLogin
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(499, 257);
+            this.Controls.Add(this.portSelector);
             this.Controls.Add(this.databaseNameInput);
             this.Controls.Add(this.dbNameLabel);
             this.Controls.Add(this.saveUsername);
@@ -236,6 +252,7 @@
             this.MaximizeBox = false;
             this.Name = "DatabaseLogin";
             this.Text = "Database Login";
+            ((System.ComponentModel.ISupportInitialize)(this.portSelector)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -260,5 +277,6 @@
         private System.Windows.Forms.CheckBox saveUsername;
         private System.Windows.Forms.Label dbNameLabel;
         private System.Windows.Forms.TextBox databaseNameInput;
+        private System.Windows.Forms.NumericUpDown portSelector;
     }
 }

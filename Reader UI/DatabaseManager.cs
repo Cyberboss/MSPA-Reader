@@ -128,7 +128,7 @@ namespace Reader_UI
             }
         }
         string dbNameForServers;
-        override public void Connect(string databaseName, string serverFolderName, string username, string password, bool reset)
+        override public void Connect(string databaseName, string serverFolderName, string username, string password, int port, bool reset)
         {
             resetFlag = reset;
             dbNameForServers = databaseName;
@@ -136,11 +136,13 @@ namespace Reader_UI
             {
                 case DBType.SQLSERVER:
                     {
-                        connectionString = "Server=" + serverFolderName + ";Initial Catalog=" + databaseName + ";";
+                        var cb = new SqlConnectionStringBuilder();
+                        cb.PersistSecurityInfo = true;
+                        connectionString = cb.ToString() + ";Server=" + serverFolderName;
                         if (username != "")
-                            connectionString += "User ID=" + username + ";Password=" + password;
+                            connectionString +=  "," + port + ";Initial Catalog=" + databaseName + ";" + "User ID=" + username + ";Password=" + password;
                         else
-                            connectionString += "Integrated Security=True;";
+                            connectionString += ";Initial Catalog=" + databaseName + "Integrated Security=True;";
                         sqlsRConn = new SqlConnection(connectionString);
                         sqlsWConn = new SqlConnection(connectionString.Replace("Initial Catalog=" + databaseName + ";", ""));
                         break;
@@ -166,6 +168,7 @@ namespace Reader_UI
                     cnx.PersistSecurityInfo = true;
                     cnx.UserID = username;
                     cnx.Server = serverFolderName;
+                    cnx.Port = (uint)port;
 
                     connectionString = cnx.ToString();
                     sqlsRConn = new MySqlConnection(connectionString);

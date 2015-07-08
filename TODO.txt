@@ -5,7 +5,6 @@ Primary: Get Openbound working
 
 Tasks:
 
--- Port support
 -- Allow horizontal scroll to center comic content if window width is too small.
 -- LOWAS in void fireflies
 -- Fix Linux styles? or is it not my problem?

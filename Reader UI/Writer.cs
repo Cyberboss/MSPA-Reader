@@ -190,7 +190,7 @@ namespace Reader_UI
         float totalMegabytesDownloaded = 0;
 
 
-        public abstract void Connect(string DatabaseName, string serverName, string username, string password, bool resetDatabase);
+        public abstract void Connect(string DatabaseName, string serverName, string username, string password, int port, bool resetDatabase);
         public bool Initialize(System.ComponentModel.BackgroundWorker bgw)
         {
             if (ReadLastIndexedOrCreateDatabase(bgw))
