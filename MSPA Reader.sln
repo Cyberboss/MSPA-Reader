@@ -5,12 +5,6 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSPA Reader", "Reader UI\MSPA Reader.csproj", "{F71D9181-0318-45D4-864B-B72A5E934986}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SQL Scripts (Requires update of string resources)", "SQL Scripts (Requires update of string resources)", "{4E3AF806-31F8-4AC8-A46C-E70352F422DB}"
-	ProjectSection(SolutionItems) = preProject
-		DBCreation Scripts\SQLiteDBCreation.sql = DBCreation Scripts\SQLiteDBCreation.sql
-		DBCreation Scripts\SQLSDBCreation.sql = DBCreation Scripts\SQLSDBCreation.sql
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{694961AC-263C-435B-9BAA-46CB1026EC39}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.Config = .nuget\NuGet.Config
