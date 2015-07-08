@@ -107,7 +107,6 @@
       <HintPath>..\packages\SQLite.CodeFirst.0.9.6.0\lib\net45\SQLite.CodeFirst.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Condition=" '$(Configuration)'=='MonoDebug' Or '$(Configuration)'=='MonoRelease'" Include="Mono.Data.Sqlite" />
     <Reference Condition=" '$(Configuration)'=='Debug' Or '$(Configuration)'=='Release'" Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Condition=" '$(Configuration)'=='Debug' Or '$(Configuration)'=='Release'" Include="System.Data.SQLite">

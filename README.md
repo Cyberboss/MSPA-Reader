@@ -3,7 +3,7 @@ A parser for the website MSPA that will download comic content into a database f
 
 This is an unofficial, fan-made program that is in no way associated with MS Paint Adventures, What Pumpkin?, or Andrew Hussie.
 
-Simply build the Release configuration with visual studio, or the MonoRelease configuration in mono. Both will require nuget package restore (Make sure your ssl ceritificates won't block you from nuget.org). You can safely ignore the missing references.
+Simply build the Release configuration with visual studio, or in mono. Both will require nuget package restore (Make sure your ssl ceritificates won't block you from nuget.org). You can safely ignore the missing references.
 
 
 Reccommend using SQLLocalDB or SQLServer if possible. Sqlite has shown to run into deadlocks during archive operations. Support for MySQL coming soon.
