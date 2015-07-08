@@ -1,5 +1,4 @@
 ﻿
-Primary: Fix Hussie/Caliborn's conversations in the narrative prompt
 Primary: Get inline images working eg 7980, 4943
 Primary: Get Openbound working
 

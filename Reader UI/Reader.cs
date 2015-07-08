@@ -1044,7 +1044,31 @@ namespace Reader_UI
 
             mainPanel.Height = comicPanel.Height + REGULAR_COMIC_PANEL_Y_OFFSET + REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET;
 
+
+            if (page.meta.promptType == "CalibornLog")
+                FixNarrativePrompt();
+
             RemoveControl(pageLoadingProgress);RemoveControl(progressLabel);
+
+        }
+        void FixNarrativePrompt()
+        {
+            pesterHideShow_Click(null, null);   //Show the prompt
+            RemoveControl(pesterHideShow);
+            pesterHideShow = null;
+            pesterlog.BorderStyle = BorderStyle.None;
+            pesterlog.BackColor = Color.White;
+            foreach (Control c in pesterlog.Controls)
+            {
+                c.BackColor = Color.White;
+            }
+            comicPanel.Paint +=PaintNarrativePrompt;
+        }
+
+        void PaintNarrativePrompt(object sender, PaintEventArgs e)
+        {
+            //draw a border rectangle on the comic panel.
+            e.Graphics.FillRectangle(new System.Drawing.SolidBrush(Color.FromArgb(198, 198, 198)), new Rectangle(pesterlog.Location.X - 4, pesterlog.Location.Y - 4, pesterlog.Width + 8, pesterlog.Height + 8));
         }
         void RelocateLinks()
         {

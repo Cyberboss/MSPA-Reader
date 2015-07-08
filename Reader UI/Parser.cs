@@ -215,6 +215,7 @@ namespace Reader_UI
         const string swfRegex = @"http:\/\/.*?\.swf";
         const string linkNumberRegex = @"[0-9]{6}";
         const string logRegex = @"Dialoglog|Spritelog|Pesterlog";
+        const string npRegex = @"border: 3px solid #c6c6c6; padding: 1px; background: white;";
         const string hexColourRegex = @"#[0-9A-Fa-f]{6}";
         const string underlineRegex = @"underline";
         const string pesterLogRegex = @"-- .*? --";
@@ -343,10 +344,16 @@ namespace Reader_UI
                //script
                 //check if page HAS a dialoglog , find it and get the lines within
                 var reg = Regex.Match(contentTable.InnerText, logRegex);
-                if (reg.Success)
+                var reg2 = Regex.Match(contentTable.InnerHtml, npRegex);
+                if (reg.Success || reg2.Success)
                 {
-                    texts.promptType = reg.Value;
-                    var convParent = contentTable.SelectSingleNode(".//*[text()[contains(., '" + reg.Value + "')]]").ParentNode.ParentNode;
+
+                    texts.promptType = reg2.Success ? "CalibornLog" : reg.Value;
+                    HtmlNode convParent = null;
+                    if (!reg2.Success)
+                        convParent = contentTable.SelectSingleNode(".//*[text()[contains(., '" + reg.Value + "')]]").ParentNode.ParentNode;
+                    else
+                        convParent = contentTable.Descendants("div").First();
                     var logBox = convParent.SelectSingleNode(".//p");
                     var conversationLines = logBox.SelectNodes("span|img|br");   //this will grab lines 
 
