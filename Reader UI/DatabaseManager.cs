@@ -193,7 +193,7 @@ namespace Reader_UI
                     var theone = from b in icos
                           where b.originalFileName == "candyCorn.gif"
                           select b;
-                    var test = theone.Count();
+
                     res = theone.First().data;
                         break;
                     case IconTypes.CUEBALL:
