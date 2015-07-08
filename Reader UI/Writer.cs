@@ -51,6 +51,8 @@ namespace Reader_UI
             SHES8ACK,
             SMASH,
             GAMEOVER,
+            VOID,
+            OVERSHINE,
         }
         public class Page
         {
@@ -186,6 +188,7 @@ namespace Reader_UI
             DOTA = 006715,
             SHES8ACK = 009305,
             GAMEOVER = 008801,
+           OVERSHINE = 009304,
         }
         float totalMegabytesDownloaded = 0;
 
@@ -315,6 +318,10 @@ namespace Reader_UI
                 return Style.TRICKSTER;
             if (pageno == 5982)
                 return Style.SBAHJ;
+            if ((pageno >= 9000 && pageno <= 9024) || (pageno >= 9174 && pageno <= 9183) || (pageno >= 9289 && pageno <= 9303))
+                return Style.VOID;
+            if (pageno == (int)PagesOfImportance.OVERSHINE)
+                return Style.OVERSHINE;
             return Style.REGULAR;
         }
         public Page WaitPage(int pageno, System.ComponentModel.BackgroundWorker bgw)
@@ -562,6 +569,30 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             ArchivePageNumber((int)PagesOfImportance.GAMEOVER, false);
             Commit();
         }
+        void HandleOvershine(System.ComponentModel.BackgroundWorker bgw, int progress)
+        {
+            if (bgw != null)
+                bgw.ReportProgress(progress, "Now parsing zap.");
+            Parser.Resource[] FUCKYOU = new Parser.Resource[1];
+            FUCKYOU[0] = new Parser.Resource(parser.DownloadFile("http://cdn.mspaintadventures.com/storyfiles/hs2/07401.gif"), "07401.gif");
+
+            var fileSize2 = FUCKYOU[0].data.Count();
+            totalMegabytesDownloaded += (float)fileSize2 / (1024.0f * 1024.0f);
+            if (bgw != null)
+                bgw.ReportProgress(progress, FUCKYOU[0].originalFileName + ": " + fileSize2 / 1024 + "KB");
+
+            Transact();
+            WriteResource(FUCKYOU, (int)PagesOfImportance.OVERSHINE, false);
+            Parser.Text asdf = new Parser.Text();
+            asdf.narr = new Parser.Text.ScriptLine("#000000", "", 0);
+            asdf.title = "";
+            Parser.Link[] lnk = new Parser.Link[1];
+            lnk[0] = new Parser.Link("[S][A6A6I4] ====>", (int)PagesOfImportance.OVERSHINE + 1);
+            WriteLinks(lnk, (int)PagesOfImportance.OVERSHINE);
+            WriteText(asdf, (int)PagesOfImportance.OVERSHINE, false);
+            ArchivePageNumber((int)PagesOfImportance.OVERSHINE, false);
+            Commit();
+        }
         public void ResumeWork(System.ComponentModel.BackgroundWorker bgw)
         {
 
@@ -660,6 +691,9 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                             break;
                         case PagesOfImportance.GAMEOVER:
                             FailMiserably(bgw, currentProgress);
+                            break;
+                        case PagesOfImportance.OVERSHINE:
+                            HandleOvershine(bgw, currentProgress);
                             break;
                     }
                     archivedPages.Add(currentPage);

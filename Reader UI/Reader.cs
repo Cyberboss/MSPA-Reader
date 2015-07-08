@@ -620,6 +620,66 @@ namespace Reader_UI
 
             mainPanel.Height = comicPanel.Height + REGULAR_COMIC_PANEL_Y_OFFSET + REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET;
         }
+        void LoadOvershine()
+        {
+            //panel
+            comicPanel = new Panel();
+            comicPanel.AutoSize = true;
+            comicPanel.Width = REGULAR_COMIC_PANEL_WIDTH;
+            comicPanel.MaximumSize = new Size(REGULAR_COMIC_PANEL_WIDTH, Int32.MaxValue);
+            comicPanel.Location = new Point(mainPanel.Width / 2 - comicPanel.Width / 2, REGULAR_COMIC_PANEL_Y_OFFSET);
+            comicPanel.BackColor = Color.FromArgb(REGULAR_COMIC_PANEL_COLOUR_R, REGULAR_COMIC_PANEL_COLOUR_G, REGULAR_COMIC_PANEL_COLOUR_B);
+
+            var bright = new GifStream();
+            bright.loc = new MemoryStream(page.resources[0].data);
+            bright.gif = new PictureBox();
+            var gif = bright.gif;
+            gif.Image = Image.FromStream(bright.loc);
+            gif.Width = gif.Image.Width;
+            gif.Height = gif.Image.Height;
+
+
+            comicPanel.Height = 743;
+
+            mainPanel.Controls.Add(gif);
+            gif.Location = new Point(0, 0);
+
+
+            mainPanel.Controls.Add(comicPanel);
+
+
+            //next page
+            var currentHeight = gif.Height + REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
+            var leftSide = comicPanel.Width / 2 - REGULAR_PESTERLOG_WIDTH / 2;
+            if (page.number < db.lastPage)
+            {
+
+                linkPrefix = new Label();
+                linkPrefix.AutoSize = true;
+                linkPrefix.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                linkPrefix.Text = REGULAR_LINK_PREFIX;
+                linkPrefix.Location = new Point(leftSide, currentHeight);
+                comicPanel.Controls.Add(linkPrefix);
+
+                if (page.links != null && page.links.Count() > 0)
+                {
+                    next = new GrowLinkLabel();
+                    next.Width = 600;
+                    next.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                    next.Text = "    " + page.links[0].originalText;
+                    next.Location = new Point(leftSide, currentHeight);
+                    next.LinkClicked += next_LinkClicked;
+                    comicPanel.Controls.Add(next);
+                }
+                linkPrefix.BringToFront();
+            }
+
+            comicPanel.Height = currentHeight + REGULAR_COMIC_PANEL_BOTTOM_PADDING;
+
+            mainPanel.Height = comicPanel.Height + REGULAR_COMIC_PANEL_Y_OFFSET + REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET;
+
+            RemoveControl(pageLoadingProgress); RemoveControl(progressLabel);
+        }
         void LoadPage()
         {
             try
@@ -654,6 +714,9 @@ namespace Reader_UI
                         break;
                     case Writer.Style.SBAHJ:
                         LoadSBAHJPage();
+                        break;
+                    case Writer.Style.OVERSHINE:
+                        LoadOvershine();
                         break;
                     case Writer.Style.GAMEOVER:
                         flash = null;//prevent progress report from changing colours
@@ -1435,6 +1498,7 @@ namespace Reader_UI
 
             switch (s)
             {
+                case Writer.Style.OVERSHINE:
                 case Writer.Style.REGULAR:
                     BackColor = Color.FromArgb(REGULAR_BACK_COLOUR_R, REGULAR_BACK_COLOUR_G, REGULAR_BACK_COLOUR_B);
 
