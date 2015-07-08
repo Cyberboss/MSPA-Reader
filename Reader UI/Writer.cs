@@ -20,7 +20,7 @@ namespace Reader_UI
             X2_HEADER = 100002,
         }
         public enum Versions{
-            Database = 2, //update with every commit that affects db layout
+            Database = 3, //update with every commit that affects db layout
             Program = 2,
             Release = Program + 1
         }
@@ -215,7 +215,7 @@ namespace Reader_UI
                     try
                     {
                         parser.LoadIcons();
-                        WriteResource(parser.GetResources(), 100000, false);
+                        WriteResource(parser.GetResources(), (int)SpecialResources.CANDYCORNS, false);
                         Commit();
                     }
                     catch

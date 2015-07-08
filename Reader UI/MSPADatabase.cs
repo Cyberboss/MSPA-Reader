@@ -59,12 +59,12 @@ namespace Reader_UI
         }
         public class Version
         {
-            public int Id { get; set; }
+            public long Id { get; set; }
             public int DatabaseVersion { get; set; }
         }
         public class Archives
         {
-            public int Id { get; set; }
+            public long Id { get; set; }
             public int pageId { get; set; }
             public bool x2 { get; set; }
             public Archives() { }
@@ -76,7 +76,7 @@ namespace Reader_UI
         }
         public class Resource
         {
-            public int Id { get; set; }
+            public long Id { get; set; }
             public int pageId { get; set; }
             public bool x2 { get; set; }
             public byte[] data { get; set; }
@@ -100,7 +100,7 @@ namespace Reader_UI
             {
                 public class SpecialSubText
                 {
-                    public int Id { get; set; }
+                    public long Id { get; set; }
                     public int begin { get; set; }
                     public int length { get; set; }
                     public bool isImg { get; set; }
@@ -124,7 +124,7 @@ namespace Reader_UI
                             return new Parser.Text.ScriptLine.SpecialSubText(begin, length, underlined, colour);
                     }
                 }
-                public int Id { get; set; }
+                public long Id { get; set; }
                 public bool isImg { get; set; }
                 public string hexColour { get; set; }
                 public string text { get; set; }
@@ -162,7 +162,7 @@ namespace Reader_UI
                     return sl;
                 }
             }
-            public int Id { get; set; }
+            public long Id { get; set; }
             public int pageId { get; set; }
             public bool x2 { get; set; }
             public string title { get; set; }
@@ -199,7 +199,7 @@ namespace Reader_UI
         }
         public class Link
         {
-            public int Id { get; set; }
+            public long Id { get; set; }
             public int pageId { get; set; }
             public int linkTo { get; set; }
             public string originalText { get; set; }

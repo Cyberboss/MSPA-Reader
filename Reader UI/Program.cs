@@ -143,14 +143,44 @@ namespace Reader_UI
             if (writer)
             {
                 if (dbw == null)
-                    dbw = new ArchiverWindow(db, immediate);
+                {
+                    if (((DatabaseManager)db).databaseType == DatabaseManager.DBType.SQLITE && dbr != null)
+                    {
+                        if (MessageBox.Show("Simultaneous reading and archiving is unsafe in sqlite mode. Close the reader to open the archiver?",
+                                         "Conflict",
+                                         MessageBoxButtons.YesNo) == DialogResult.Yes)
+                        {
+                            dbr.Close();
+                            dbw = new ArchiverWindow(db, immediate);
+                        }
+                        else
+                            return;
+                    }
+                    else
+                        dbw = new ArchiverWindow(db, immediate);
+                }
                 dbw.Show();
                 dbw.Focus();
             }
             else
             {
                 if (dbr == null)
-                    dbr = new Reader(db);
+                {
+                    if (((DatabaseManager)db).databaseType == DatabaseManager.DBType.SQLITE && dbw != null)
+                    {
+                        if (MessageBox.Show("Simultaneous reading and archiving is unsafe in sqlite mode. Close the archiver to open the reader?",
+                                         "Conflict",
+                                         MessageBoxButtons.YesNo) == DialogResult.Yes)
+                        {
+                            dbw.Close();
+                            dbr = new Reader(db);
+                        }
+                        else
+                            return;
+                    }
+                    else
+                        dbr = new Reader(db);
+                }
                 dbr.Show();
                 dbr.Focus();
             }

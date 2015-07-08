@@ -34,7 +34,7 @@ namespace Reader_UI
             MYSQL
         }
 
-        readonly DBType databaseType;
+        public readonly DBType databaseType;
         bool resetFlag = false;
 
         public DatabaseManager(DBType com)
@@ -142,7 +142,7 @@ namespace Reader_UI
                         if (username != "")
                             connectionString +=  "," + port + ";Initial Catalog=" + databaseName + ";" + "User ID=" + username + ";Password=" + password;
                         else
-                            connectionString += ";Initial Catalog=" + databaseName + "Integrated Security=True;";
+                            connectionString += ";Initial Catalog=" + databaseName + ";Integrated Security=True;";
                         sqlsRConn = new SqlConnection(connectionString);
                         sqlsWConn = new SqlConnection(connectionString.Replace("Initial Catalog=" + databaseName + ";", ""));
                         break;
@@ -182,36 +182,36 @@ namespace Reader_UI
         {
             var reader = new MSPADatabase(sqlsRConn);
             var icos = from b in writer.Resources
-                       where b.pageId == 100000
+                       where b.pageId == (int)SpecialResources.CANDYCORNS
                        select b;
 
 
             byte[] res;
-                switch (ic)
-                {
-                    case IconTypes.CANDYCORN:
+            switch (ic)
+            {
+                case IconTypes.CANDYCORN:
                     var theone = from b in icos
-                          where b.originalFileName == "candyCorn.gif"
-                          select b;
+                                 where b.originalFileName == "candycorn.gif"
+                                 select b;
 
                     res = theone.First().data;
-                        break;
-                    case IconTypes.CUEBALL:
+                    break;
+                case IconTypes.CUEBALL:
                     var theone2 = from b in icos
                                   where b.originalFileName == "candycorn_scratch.png"
-                                 select b;
+                                  select b;
                     res = theone2.First().data;
-                        break;
-                    case IconTypes.CALIBORNTOOTH:
+                    break;
+                case IconTypes.CALIBORNTOOTH:
                     var theone3 = from b in icos
                                   where b.originalFileName == "a6a6_tooth2.gif"
-                                 select b;
+                                  select b;
                     res = theone3.First().data;
-                        break;
-                    default:
-                        System.Diagnostics.Debugger.Break();
-                        throw new Exception();
-                }
+                    break;
+                default:
+                    System.Diagnostics.Debugger.Break();
+                    throw new Exception();
+            }
             reader.Dispose();
             return res;
         }
@@ -320,8 +320,8 @@ namespace Reader_UI
         override public void WriteResource(Parser.Resource[] res, int page, bool x2)
         {
             foreach (var link in res)
-        {
-                writer.Resources.Add(new MSPADatabase.Resource(link,page,x2));
+            {
+                writer.Resources.Add(new MSPADatabase.Resource(link, page, x2));
             }
         }
         public override bool IconsAreParsed()

@@ -59,6 +59,7 @@ namespace Reader_UI
         {
             try
             {
+                initializer.ReportProgress(0, "Connecting to database...");
                 db.Connect(dbName, dbFName, username, password, port, reset);
                 success = db.Initialize(initializer);
             }
