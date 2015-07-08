@@ -11,12 +11,20 @@ namespace Reader_UI
 {
     class MSPADatabase : DbContext
     {
+        public static MSPADatabase Initialize(DbConnection existingConnection, bool r, DatabaseManager.DBType dbtype)
+        {
+            if(dbtype == DatabaseManager.DBType.MYSQL)
+                DbConfiguration.SetConfiguration(new MySql.Data.Entity.MySqlEFConfiguration());
+            var db = new MSPADatabase(existingConnection, r, dbtype);
+            db.Database.Initialize(false);
+            return db;
+        }
         DbContextTransaction transaction = null;
         private readonly bool isSqlite, reset;
-        public MSPADatabase(DbConnection existingConnection, bool r, bool sqlite)
+        public MSPADatabase(DbConnection existingConnection, bool r, DatabaseManager.DBType dbtype)
             : base(existingConnection, true)
         {
-            isSqlite = sqlite;
+            isSqlite = dbtype == DatabaseManager.DBType.SQLITE;
             reset = r;
             if (reset)
                 Database.SetInitializer<MSPADatabase>(new DropCreateDatabaseAlways<MSPADatabase>());

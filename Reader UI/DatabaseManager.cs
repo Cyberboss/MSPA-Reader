@@ -158,9 +158,18 @@ namespace Reader_UI
                     sqlsWConn = new SQLiteConnection(connectionString);
                     break;
                 case DBType.MYSQL:
-                    connectionString = "Server=" + serverFolderName + ";Database=" + databaseName + ";User ID=" + username + ";Password=" + password + ";Pooling=true";
+
+                    MySqlConnectionStringBuilder cnx = new MySqlConnectionStringBuilder();
+                    
+                    cnx.Database = databaseName;
+                    cnx.Password = password;
+                    cnx.PersistSecurityInfo = true;
+                    cnx.UserID = username;
+                    cnx.Server = serverFolderName;
+
+                    connectionString = cnx.ToString();
                     sqlsRConn = new MySqlConnection(connectionString);
-                    sqlsWConn = new MySqlConnection(connectionString.Replace("Database=" + databaseName + ";", ""));
+                    sqlsWConn = new MySqlConnection(connectionString.Replace("database=" + databaseName + ";", ""));
                     break;
             }
             sqlsWConn.Open();
@@ -265,25 +274,25 @@ namespace Reader_UI
                                      "Version Mismatch",
                                          MessageBoxButtons.YesNo) == DialogResult.Yes);
                         if (!autoDrop)
-                        return false;
+                            return false;
+                    }
                 }
-            }
-            catch
-            {
+                catch
+                {
                     autoDrop = true;
                 }
                 sqlsWConn.Close();  //we have to close the connection or entity framework can't figure out how to unlock the db for dropping
                 sqlsWConn.ConnectionString = connectionString;  //reset connection string
+
                 if (resetFlag || autoDrop)
                     bgw.ReportProgress(0, "Creating Entity Framework (This may take some time)...");
                 else
                     bgw.ReportProgress(0, "Initializing Entity Framework...");
-                //will drop if model is different/deprecated and user said yes
-                writer = new MSPADatabase(sqlsWConn, resetFlag || autoDrop, databaseType == DBType.SQLITE);
 
-                writer.Database.Initialize(false);   //explicitly run initialization
+                writer = MSPADatabase.Initialize(sqlsWConn, resetFlag || autoDrop, databaseType);
 
-                if(writer.Versions.Count() == 0){
+                if (writer.Versions.Count() == 0)
+                {
                     var tmp = new MSPADatabase.Version();
                     tmp.DatabaseVersion = (int)Versions.Database;
                     writer.Versions.Add(tmp);
@@ -295,16 +304,16 @@ namespace Reader_UI
                     archivedPages.Add(page.pageId);
 
                 return true;
-                    }
-                catch
-                {
-                if (databaseType == DBType.SQLLOCALDB)
-                        MessageBox.Show("Error creating database, make sure the application has read/write permissions in the working directory.");
-                    else
-                        MessageBox.Show("Error creating database, make sure the specified account has read/write permissions.");
-                    return false;
-                }
             }
+            catch
+            {
+                if (databaseType == DBType.SQLLOCALDB)
+                    MessageBox.Show("Error creating database, make sure the application has read/write permissions in the working directory.");
+                else
+                    MessageBox.Show("Error creating database, make sure the specified account has read/write permissions.");
+                return false;
+            }
+        }
         override public void WriteResource(Parser.Resource[] res, int page, bool x2)
         {
             foreach (var link in res)
