@@ -1161,6 +1161,8 @@ namespace Reader_UI
             mspaHeaderLink[0].ForeColor = System.Drawing.Color.White;
             mspaHeaderLink[0].Location = new System.Drawing.Point(HEADER_FIRST_LINK_OFFSET, REGULAR_MSPAHEADERLINK_Y_OFFSET);
             mspaHeaderLink[0].Text = REGULAR_LABEL_TEXT_1;
+            mspaHeaderLink[0].Click += (o, i) => { System.Diagnostics.Process.Start("http://www.mspaintadventures.com"); };
+            mspaHeaderLink[0].Cursor = Cursors.Hand;
             headerPanel.Controls.Add(mspaHeaderLink[0]);
 
             candyCorn[0] = new PictureBox();
@@ -1179,6 +1181,8 @@ namespace Reader_UI
             mspaHeaderLink[1].ForeColor = Color.FromArgb(REGULAR_HEADER_GREEN_R, REGULAR_HEADER_GREEN_G, REGULAR_HEADER_GREEN_B);
             mspaHeaderLink[1].Location = new System.Drawing.Point(candyCorn[0].Location.X + candyCorn[0].Width + REGULAR_HEADER_X_OFFSET, REGULAR_MSPAHEADERLINK_Y_OFFSET);
             mspaHeaderLink[1].Text = REGULAR_LABEL_TEXT_2;
+            mspaHeaderLink[1].Click += (o, i) => { System.Diagnostics.Process.Start("http://www.mspaintadventures.com?viewpage=archive"); };
+            mspaHeaderLink[1].Cursor = Cursors.Hand;
             headerPanel.Controls.Add(mspaHeaderLink[1]);
 
             mspaHeaderLink[2] = new Label();
@@ -1195,6 +1199,8 @@ namespace Reader_UI
             mspaHeaderLink[3].ForeColor = Color.FromArgb(REGULAR_HEADER_GREEN_R, REGULAR_HEADER_GREEN_G, REGULAR_HEADER_GREEN_B);
             mspaHeaderLink[3].Location = new System.Drawing.Point(mspaHeaderLink[2].Location.X + mspaHeaderLink[2].Width, REGULAR_MSPAHEADERLINK_Y_OFFSET);
             mspaHeaderLink[3].Text = REGULAR_LABEL_TEXT_4;
+            mspaHeaderLink[3].Click += (o, i) => { System.Diagnostics.Process.Start("http://www.mspaintadventures.com?viewpage=new"); };
+            mspaHeaderLink[3].Cursor = Cursors.Hand;
             headerPanel.Controls.Add(mspaHeaderLink[3]);
 
             candyCorn[1] = new PictureBox();
@@ -1213,6 +1219,8 @@ namespace Reader_UI
             mspaHeaderLink[4].ForeColor = Color.FromArgb(REGULAR_HEADER_BLUE_R, REGULAR_HEADER_BLUE_G, REGULAR_HEADER_BLUE_B);
             mspaHeaderLink[4].Location = new System.Drawing.Point(candyCorn[1].Location.X + candyCorn[1].Width + REGULAR_HEADER_X_OFFSET, REGULAR_MSPAHEADERLINK_Y_OFFSET);
             mspaHeaderLink[4].Text = REGULAR_LABEL_TEXT_5;
+            mspaHeaderLink[4].Click += (o, i) => { System.Diagnostics.Process.Start("http://www.mspaintadventures.com?viewmap=menu"); };
+            mspaHeaderLink[4].Cursor = Cursors.Hand;
             headerPanel.Controls.Add(mspaHeaderLink[4]);
 
             mspaHeaderLink[5] = new Label();
@@ -1230,6 +1238,8 @@ namespace Reader_UI
             mspaHeaderLink[6].ForeColor = Color.FromArgb(REGULAR_HEADER_BLUE_R, REGULAR_HEADER_BLUE_G, REGULAR_HEADER_BLUE_B);
             mspaHeaderLink[6].Location = new System.Drawing.Point(mspaHeaderLink[5].Location.X + mspaHeaderLink[5].Width, REGULAR_MSPAHEADERLINK_Y_OFFSET);
             mspaHeaderLink[6].Text = REGULAR_LABEL_TEXT_7;
+            mspaHeaderLink[6].Click += (o, i) => { System.Diagnostics.Process.Start("http://www.mspaintadventures.com?viewlog=menu"); };
+            mspaHeaderLink[6].Cursor = Cursors.Hand;
             headerPanel.Controls.Add(mspaHeaderLink[6]);
 
             mspaHeaderLink[7] = new Label();
@@ -1246,6 +1256,8 @@ namespace Reader_UI
             mspaHeaderLink[8].ForeColor = Color.FromArgb(REGULAR_HEADER_BLUE_R, REGULAR_HEADER_BLUE_G, REGULAR_HEADER_BLUE_B);
             mspaHeaderLink[8].Location = new System.Drawing.Point(mspaHeaderLink[7].Location.X + mspaHeaderLink[7].Width, REGULAR_MSPAHEADERLINK_Y_OFFSET);
             mspaHeaderLink[8].Text = REGULAR_LABEL_TEXT_9;
+            mspaHeaderLink[8].Click += (o, i) => { System.Diagnostics.Process.Start("http://www.mspaintadventures.com?search=menu"); };
+            mspaHeaderLink[8].Cursor = Cursors.Hand;
             headerPanel.Controls.Add(mspaHeaderLink[8]); 
             
             candyCorn[2] = new PictureBox();
@@ -1264,6 +1276,8 @@ namespace Reader_UI
             mspaHeaderLink[9].ForeColor = Color.FromArgb(REGULAR_HEADER_YELLOW_R, REGULAR_HEADER_YELLOW_G, REGULAR_HEADER_YELLOW_B);
             mspaHeaderLink[9].Location = new System.Drawing.Point(candyCorn[2].Location.X + candyCorn[2].Width + REGULAR_HEADER_X_OFFSET, REGULAR_MSPAHEADERLINK_Y_OFFSET);
             mspaHeaderLink[9].Text = REGULAR_LABEL_TEXT_10;
+            mspaHeaderLink[9].Click += (o, i) => { System.Diagnostics.Process.Start("http://www.mspaintadventures.com?viewpage=shop"); };
+            mspaHeaderLink[9].Cursor = Cursors.Hand;
             headerPanel.Controls.Add(mspaHeaderLink[9]);
 
             mspaHeaderLink[10] = new Label();
@@ -1281,6 +1295,8 @@ namespace Reader_UI
             mspaHeaderLink[11].ForeColor = Color.FromArgb(REGULAR_HEADER_YELLOW_R, REGULAR_HEADER_YELLOW_G, REGULAR_HEADER_YELLOW_B);
             mspaHeaderLink[11].Location = new System.Drawing.Point(mspaHeaderLink[10].Location.X + mspaHeaderLink[10].Width, REGULAR_MSPAHEADERLINK_Y_OFFSET);
             mspaHeaderLink[11].Text = REGULAR_LABEL_TEXT_12;
+            mspaHeaderLink[11].Click += (o, i) => { System.Diagnostics.Process.Start("http://homestuck.bandcamp.com/"); };
+            mspaHeaderLink[11].Cursor = Cursors.Hand;
             headerPanel.Controls.Add(mspaHeaderLink[11]);
 
             candyCorn[3] = new PictureBox();
@@ -1299,6 +1315,8 @@ namespace Reader_UI
             mspaHeaderLink[12].ForeColor = Color.FromArgb(REGULAR_HEADER_ORANGE_R, REGULAR_HEADER_ORANGE_G, REGULAR_HEADER_ORANGE_B);
             mspaHeaderLink[12].Location = new System.Drawing.Point(candyCorn[3].Location.X + candyCorn[3].Width + REGULAR_HEADER_X_OFFSET, REGULAR_MSPAHEADERLINK_Y_OFFSET);
             mspaHeaderLink[12].Text = REGULAR_LABEL_TEXT_13;
+            mspaHeaderLink[12].Click += (o, i) => { System.Diagnostics.Process.Start("http://mspaforums.com"); };
+            mspaHeaderLink[12].Cursor = Cursors.Hand;
             headerPanel.Controls.Add(mspaHeaderLink[12]);
 
             mspaHeaderLink[13] = new Label();
@@ -1316,6 +1334,8 @@ namespace Reader_UI
             mspaHeaderLink[14].ForeColor = Color.FromArgb(REGULAR_HEADER_ORANGE_R, REGULAR_HEADER_ORANGE_G, REGULAR_HEADER_ORANGE_B);
             mspaHeaderLink[14].Location = new System.Drawing.Point(mspaHeaderLink[13].Location.X + mspaHeaderLink[13].Width, REGULAR_MSPAHEADERLINK_Y_OFFSET);
             mspaHeaderLink[14].Text = REGULAR_LABEL_TEXT_15;
+            mspaHeaderLink[14].Click += (o, i) => { System.Diagnostics.Process.Start("http://www.mspaintadventures.com/unlock.html"); };
+            mspaHeaderLink[14].Cursor = Cursors.Hand;
             headerPanel.Controls.Add(mspaHeaderLink[14]);
 
             mspaHeaderLink[15] = new Label();
@@ -1332,6 +1352,8 @@ namespace Reader_UI
             mspaHeaderLink[16].ForeColor = Color.FromArgb(REGULAR_HEADER_ORANGE_R, REGULAR_HEADER_ORANGE_G, REGULAR_HEADER_ORANGE_B);
             mspaHeaderLink[16].Location = new System.Drawing.Point(mspaHeaderLink[15].Location.X + mspaHeaderLink[15].Width, REGULAR_MSPAHEADERLINK_Y_OFFSET);
             mspaHeaderLink[16].Text = REGULAR_LABEL_TEXT_17;
+            mspaHeaderLink[16].Click += (o, i) => { System.Diagnostics.Process.Start("http://www.mspaintadventures.com/credits.html"); };
+            mspaHeaderLink[16].Cursor = Cursors.Hand;
             headerPanel.Controls.Add(mspaHeaderLink[16]);
 
             Controls.Add(headerPanel);

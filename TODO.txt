@@ -1,32 +1,29 @@
 ﻿
 Primary: Get inline images working eg 7980, 4943
+Primary: Inline links eg 2623
 Primary: Get Openbound working
 
 Tasks:
 
 -- Allow horizontal scroll to center comic content if window width is too small.
 -- LOWAS in void fireflies
--- Fix Linux styles? or is it not my problem?
--- Disable Simultaneous Archiving and Reading while in Sqlite mode
+-- Fix mono layout? Is it my fault that it's not acting correctly?
 -- Check if it works with older MSPA works(Jailbreak, problem sleuth), if we're lucky it will jst work with the regular style and we can just lower the minimum page cap
--- Implement archive page
+-- Implement archive page (Use header link once done)
 -- Review password saving code
 -- Implement ads taken straight from the website in comic footer, legal? (trying to help out hussie here, and I'm pretty sure they all go to whatpumpkin anyway)
 	^ thinking about it, also the sidebar ads too, I don't want hussie losing revenue.
 (DONE??? I SERIOUSLY CAN'T TELL) -- Figure out how to load Cascade properly (only multipart flash, as of right now I have no idea how if it's loading from the files or the loader is downloading the rest of the segments).
 -- Support for archival and serial reading modes (x.gif vs x_retcon.gif, activate retcon once past a certain page)
--- Better narrative/dialog parsing
--- Support line breaks in pesterlogs
-(DONE? Does this happen anywhere besides x2?) -- Note side by side longways images so the reader doesn't arrange them turnways (*horizontal, *vertical)
+-- Better narrative/dialog parsing?
+-- Support line breaks in pesterlogs?
 (NOT NEEDED?) -- Support fonts via parsing instead of statically
 -- Fix pesterlog system message regex?
--- Add funtionality to the header (direct to mspa)
 -- Read through and mark down problem pages
 -- Fix problem pages
 (DONE? lack of integrity check may make it buggy, no idea how transactions are handled either) -- Support Sqlite
 -- Support Oracle (Can I get access to a db for testing?)
 -- Better parsing techniques?
-(DONE? Looks like crap on my box) -- Support *nix (Theoretically we could as it's .NET, we do have a bunch of native methods however...)
 (Dismissed as Impossible) -- S̶u̶p̶p̶o̶r̶t̶ ̶V̶r̶i̶s̶k̶a̶  
 while(true)
 	-- More Horses
