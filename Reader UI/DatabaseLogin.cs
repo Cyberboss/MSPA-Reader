@@ -114,7 +114,7 @@ namespace Reader_UI
             {
                 if (resetDatabase.Checked)
                 {
-                    Properties.Settings.Default.lastReadPage = (int)Writer.PagesOfImportance.HOMESTUCK_PAGE_ONE;
+                    Properties.Settings.Default.lastReadPage = 0;
                 }
                 if (checkBox1.Checked)
                     Program.Open(db, false, true);

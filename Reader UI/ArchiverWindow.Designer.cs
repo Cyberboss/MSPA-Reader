@@ -35,6 +35,7 @@
             this.openReader = new System.Windows.Forms.Button();
             this.updateButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
+            this.startAt = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // progressBar1
@@ -75,10 +76,18 @@
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
             // 
+            // startAt
+            // 
+            this.startAt.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.startAt.FormattingEnabled = true;
+            resources.ApplyResources(this.startAt, "startAt");
+            this.startAt.Name = "startAt";
+            // 
             // ArchiverWindow
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.startAt);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.updateButton);
             this.Controls.Add(this.openReader);
@@ -98,5 +107,6 @@
         private System.Windows.Forms.Button openReader;
         private System.Windows.Forms.Button updateButton;
         private System.Windows.Forms.Button cancelButton;
+        private System.Windows.Forms.ComboBox startAt;
     }
 }

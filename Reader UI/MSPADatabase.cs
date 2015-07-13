@@ -217,6 +217,55 @@ namespace Reader_UI
         public DbSet<Text> PageMeta { get; set; }
         public DbSet<Link> Links { get; set; }
 
+        public void Prune(int pageno)
+        {
+            Transact();
+            try
+            {
+                var selectedRes = (from b in Resources
+                                   where b.pageId == pageno
+                                   select b);
+                var selectedMeta2 = (from b in PageMeta
+                                     where b.pageId == pageno
+                                     select b).Include(m => m.narr).Include(m => m.lines).Include(m => m.narr.subTexts).Include(m => m.lines.Select(l => l.subTexts));
+                var selectedLinks = (from b in Links
+                                     where b.pageId == pageno
+                                     select b).ToList();
+                var selectedPage = (from b in ArchivedPages where b.pageId == pageno select b);
+
+                foreach (var r in selectedRes)
+                    Resources.Remove(r);
+                foreach (var l in selectedLinks)
+                    Links.Remove(l);
+                foreach (var p in selectedPage)
+                    ArchivedPages.Remove(p);
+                foreach (var selectedMeta in selectedMeta2)
+                {
+                    if (selectedMeta.narr != null)
+                    {
+                        foreach (var sst in selectedMeta.narr.subTexts)
+                        {
+                            selectedMeta.narr.subTexts.Remove(sst);
+                        }
+                    }
+                    else
+                        foreach (var l in selectedMeta.lines)
+                        {
+                            foreach (var sst in l.subTexts)
+                            {
+                                l.subTexts.Remove(sst);
+                            }
+                        }
+                    PageMeta.Remove(selectedMeta);
+                }
+                Commit();
+            }
+            catch
+            {
+                Rollback();
+                System.Diagnostics.Debugger.Break();
+            }
+        }
         public Writer.Page ToWriterObject(int pageNo, bool x2)
         {
 
@@ -290,5 +339,6 @@ namespace Reader_UI
 
             return page;
         }
+
     }
 }

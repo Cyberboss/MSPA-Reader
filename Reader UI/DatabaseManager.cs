@@ -359,6 +359,11 @@ namespace Reader_UI
             }
             writer.ArchivedPages.Add(new MSPADatabase.Archives(page,x2));
         }
+
+        public override void Prune(int pageno)
+        {
+            writer.Prune(pageno);
+        }
         override public void Rollback()
         {
             writer.Rollback();

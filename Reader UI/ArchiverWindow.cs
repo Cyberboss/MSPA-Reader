@@ -15,10 +15,9 @@ namespace Reader_UI
         Writer db = null;
         bool running = false;
         bool closeRequested = false;
-        readonly bool startImmediate;
-        public ArchiverWindow(Writer idb,bool start)
+        int startingPage;
+        public ArchiverWindow(Writer idb)
         {
-            startImmediate = start;
             db = idb;
             InitializeComponent();
             updateButton.Enabled = false;
@@ -27,13 +26,10 @@ namespace Reader_UI
             FormClosed += Writer_Closed;
             cancelButton.Enabled = false;
             updateButton.Enabled = true;
-            this.Shown += DatabaseWriter_Shown;
-        }
-
-        void DatabaseWriter_Shown(object sender, EventArgs e)
-        {
-            if (startImmediate)
-                updateButton_Click(null, null);
+            startAt.Items.Add("Jailbreak");
+            startAt.Items.Add("Homestuck");
+            startAt.Items.Add("    Act 1");
+            startAt.SelectedIndex = 1;
         }
         void Writer_Closed(object sender, System.EventArgs e)
         {
@@ -62,6 +58,7 @@ namespace Reader_UI
                 {
                     cancelButton.Enabled = false;
                     updateButton.Enabled = true;
+                    startAt.Enabled = true;
                     return;
                 }
                 System.Threading.Thread.Sleep(1000);
@@ -77,10 +74,23 @@ namespace Reader_UI
         {
             Program.Open(db, false);
         }
-
+        int GetStartPage()
+        {
+            switch (startAt.SelectedIndex)
+            {
+                case 0:
+                    return (int)Writer.StoryBoundaries.JAILBREAK_PAGE_ONE;
+                case 1:
+                case 2:
+                    return (int)Writer.StoryBoundaries.HOMESTUCK_PAGE_ONE;
+                default:
+                    System.Diagnostics.Debugger.Break();
+                    throw new Exception();
+            }
+        }
         private void worker_DoWork(object sender, DoWorkEventArgs e)
         {
-            db.ResumeWork(worker);
+            db.ResumeWork(worker, startingPage);
             worker.ReportProgress(100, "FormMessageClose");
         }
 
@@ -91,6 +101,8 @@ namespace Reader_UI
             running = true;
             updateButton.Enabled = false;
             cancelButton.Enabled = true;
+            startAt.Enabled = false;
+            startingPage = GetStartPage();
             worker.RunWorkerAsync();
         }
 

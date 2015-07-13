@@ -151,13 +151,13 @@ namespace Reader_UI
                                          MessageBoxButtons.YesNo) == DialogResult.Yes)
                         {
                             dbr.Close();
-                            dbw = new ArchiverWindow(db, immediate);
+                            dbw = new ArchiverWindow(db);
                         }
                         else
                             return;
                     }
                     else
-                        dbw = new ArchiverWindow(db, immediate);
+                        dbw = new ArchiverWindow(db);
                 }
                 dbw.Show();
                 dbw.Focus();

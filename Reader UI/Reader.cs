@@ -225,7 +225,7 @@ namespace Reader_UI
 #endif
             FormClosed += Reader_Closed;
             numericUpDown1.Maximum = db.lastPage;
-            numericUpDown1.Minimum = (int)Writer.PagesOfImportance.HOMESTUCK_PAGE_ONE;
+            numericUpDown1.Minimum = (int)Writer.StoryBoundaries.JAILBREAK_PAGE_ONE;
             numericUpDown1.Value = numericUpDown1.Minimum;
             AcceptButton = jumpButton;
             Shown += Reader_Shown;
@@ -277,8 +277,7 @@ namespace Reader_UI
                         toggleFullscreen_Click(null, null);
                         return true;
                     case Keys.Left:
-                        if (page.number > (int)Writer.PagesOfImportance.HOMESTUCK_PAGE_ONE)
-                            WakeUpMr(page.number - 1);
+                        WakeUpMr(Writer.ValidRange(page.number - 1));
                         return true;
                     case Keys.Right:
                         if (page.number < db.lastPage)
@@ -680,6 +679,25 @@ namespace Reader_UI
 
             RemoveControl(pageLoadingProgress); RemoveControl(progressLabel);
         }
+        void LoadJailbreak()
+        {
+            LoadRegularPage();
+            comicPanel.MaximumSize = new Size(782,Int32.MaxValue);
+            comicPanel.Width = 782;
+            var oldLocX = comicPanel.Location.X;
+            comicPanel.Location = new Point(mainPanel.Width / 2 - comicPanel.Width / 2, comicPanel.Location.Y);
+            foreach (var tempPB in gifs)
+            {
+                tempPB.gif.Location = new Point(comicPanel.Width / 2 - tempPB.gif.Width / 2, tempPB.gif.Location.Y);
+            }
+            var leftSide = comicPanel.Width / 2 - REGULAR_NARRATIVE_WIDTH / 2;
+            if(narrative != null)
+                narrative.Location = new Point(leftSide, narrative.Location.Y);
+            if (linkPrefix != null)
+                linkPrefix.Location = new Point(leftSide, linkPrefix.Location.Y);
+            if (next != null)
+                next.Location = new Point(leftSide, next.Location.Y);
+        }
         void LoadPage()
         {
             try
@@ -694,6 +712,9 @@ namespace Reader_UI
                 saveButton.Enabled = true;
                 switch (db.GetStyle(pageRequest))
                 {
+                    case Writer.Style.JAILBREAK:
+                        LoadJailbreak();
+                        break;
                     case Writer.Style.X2:
                         LoadX2Page();
                         break;
@@ -1173,7 +1194,7 @@ namespace Reader_UI
 
             WakeUpMr(page.links[0].pageNumber);
 
-        }
+        }        
         void WakeUpMr(int pg)
         {
 
@@ -1196,11 +1217,11 @@ namespace Reader_UI
             Reader_Resize(null, null);
             CurtainsUp();
             int pr;
-            if (Properties.Settings.Default.lastReadPage >= (int)Writer.PagesOfImportance.HOMESTUCK_PAGE_ONE &&
+            if (Properties.Settings.Default.lastReadPage >= (int)Writer.StoryBoundaries.HOMESTUCK_PAGE_ONE &&
                 Properties.Settings.Default.lastReadPage <= db.lastPage)
                 pr = Properties.Settings.Default.lastReadPage;
             else
-                pr = (int)Writer.PagesOfImportance.HOMESTUCK_PAGE_ONE;
+                pr = (int)Writer.StoryBoundaries.HOMESTUCK_PAGE_ONE;
             WakeUpMr(pr);
         }
         void RemoveControl(Control c)
@@ -1498,6 +1519,7 @@ namespace Reader_UI
 
             switch (s)
             {
+                case Writer.Style.JAILBREAK:
                 case Writer.Style.OVERSHINE:
                 case Writer.Style.REGULAR:
                     BackColor = Color.FromArgb(REGULAR_BACK_COLOUR_R, REGULAR_BACK_COLOUR_G, REGULAR_BACK_COLOUR_B);
@@ -1751,8 +1773,8 @@ namespace Reader_UI
                 pageQueue.Pop();
             if (pageQueue.Count == 0)
             {
-                if (page != null && page.number > (int)Writer.PagesOfImportance.HOMESTUCK_PAGE_ONE)
-                    WakeUpMr(page.number - 1);
+                if (page != null)
+                    WakeUpMr(Writer.ValidRange(page.number - 1));
             }
             else
                 WakeUpMr(pageQueue.Pop());
@@ -1792,12 +1814,12 @@ namespace Reader_UI
 
         private void startOverButton_Click(object sender, EventArgs e)
         {
-            WakeUpMr((int)Writer.PagesOfImportance.HOMESTUCK_PAGE_ONE);
+            WakeUpMr((int)Writer.StoryBoundaries.HOMESTUCK_PAGE_ONE);
         }
 
         private void deleteButton_Click(object sender, EventArgs e)
         {
-            Properties.Settings.Default.lastReadPage = (int)Writer.PagesOfImportance.HOMESTUCK_PAGE_ONE;
+            Properties.Settings.Default.lastReadPage = (int)Writer.StoryBoundaries.HOMESTUCK_PAGE_ONE;
         }
 
         private void uiToggleButton_Click(object sender, EventArgs e)
@@ -1882,6 +1904,11 @@ namespace Reader_UI
             mainPanel.DrawToBitmap(pix, new Rectangle(0, 0, 1, 1));
             BackColor = pix.GetPixel(0, 0);
             pix.Dispose();
+        }
+
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        {
+            numericUpDown1.Value = Writer.ValidRange((int)numericUpDown1.Value);
         }
 
     }

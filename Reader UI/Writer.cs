@@ -40,6 +40,7 @@ namespace Reader_UI
         }
         public enum Style
         {
+            JAILBREAK,
             REGULAR,
             SCRATCH,
             X2,
@@ -93,12 +94,14 @@ namespace Reader_UI
             }
         }
         WorkerLock wl = new WorkerLock();
+        public abstract void Prune(int pageno);
         protected class ArchiveLock
         {
             private List<int> archivedPages = new List<int>();
             private int request = 0;
             private object _sync = new object();
             private bool ff = false;
+            private bool pruned;
 
             public bool IsPageArchived(int page)
             {
@@ -106,6 +109,21 @@ namespace Reader_UI
                 lock (_sync)
                 {
                     ret = archivedPages.IndexOf(page) >= 0;
+                }
+                return ret;
+            }
+            public int Prune()
+            {
+                int ret;
+                lock (_sync)
+                {
+                    if (!pruned)
+                    {
+                        ret = archivedPages.Max();
+                        archivedPages.RemoveAt(archivedPages.IndexOf(ret));
+                        pruned = true;
+                    }else
+                        ret = 0;
                 }
                 return ret;
             }
@@ -133,7 +151,7 @@ namespace Reader_UI
                             break;
                         }
                 }
-                return ret;
+                return Writer.ValidRange(ret);
             }
             public void Add(int page)
             {
@@ -181,7 +199,7 @@ namespace Reader_UI
         protected ArchiveLock archivedPages = new ArchiveLock();
        public  enum PagesOfImportance
         {
-            HOMESTUCK_PAGE_ONE = 001901,
+           JAILBREAK_LAST_PAGE = 000136,
             CASCADE = 006009,
             CALIBORN_PAGE_SMASH = 007395,
             CALIBORN_PAGE_SMASH2 = 007680,
@@ -190,6 +208,12 @@ namespace Reader_UI
             GAMEOVER = 008801,
            OVERSHINE = 009304,
         }
+       public enum StoryBoundaries
+       {
+           JAILBREAK_PAGE_ONE = 000002,
+           JAILBREAK_LAST_PAGE = 000136,
+           HOMESTUCK_PAGE_ONE = 001901,
+       }
         float totalMegabytesDownloaded = 0;
 
 
@@ -208,6 +232,15 @@ namespace Reader_UI
                     {
                         MessageBox.Show("The database is empty. Cannot read MSPA.");
                         return false;
+                    }
+                }
+                else{
+                    var pg = archivedPages.Prune();
+                    if (pg != 0)
+                    {
+                        bgw.ReportProgress(0, "Reparsing last page...");
+                        Prune(pg);
+                        SavePage(pg);
                     }
                 }
 
@@ -298,6 +331,8 @@ namespace Reader_UI
 
         public abstract Page GetPage(int pageno,bool x2);
         public Style GetStyle(int pageno){
+            if (pageno <= (int)StoryBoundaries.JAILBREAK_LAST_PAGE)
+                return Style.JAILBREAK;
             if (pageno == (int)PagesOfImportance.CASCADE)
                 return Style.CASCADE;
             if (pageno == (int)PagesOfImportance.DOTA)
@@ -432,13 +467,13 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             }
 
             cascadeSegments[6] = new Parser.Resource(parser.DownloadFile("http://www.mspaintadventures.com/images/header_cascade.gif"), "header_cascade.gif");
-            
+
+            Parser.Text asdf = new Parser.Text();
+            asdf.narr = new Parser.Text.ScriptLine("#000000", "", 0);
+            asdf.title = "[S] Cascade.";
             Transact();
             WriteResource(cascadeSegments, (int)PagesOfImportance.CASCADE, false);
             WriteLinks(next, (int)PagesOfImportance.CASCADE);
-            Parser.Text asdf = new Parser.Text();
-            asdf.narr = new Parser.Text.ScriptLine("#000000","",0);
-            asdf.title = "[S] Cascade.";
             WriteText(asdf, (int)PagesOfImportance.CASCADE, false);
 
             ///BRB
@@ -459,14 +494,14 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             if (bgw != null)
                 bgw.ReportProgress(progress, FUCKYOU[0].originalFileName + ": " + fileSize2 / 1024 + "KB");
 
-            Transact();
-            WriteResource(FUCKYOU, (int)PagesOfImportance.CALIBORN_PAGE_SMASH, false);
             Parser.Link[] lnk = new Parser.Link[1];
             lnk[0] = new Parser.Link("", (int)PagesOfImportance.CALIBORN_PAGE_SMASH + 1);
-            WriteLinks(lnk, (int)PagesOfImportance.CALIBORN_PAGE_SMASH);
             Parser.Text asdf = new Parser.Text();
             asdf.narr = new Parser.Text.ScriptLine("#000000", "", 0);
             asdf.title = "[S] Cascade.";
+            Transact();
+            WriteResource(FUCKYOU, (int)PagesOfImportance.CALIBORN_PAGE_SMASH, false);
+            WriteLinks(lnk, (int)PagesOfImportance.CALIBORN_PAGE_SMASH);
             WriteText(asdf, (int)PagesOfImportance.CALIBORN_PAGE_SMASH, false);
             ArchivePageNumber((int)PagesOfImportance.CALIBORN_PAGE_SMASH, false);
             Commit();
@@ -484,14 +519,14 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             if (bgw != null)
                 bgw.ReportProgress(progress, FUCKYOU[0].originalFileName + ": " + fileSize2 / 1024 + "KB");
 
-            Transact();
-            WriteResource(FUCKYOU, (int)PagesOfImportance.CALIBORN_PAGE_SMASH2, false);
             Parser.Link[] lnk = new Parser.Link[1];
             lnk[0] = new Parser.Link("", (int)PagesOfImportance.CALIBORN_PAGE_SMASH2 + 1);
-            WriteLinks(lnk, (int)PagesOfImportance.CALIBORN_PAGE_SMASH2);
             Parser.Text asdf = new Parser.Text();
             asdf.narr = new Parser.Text.ScriptLine("#000000", "", 0);
             asdf.title = "[S] Cascade.";
+            Transact();
+            WriteLinks(lnk, (int)PagesOfImportance.CALIBORN_PAGE_SMASH2);
+            WriteResource(FUCKYOU, (int)PagesOfImportance.CALIBORN_PAGE_SMASH2, false);
             WriteText(asdf, (int)PagesOfImportance.CALIBORN_PAGE_SMASH2, false);
             ArchivePageNumber((int)PagesOfImportance.CALIBORN_PAGE_SMASH2, false);
             Commit();
@@ -509,13 +544,13 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             if (bgw != null)
                 bgw.ReportProgress(progress, FUCKYOU[0].originalFileName + ": " + fileSize2 / 1024 + "KB");
 
-            Transact();
-            WriteResource(FUCKYOU, (int)PagesOfImportance.DOTA, false);
             Parser.Text asdf = new Parser.Text();
             asdf.narr = new Parser.Text.ScriptLine("#000000", "", 0);
             asdf.title = "";
             Parser.Link[] lnk = new Parser.Link[1];
             lnk[0] = new Parser.Link("", (int)PagesOfImportance.DOTA + 1);
+            Transact();
+            WriteResource(FUCKYOU, (int)PagesOfImportance.DOTA, false);
             WriteLinks(lnk, (int)PagesOfImportance.DOTA);
             WriteText(asdf, (int)PagesOfImportance.DOTA, false);
             ArchivePageNumber((int)PagesOfImportance.DOTA, false);
@@ -533,13 +568,13 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             if (bgw != null)
                 bgw.ReportProgress(progress, FUCKYOU[0].originalFileName + ": " + fileSize2 / 1024 + "KB");
 
-            Transact();
-            WriteResource(FUCKYOU, (int)PagesOfImportance.SHES8ACK, false);
             Parser.Text asdf = new Parser.Text();
             asdf.narr = new Parser.Text.ScriptLine("#000000", "", 0);
             asdf.title = "";
             Parser.Link[] lnk = new Parser.Link[1];
             lnk[0] = new Parser.Link("", (int)PagesOfImportance.SHES8ACK + 1);
+            Transact();
+            WriteResource(FUCKYOU, (int)PagesOfImportance.SHES8ACK, false);
             WriteLinks(lnk, (int)PagesOfImportance.SHES8ACK);
             WriteText(asdf, (int)PagesOfImportance.SHES8ACK, false);
             ArchivePageNumber((int)PagesOfImportance.SHES8ACK, false);
@@ -557,13 +592,13 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             if (bgw != null)
                 bgw.ReportProgress(progress, FUCKYOU[0].originalFileName + ": " + fileSize2 / 1024 + "KB");
 
-            Transact();
-            WriteResource(FUCKYOU, (int)PagesOfImportance.GAMEOVER, false);
             Parser.Text asdf = new Parser.Text();
             asdf.narr = new Parser.Text.ScriptLine("#000000", "", 0);
             asdf.title = "";
             Parser.Link[] lnk = new Parser.Link[1];
             lnk[0] = new Parser.Link("", (int)PagesOfImportance.GAMEOVER + 1);
+            Transact();
+            WriteResource(FUCKYOU, (int)PagesOfImportance.GAMEOVER, false);
             WriteLinks(lnk, (int)PagesOfImportance.GAMEOVER);
             WriteText(asdf, (int)PagesOfImportance.GAMEOVER, false);
             ArchivePageNumber((int)PagesOfImportance.GAMEOVER, false);
@@ -581,19 +616,52 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             if (bgw != null)
                 bgw.ReportProgress(progress, FUCKYOU[0].originalFileName + ": " + fileSize2 / 1024 + "KB");
 
-            Transact();
-            WriteResource(FUCKYOU, (int)PagesOfImportance.OVERSHINE, false);
             Parser.Text asdf = new Parser.Text();
             asdf.narr = new Parser.Text.ScriptLine("#000000", "", 0);
             asdf.title = "";
             Parser.Link[] lnk = new Parser.Link[1];
             lnk[0] = new Parser.Link("[S][A6A6I4] ====>", (int)PagesOfImportance.OVERSHINE + 1);
+            Transact();
+            WriteResource(FUCKYOU, (int)PagesOfImportance.OVERSHINE, false);
             WriteLinks(lnk, (int)PagesOfImportance.OVERSHINE);
             WriteText(asdf, (int)PagesOfImportance.OVERSHINE, false);
             ArchivePageNumber((int)PagesOfImportance.OVERSHINE, false);
             Commit();
         }
-        public void ResumeWork(System.ComponentModel.BackgroundWorker bgw)
+        void HandleJailbreakLast(System.ComponentModel.BackgroundWorker bgw, int progress)
+        {
+            if (bgw != null)
+                bgw.ReportProgress(progress, "Now parsing your victory.");
+            Parser.Resource[] FUCKYOU = new Parser.Resource[1];
+            FUCKYOU[0] = new Parser.Resource(parser.DownloadFile("http://cdn.mspaintadventures.com/storyfiles/jb2/YOUWIN.gif"), "YOUWIN.gif");
+
+            var fileSize2 = FUCKYOU[0].data.Count();
+            totalMegabytesDownloaded += (float)fileSize2 / (1024.0f * 1024.0f);
+            if (bgw != null)
+                bgw.ReportProgress(progress, FUCKYOU[0].originalFileName + ": " + fileSize2 / 1024 + "KB");
+
+            Parser.Text asdf = new Parser.Text();
+            asdf.narr = new Parser.Text.ScriptLine("#000000", "Would you like to play again?", 0);
+            asdf.title = "Enjoy restful slumber.";
+            Transact();
+            WriteResource(FUCKYOU, (int)PagesOfImportance.JAILBREAK_LAST_PAGE, false);
+            WriteLinks(new Parser.Link[0], (int)PagesOfImportance.JAILBREAK_LAST_PAGE);
+            WriteText(asdf, (int)PagesOfImportance.JAILBREAK_LAST_PAGE, false);
+            ArchivePageNumber((int)PagesOfImportance.JAILBREAK_LAST_PAGE, false);
+            Commit();
+        }
+        public static int ValidRange(int pg)
+        {
+            if (pg < (int)StoryBoundaries.JAILBREAK_PAGE_ONE)
+                return (int)StoryBoundaries.JAILBREAK_PAGE_ONE;
+            if (pg <= (int)StoryBoundaries.JAILBREAK_LAST_PAGE)
+                return pg;
+            if (pg < (int)StoryBoundaries.HOMESTUCK_PAGE_ONE)
+                return (int)StoryBoundaries.HOMESTUCK_PAGE_ONE;
+            //TODO: Check for empty pages
+            return pg;
+        }
+        public void ResumeWork(System.ComponentModel.BackgroundWorker bgw, int startPage)
         {
 
             int currentProgress;
@@ -605,7 +673,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 {
                     int missedPages = 0;
 
-                    int startPage = archivedPages.FindLowestPage((int)PagesOfImportance.HOMESTUCK_PAGE_ONE, lastPage);
+                    startPage = archivedPages.FindLowestPage(startPage, lastPage);
                     int currentPage = startPage;
                     int pagesToParse = lastPage - startPage;
                     currentProgress = (int)(((float)(currentPage - 1 - startPage) / (float)(pagesToParse)) * 100.0f);
@@ -668,7 +736,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
         }
         int SavePage(int currentPage, System.ComponentModel.BackgroundWorker bgw = null, int currentProgress = 0)
         {
-            if ((Enum.IsDefined(typeof(PagesOfImportance), currentPage)) && currentPage != (int)PagesOfImportance.HOMESTUCK_PAGE_ONE)
+            if (Enum.IsDefined(typeof(PagesOfImportance), currentPage))
             {
                 try
                 {
@@ -694,6 +762,9 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                             break;
                         case PagesOfImportance.OVERSHINE:
                             HandleOvershine(bgw, currentProgress);
+                            break;
+                        case PagesOfImportance.JAILBREAK_LAST_PAGE:
+                            HandleJailbreakLast(bgw, currentProgress);
                             break;
                     }
                     archivedPages.Add(currentPage);

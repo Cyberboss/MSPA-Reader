@@ -200,16 +200,16 @@ namespace Reader_UI
                 return res;
             }
         }
-        const string prepend = "http://www.mspaintadventures.com/?s=6&p=";
+        const string prepend2 = "http://www.mspaintadventures.com/?s=";
+        const string prepend3 = "&p=";
         const string gifRegex = @"http:\/\/(?!" + 
             @".*v2_blankstrip"  //stuff to ignore
             + @"|.*v2_blanksquare2"
             + @"|.*v2_blanksquare3"
             + @"|.*spacer"
-            //the trickster comic bg
             + @"|.*bluetile"
-            + @")(.*?)\.gif";
-        const string scratchHeaderImageRegex = "src=\\\"(.*?\\.gif)\\\"";
+            + @")(.*?)\.(?i)gif";
+        const string scratchHeaderImageRegex = "src=\\\"(.*?\\.[gif|GIF])\\\"";
         const string scratchHeaderImageFilenameRegex = @".*\/(.*)";
         const string scratchTitleRegex = "title=\\\"(.*?)\\\"";
         const string swfRegex = @"http:\/\/.*?\.swf";
@@ -655,12 +655,18 @@ namespace Reader_UI
         {
             return pageno == 5982;
         }
+        int GetStoryFromPage(int pg)
+        {
+            if (pg <= 136)
+                return 1;
+            return 6;
+        }
         public bool LoadPage(int pageno)
         {
             try
             {
                 x2Flag = false;
-                var response = client.GetByteArrayAsync(new Uri(prepend + pageno.ToString("D6"))).Result;
+                var response = client.GetByteArrayAsync(new Uri(prepend2 + GetStoryFromPage(pageno) + prepend3 + pageno.ToString("D6"))).Result;
                 String source = Encoding.GetEncoding("utf-8").GetString(response, 0, response.Length - 1);
                 source = WebUtility.HtmlDecode(source);
                 var html = new HtmlDocument();
@@ -689,7 +695,7 @@ namespace Reader_UI
                     contentTable = html.DocumentNode.SelectSingleNode("//comment()[contains(., 'COMIC ONE')]").ParentNode.SelectSingleNode("table");
                     secondContentTable = html.DocumentNode.SelectSingleNode("//comment()[contains(., 'COMIC TWO')]").ParentNode.SelectSingleNode("table");
 
-                    //essentially it's two pages of comics right next to each other. Simple enough for the parser. Fucking nightmare for the db and reader
+                    //essentially it's two pages of comics right next to each other. Simple enough for the parser. Fucking nightmare for the reader
 
                 }
                 else
