@@ -49,27 +49,30 @@ namespace Reader_UI
                 {
                     public readonly int begin, length;
                     public readonly bool isImg;
+                    public readonly bool isLink;
                     public readonly bool underlined;
                     public readonly string colour;
                     public SpecialSubText(int beg, int len, bool under, string col)
                     {
                         isImg = false;
+                        isLink = false;
                         begin = beg;
                         length = len;
                         underlined = under;
                         colour = col;
                     }
-                    public SpecialSubText(int beg, int len, string imageName)
+                    public SpecialSubText(int beg, int len, string imageName, bool imgnotlink)
                     {
-                        isImg = true;
+                        isImg = imgnotlink;
+                        isLink = !imgnotlink;
                         begin = beg;
                         length = len;
                         underlined = false;
                         colour = imageName;
                     }
-                    public SpecialSubText(int beg, int len, bool under, string col, bool i)
+                    public SpecialSubText(int beg, int len, bool under, string col, bool i, bool l)
                     {
-
+                        isLink = l;
                         isImg = i;
                         begin = beg;
                         length = len;
@@ -282,7 +285,8 @@ namespace Reader_UI
         {
             var lineSpecialSubtext = currentLine.SelectNodes("span");
             var lineImages = currentLine.SelectNodes("img");
-            if (lineImages == null && lineSpecialSubtext == null)
+            var lineLinks = currentLine.SelectNodes("a");
+            if (lineImages == null && lineSpecialSubtext == null && lineLinks == null)
                 return;
 
             List<Text.ScriptLine.SpecialSubText> sTs = new List<Text.ScriptLine.SpecialSubText>();
@@ -295,8 +299,8 @@ namespace Reader_UI
                     bool underlined = Regex.Match(currentSpecialSubtext.OuterHtml, underlineRegex).Success;
                     var colourReg = Regex.Match(currentSpecialSubtext.OuterHtml, hexColourRegex);
                     string colour = colourReg.Success ? colourReg.Value : scriptLine.hexColour;
-                    int begin = currentLine.InnerText.IndexOf(currentSpecialSubtext.InnerText);
-                    int length = currentSpecialSubtext.InnerText.Length;
+                    int begin = currentLine.InnerText.Trim().IndexOf(currentSpecialSubtext.InnerText);
+                    int length = currentSpecialSubtext.InnerText.Trim().Length;
                     sTs.Add(new Text.ScriptLine.SpecialSubText(begin, length, underlined, colour));
                 }
             }
@@ -308,14 +312,31 @@ namespace Reader_UI
                     var currentSpecialSubtext = lineImages.ElementAt(j);
                     var reg = Regex.Match(currentSpecialSubtext.OuterHtml, gifRegex);
                     string img = System.IO.Path.GetFileName(new Uri(reg.Value).LocalPath);
-                    int begin = currentLine.InnerHtml.IndexOf(currentSpecialSubtext.OuterHtml);
-                    int length = currentSpecialSubtext.InnerText.Length;
+                    int begin = currentLine.InnerText.Trim().IndexOf(currentSpecialSubtext.InnerText);
+                    int length = currentSpecialSubtext.InnerText.Trim().Length;
                     resources.Find(x => x.originalFileName == img).isInPesterLog = true;
-                    sTs.Add(new Text.ScriptLine.SpecialSubText(begin, length, img));
+                    sTs.Add(new Text.ScriptLine.SpecialSubText(begin, length, img, true));
                 }
             }
+            if (lineLinks != null)
+                for (int i = 0; i < lineLinks.Count(); ++i)
+                {
+                    var currentSpecialSubtext = lineLinks.ElementAt(i);
+                    string link = currentSpecialSubtext.Attributes["href"].Value;
+                    int begin = currentLine.InnerText.Trim().IndexOf(currentSpecialSubtext.InnerText);
+                    int length = currentSpecialSubtext.InnerText.Trim().Length;
+                    sTs.Add(new Text.ScriptLine.SpecialSubText(begin, length, MakeAbsoluteUrl(link), false));
+                }
             scriptLine.subTexts = sTs.ToArray();
 
+        }
+        static string MakeAbsoluteUrl(string url)
+        {
+            Uri result;
+            var res = Uri.TryCreate(url, UriKind.Absolute, out result);
+            if (res)
+                return url;
+            return "http://mspaintadventures.com/" + url;
         }
         void ParseText()
         {

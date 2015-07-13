@@ -960,13 +960,70 @@ namespace Reader_UI
                 narrative.Width = REGULAR_NARRATIVE_WIDTH;
                 narrative.SelectionAlignment = HorizontalAlignment.Center;
                 narrative.Font = new System.Drawing.Font("Courier New", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-                narrative.Text = page.meta.narr.text.Trim();
+                narrative.Text = page.meta.narr.text;
                 narrative.ForeColor = System.Drawing.ColorTranslator.FromHtml(page.meta.narr.hexColour);
+                var tmpl = narrative;
+                if (page.meta.narr.subTexts.Count() != 0)
+                    for (int j = 0; j < page.meta.narr.subTexts.Count(); ++j)
+                    {
+                        if (!page.meta.narr.subTexts[j].isImg && !page.meta.narr.subTexts[j].isLink)
+                        {
+
+                            //font change
+                            tmpl.Select(page.meta.narr.subTexts[j].begin, page.meta.narr.subTexts[j].length);
+                            if (page.meta.narr.subTexts[j].underlined)
+                                tmpl.SelectionFont = new System.Drawing.Font("Courier New", 10.5F, System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                            tmpl.SelectionColor = System.Drawing.ColorTranslator.FromHtml(page.meta.narr.subTexts[j].colour);
+                        }
+                        else if (page.meta.narr.subTexts[j].isLink)
+                        {
+                            //so since rtf hyperlinks are broken to fuck we'll just improvise
+                            var link = new GrowLinkLabel();
+                            tmpl.Select(page.meta.narr.subTexts[j].begin, page.meta.narr.subTexts[j].length);
+                            link.Text = tmpl.SelectedText;
+                            link.Font = narrative.Font;
+                            link.Click += (o, i) => { System.Diagnostics.Process.Start(page.meta.narr.subTexts[j].colour); };
+                            link.Width = narrative.Width;
+                            link.Height = narrative.Height;
+                            link.TextAlign = ContentAlignment.MiddleCenter;
+                            conversations.Add(new LineOrPB(link));
+                        }
+                        else
+                        {
+                            //inline image
+
+                            //what needs to happen here is we need to advance the text so that the image can fit in which should just be " " times some factor of the width of the image
+                            //for now assume 1space = 10.5 pt = 14px
+                            Parser.Resource inlineImg = Array.Find(page.resources, x => x.isInPesterLog == true && x.originalFileName == page.meta.narr.subTexts[j].colour);
+                            var tmpPB = new GifStream();
+                            tmpPB.loc = new MemoryStream(inlineImg.data);
+                            tmpPB.gif = new PictureBox();
+                            tmpPB.gif.Image = Image.FromStream(tmpPB.loc);
+
+                            string spaces = "";
+                            int needed = tmpPB.gif.Image.Width / 14;
+                            for (int k = 0; k < needed; ++k)
+                                spaces += " ";
+
+                            tmpl.Text = tmpl.Text.Substring(0, page.meta.narr.subTexts[j].begin) + spaces + tmpl.Text.Substring(page.meta.narr.subTexts[j].begin);
+
+                            //just dispose the picture while we are testing this
+                            tmpPB.gif.Dispose();
+                            tmpPB.loc.Dispose();
+
+                        }
+                    }
                 leftSide = comicPanel.Width / 2 - narrative.Width / 2;
                 narrative.Location = new Point(leftSide, currentHeight);
                 currentHeight += narrative.Height;
                 comicPanel.Controls.Add(narrative);
 
+                foreach (var link in conversations)
+                {
+                    comicPanel.Controls.Add(link.GetControl());
+                    link.GetControl().Location = narrative.Location;
+                    link.GetControl().BringToFront();
+                }
             }
             else
             {
@@ -1011,7 +1068,7 @@ namespace Reader_UI
                         if (page.meta.lines[i].subTexts.Count() != 0)
                             for (int j = 0; j < page.meta.lines[i].subTexts.Count(); ++j)
                             {
-                                if (!page.meta.lines[i].subTexts[j].isImg)
+                                if (!page.meta.lines[i].subTexts[j].isImg && !page.meta.lines[i].subTexts[j].isLink)
                                 {
 
                                     //font change
@@ -1019,6 +1076,14 @@ namespace Reader_UI
                                     if (page.meta.lines[i].subTexts[j].underlined)
                                         tmpl.SelectionFont = new System.Drawing.Font("Courier New", 10.5F, System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
                                     tmpl.SelectionColor = System.Drawing.ColorTranslator.FromHtml(page.meta.lines[i].subTexts[j].colour);
+                                }
+                                else if (page.meta.lines[i].subTexts[j].isLink)
+                                {
+
+                                    tmpl.Select(page.meta.lines[i].subTexts[j].begin, page.meta.lines[i].subTexts[j].length);
+                                    tmpl.DetectUrls = true;
+                                    tmpl.AppendText(page.meta.lines[i].subTexts[j].colour);
+                                    Debugger.Break();
                                 }
                                 else
                                 {

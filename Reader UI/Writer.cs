@@ -10,9 +10,6 @@ namespace Reader_UI
 {
     public abstract class Writer : IDisposable
     {
-        //candy at 100000
-        //trickster is stored at 100001
-        //x2 header at 100002
         public enum SpecialResources
         {
             CANDYCORNS = 100000,
@@ -20,7 +17,7 @@ namespace Reader_UI
             X2_HEADER = 100002,
         }
         public enum Versions{
-            Database = 3, //update with every commit that affects db layout
+            Database = 4, //update with every commit that affects db layout
             Program = 2,
             Release = Program + 1
         }
@@ -117,7 +114,7 @@ namespace Reader_UI
                 int ret;
                 lock (_sync)
                 {
-                    if (!pruned)
+                    if (!pruned && archivedPages.Count() > 0)
                     {
                         ret = archivedPages.Max();
                         archivedPages.RemoveAt(archivedPages.IndexOf(ret));

@@ -104,6 +104,7 @@ namespace Reader_UI
                     public int begin { get; set; }
                     public int length { get; set; }
                     public bool isImg { get; set; }
+                    public bool isLink { get; set; }
                     public bool underlined { get; set; }
                     public string colour { get; set; }
 
@@ -113,13 +114,16 @@ namespace Reader_UI
                         begin = sst.begin;
                         length = sst.length;
                         isImg = sst.isImg;
+                        isLink = sst.isLink;
                         underlined = sst.underlined;
                         colour = sst.colour;
                     }
                     public Parser.Text.ScriptLine.SpecialSubText ToParserObject()
                     {
                         if (isImg)
-                            return new Parser.Text.ScriptLine.SpecialSubText(begin, length, colour);
+                            return new Parser.Text.ScriptLine.SpecialSubText(begin, length, colour,true);
+                        else if (isLink)
+                            return new Parser.Text.ScriptLine.SpecialSubText(begin, length, colour, false);
                         else
                             return new Parser.Text.ScriptLine.SpecialSubText(begin, length, underlined, colour);
                     }
@@ -233,25 +237,25 @@ namespace Reader_UI
                                      select b).ToList();
                 var selectedPage = (from b in ArchivedPages where b.pageId == pageno select b);
 
-                foreach (var r in selectedRes)
+                foreach (var r in selectedRes.ToList())
                     Resources.Remove(r);
-                foreach (var l in selectedLinks)
+                foreach (var l in selectedLinks.ToList())
                     Links.Remove(l);
-                foreach (var p in selectedPage)
+                foreach (var p in selectedPage.ToList())
                     ArchivedPages.Remove(p);
-                foreach (var selectedMeta in selectedMeta2)
+                foreach (var selectedMeta in selectedMeta2.ToList())
                 {
                     if (selectedMeta.narr != null)
                     {
-                        foreach (var sst in selectedMeta.narr.subTexts)
+                        foreach (var sst in selectedMeta.narr.subTexts.ToList())
                         {
                             selectedMeta.narr.subTexts.Remove(sst);
                         }
                     }
                     else
-                        foreach (var l in selectedMeta.lines)
+                        foreach (var l in selectedMeta.lines.ToList())
                         {
-                            foreach (var sst in l.subTexts)
+                            foreach (var sst in l.subTexts.ToList())
                             {
                                 l.subTexts.Remove(sst);
                             }
