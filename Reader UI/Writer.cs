@@ -210,9 +210,19 @@ namespace Reader_UI
         }
        public enum StoryBoundaries
        {
-           JAILBREAK_PAGE_ONE = 000002,
-           JAILBREAK_LAST_PAGE = 000136,
-           HOMESTUCK_PAGE_ONE = 001901,
+           JAILBREAK_PAGE_ONE = 2,
+           JAILBREAK_LAST_PAGE = 136,
+           HOMESTUCK_PAGE_ONE = 1901,
+           HS_EOA1 = 2147,
+           HS_A2 = 2149,        //yes i know the act boundaries aren't cohesive but that's not my problem, if the reader want's the inbetweens they should pick part 1 or all of homestuck
+           HS_EOA2 = 2658,
+           HS_A3 = 2660,
+           HS_EOA3 = 3053,
+           HS_I1 = 3054,
+           HS_EOI1 = 3257,
+           HS_A4 = 3258,
+           HS_EOA4 = 3841,
+           HS_EOP1 = 3888,  //because that's a lot of missing pages, since EOA4
        }
         float totalMegabytesDownloaded = 0;
 
@@ -671,27 +681,24 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             {
                 List<int> missedPages = new List<int>();
                 bool missedRound = false;
+                int currentPage;
+                startPage = ValidRange(startPage);
+                int pagesToParse = lastPage - startPage;
+                int pagesParsed = 0;
                 while (true)
                 {
 
-                    startPage = archivedPages.FindLowestPage(startPage, lastPage);
-                    int currentPage;
-                    int pagesParsed = 0;
                     if (!missedRound)
-                        currentPage = ValidRange(startPage);
+                        currentPage = archivedPages.FindLowestPage(startPage, lastPage);
                     else
                         currentPage = missedPages[0];
-                    int pagesToParse = lastPage - startPage;
+                    if (currentPage > lastPage)
+                    {
+                        if (!bgw.CancellationPending)
+                            bgw.ReportProgress(100, "Range already archived!");
+                        return;
+                    }
                     currentProgress = (int)(((float)(pagesParsed) / (float)(pagesToParse)) * 100.0f);
-
-
-                    //debug set current page here
-                    //currentPage = 6708;
-                    //currentPage = 7326;
-                    //currentPage = 4163;
-                    //currentPage = 1926;
-                    //currentPage = 7690;
-                    //currentPage = 6009;
 
                     if (!bgw.CancellationPending)
                     {

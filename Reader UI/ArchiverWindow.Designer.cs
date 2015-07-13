@@ -37,6 +37,7 @@
             this.cancelButton = new System.Windows.Forms.Button();
             this.startAt = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.clearButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // progressBar1
@@ -89,10 +90,18 @@
             resources.ApplyResources(this.label1, "label1");
             this.label1.Name = "label1";
             // 
+            // clearButton
+            // 
+            resources.ApplyResources(this.clearButton, "clearButton");
+            this.clearButton.Name = "clearButton";
+            this.clearButton.UseVisualStyleBackColor = true;
+            this.clearButton.Click += new System.EventHandler(this.clearButton_Click);
+            // 
             // ArchiverWindow
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.clearButton);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.startAt);
             this.Controls.Add(this.cancelButton);
@@ -116,5 +125,6 @@
         private System.Windows.Forms.Button cancelButton;
         private System.Windows.Forms.ComboBox startAt;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button clearButton;
     }
 }

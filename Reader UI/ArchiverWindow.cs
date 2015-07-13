@@ -12,6 +12,19 @@ namespace Reader_UI
 {
     public partial class ArchiverWindow : Form
     {
+        class PageRange
+        {
+            public readonly string listName;
+            public readonly int begin;
+            public readonly int end;
+            public PageRange(string lN, int b, int e)
+            {
+                listName = lN;
+                begin = b;
+                end = e;
+            }
+        }
+        List<PageRange> toc = new List<PageRange>();
         Writer db = null;
         bool running = false;
         bool closeRequested = false;
@@ -27,58 +40,61 @@ namespace Reader_UI
             FormClosed += Writer_Closed;
             cancelButton.Enabled = false;
             updateButton.Enabled = true;
-            startAt.Items.Add(@"MS Paint Adventures");
-            startAt.Items.Add(@"=> Jailbreak");
-            startAt.Items.Add(@"=> Bard Quest");
-            startAt.Items.Add(@"=> Problem Sleuth");
-            startAt.Items.Add(@"=> Ryanquest");
-            startAt.Items.Add(@"=> Homestuck Beta");
-            startAt.Items.Add(@"=> Homestuck");
-            startAt.Items.Add(@"| => Part 1");
-            startAt.Items.Add(@"| | => Act 1: The Note Desolation Plays");
-            startAt.Items.Add(@"| | => Act 2: Raise of the Conductor's Baton");
-            startAt.Items.Add(@"| | => Act 3: Insane Corkscrew Haymakers");
-            startAt.Items.Add(@"| | => Intermission 1: Don't Bleed on the Suits");
-            startAt.Items.Add(@"| \ => Act 4: Flight of the Paradox Clones");
-            startAt.Items.Add(@"| => Part 2");
-            startAt.Items.Add(@"| | => Act 5");
-            startAt.Items.Add(@"| | | => Act 1: MOB1US DOUBL3 R34CH4ROUND");
-            startAt.Items.Add(@"| | | => Act 2: He is already here.");
-            startAt.Items.Add(@"| | | \ => Scratch: excellent h[o]st");
-            startAt.Items.Add(@"| | \ => Cascade");
-            startAt.Items.Add(@"| \ => Intermission 2: The Man in the Cairo Overcoat");
-            startAt.Items.Add(@"| => Part 3");
-            startAt.Items.Add(@"| | => Act 6");
-            startAt.Items.Add(@"| | | => Act 1: Through Broken Glass");
-            startAt.Items.Add(@"| | | => Intermission 1: corpse party");
-            startAt.Items.Add(@"| | | => Act 2: Your shit is wrecked.");
-            startAt.Items.Add(@"| | | => Intermission 2: penis ouija");
-            startAt.Items.Add(@"| | | => Act 3: Nobles");
-            startAt.Items.Add(@"| | | => Intermission 3: Ballet of the Dancestors");
-            startAt.Items.Add(@"| | | => Act 4: Void");
-            startAt.Items.Add(@"| | | => Intermission 4: Dead");
-            startAt.Items.Add(@"| | | => Act 5: Of Gods and Tricksters");
-            startAt.Items.Add(@"| | | | => Act 1");
-            startAt.Items.Add(@"| | | \ => Act 2");
-            startAt.Items.Add(@"| | | => Intermission 5: I'M PUTTING YOU ON SPEAKER CRAB.");
-            startAt.Items.Add(@"| | | | => Intermission 1");
-            startAt.Items.Add(@"| | | | => Intermission 2");
-            startAt.Items.Add(@"| | | | => Interfishin");
-            startAt.Items.Add(@"| | | | => Intermission 3");
-            startAt.Items.Add(@"| | | | => Intermission 4");
-            startAt.Items.Add(@"| | | | => Intermission 5");
-            startAt.Items.Add(@"| | | \ => Intermission 6");
-            startAt.Items.Add(@"| | | => Act 6");
-            startAt.Items.Add(@"| | | | => Act 1");
-            startAt.Items.Add(@"| | | | => Intermission 1");
-            startAt.Items.Add(@"| | | | => Act 2");
-            startAt.Items.Add(@"| | | | => Intermission 2");
-            startAt.Items.Add(@"| | | | => Act 3");
-            startAt.Items.Add(@"| | | | => Intermission 3");
-            startAt.Items.Add(@"| | | | => Act 4");
-            startAt.Items.Add(@"| | | | => Intermission 4");
-            startAt.Items.Add(@"| | | | => Act 5");
-            startAt.Items.Add(@"| | | | => Intermission 5");
+            toc.Add(new PageRange(@"MS Paint Adventures",(int)Writer.StoryBoundaries.JAILBREAK_PAGE_ONE,db.lastPage));
+            toc.Add(new PageRange(@"=> Jailbreak", (int)Writer.StoryBoundaries.JAILBREAK_PAGE_ONE, (int)Writer.StoryBoundaries.JAILBREAK_LAST_PAGE));
+            toc.Add(new PageRange(@"=> Bard Quest",0,0));
+            toc.Add(new PageRange(@"=> Problem Sleuth",0,0));
+            toc.Add(new PageRange(@"=> Ryanquest",0,0));
+            toc.Add(new PageRange(@"=> Homestuck Beta",0,0));
+            toc.Add(new PageRange(@"=> Homestuck", (int)Writer.StoryBoundaries.HOMESTUCK_PAGE_ONE, db.lastPage));
+            toc.Add(new PageRange(@"| => Part 1", (int)Writer.StoryBoundaries.HOMESTUCK_PAGE_ONE, (int)Writer.StoryBoundaries.HS_EOP1));
+            toc.Add(new PageRange(@"| | => Act 1: The Note Desolation Plays",(int)Writer.StoryBoundaries.HOMESTUCK_PAGE_ONE,(int)Writer.StoryBoundaries.HS_EOA1));
+            toc.Add(new PageRange(@"| | => Act 2: Raise of the Conductor's Baton",(int)Writer.StoryBoundaries.HS_A2,(int)Writer.StoryBoundaries.HS_EOA2));
+            toc.Add(new PageRange(@"| | => Act 3: Insane Corkscrew Haymakers", (int)Writer.StoryBoundaries.HS_A3, (int)Writer.StoryBoundaries.HS_EOA3));
+            toc.Add(new PageRange(@"| | => Intermission 1: Don't Bleed on the Suits", (int)Writer.StoryBoundaries.HS_I1, (int)Writer.StoryBoundaries.HS_EOI1));
+            toc.Add(new PageRange(@"| \ => Act 4: Flight of the Paradox Clones", (int)Writer.StoryBoundaries.HS_A4, (int)Writer.StoryBoundaries.HS_EOA4));
+            toc.Add(new PageRange(@"| => Part 2",0,0));
+            toc.Add(new PageRange(@"| | => Act 5",0,0));
+            toc.Add(new PageRange(@"| | | => Act 1: MOB1US DOUBL3 R34CH4ROUND",0,0));
+            toc.Add(new PageRange(@"| | | => Act 2: He is already here.",0,0));
+            toc.Add(new PageRange(@"| | | \ => Scratch: excellent h[o]st",0,0));
+            toc.Add(new PageRange(@"| | \ => Cascade",0,0));
+            toc.Add(new PageRange(@"| \ => Intermission 2: The Man in the Cairo Overcoat",0,0));
+            toc.Add(new PageRange(@"| => Part 3",0,0));
+            toc.Add(new PageRange(@"| | => Act 6",0,0));
+            toc.Add(new PageRange(@"| | | => Act 1: Through Broken Glass",0,0));
+            toc.Add(new PageRange(@"| | | => Intermission 1: corpse party",0,0));
+            toc.Add(new PageRange(@"| | | => Act 2: Your shit is wrecked.",0,0));
+            toc.Add(new PageRange(@"| | | => Intermission 2: penis ouija",0,0));
+            toc.Add(new PageRange(@"| | | => Act 3: Nobles",0,0));
+            toc.Add(new PageRange(@"| | | => Intermission 3: Ballet of the Dancestors",0,0));
+            toc.Add(new PageRange(@"| | | => Act 4: Void",0,0));
+            toc.Add(new PageRange(@"| | | => Intermission 4: Dead",0,0));
+            toc.Add(new PageRange(@"| | | => Act 5: Of Gods and Tricksters",0,0));
+            toc.Add(new PageRange(@"| | | | => Act 1",0,0));
+            toc.Add(new PageRange(@"| | | \ => Act 2",0,0));
+            toc.Add(new PageRange(@"| | | => Intermission 5: I'M PUTTING YOU ON SPEAKER CRAB.",0,0));
+            toc.Add(new PageRange(@"| | | | => Intermission 1",0,0));
+            toc.Add(new PageRange(@"| | | | => Intermission 2",0,0));
+            toc.Add(new PageRange(@"| | | | => Interfishin",0,0));
+            toc.Add(new PageRange(@"| | | | => Intermission 3",0,0));
+            toc.Add(new PageRange(@"| | | | => Intermission 4",0,0));
+            toc.Add(new PageRange(@"| | | | => Intermission 5",0,0));
+            toc.Add(new PageRange(@"| | | \ => Intermission 6",0,0));
+            toc.Add(new PageRange(@"| | | => Act 6",0,0));
+            toc.Add(new PageRange(@"| | | | => Act 1",0,0));
+            toc.Add(new PageRange(@"| | | | => Intermission 1",0,0));
+            toc.Add(new PageRange(@"| | | | => Act 2",0,0));
+            toc.Add(new PageRange(@"| | | | => Intermission 2",0,0));
+            toc.Add(new PageRange(@"| | | | => Act 3",0,0));
+            toc.Add(new PageRange(@"| | | | => Intermission 3",0,0));
+            toc.Add(new PageRange(@"| | | | => Act 4",0,0));
+            toc.Add(new PageRange(@"| | | | => Intermission 4",0,0));
+            toc.Add(new PageRange(@"| | | | => Act 5",0,0));
+            toc.Add(new PageRange(@"| | | | => Intermission 5",0,0));
+            foreach(PageRange i in toc){
+                startAt.Items.Add(i.listName);
+            }
             startAt.SelectedIndex = 0;
         }
         void Writer_Closed(object sender, System.EventArgs e)
@@ -126,24 +142,13 @@ namespace Reader_UI
         }
         bool SetPageBoundaries()
         {
-            switch (startAt.SelectedIndex)
+            startingPage = toc[startAt.SelectedIndex].begin;
+            if (startingPage == 0)
             {
-                case 0:
-                    startingPage = (int)Writer.StoryBoundaries.JAILBREAK_PAGE_ONE;
-                    lastPage = db.lastPage;
-                    break;
-                case 1:
-                    startingPage = (int)Writer.StoryBoundaries.JAILBREAK_PAGE_ONE;
-                    lastPage = (int)Writer.StoryBoundaries.JAILBREAK_LAST_PAGE;
-                    break;
-                case 6:
-                    startingPage = (int)Writer.StoryBoundaries.HOMESTUCK_PAGE_ONE;
-                    lastPage = db.lastPage;
-                    break;
-                default:
-                    MessageBox.Show("Page range not yet coded! If you see this in a release build, bug me on github http://github.com/cybnetsurfe3011/MSPA-Reader.");
-                    return false;
+                MessageBox.Show("Page range not yet coded! If you see this in a release build, bug me on github http://github.com/cybnetsurfe3011/MSPA-Reader.");
+                return false;
             }
+            lastPage = toc[startAt.SelectedIndex].end;
             return true;
         }
         private void worker_DoWork(object sender, DoWorkEventArgs e)
@@ -170,6 +175,13 @@ namespace Reader_UI
             Cursor.Current = Cursors.WaitCursor;
             cancelButton.Enabled = false;
             worker.CancelAsync();
+        }
+
+        private void clearButton_Click(object sender, EventArgs e)
+        {
+            logOutput.Text = "";
+            if (!running)
+                progressBar1.Value = 0;
         }
     }
 }
