@@ -12,7 +12,7 @@ namespace Reader_UI
 {
     public partial class ArchiverWindow : Form
     {
-        class PageRange
+        public class PageRange
         {
             public readonly string listName;
             public readonly int begin;
@@ -24,28 +24,21 @@ namespace Reader_UI
                 end = e;
             }
         }
-        List<PageRange> toc = new List<PageRange>();
+        List<PageRange> toc;
         Writer db = null;
         bool running = false;
         bool closeRequested = false;
         int startingPage;
         int lastPage;
-        public ArchiverWindow(Writer idb)
+        public static List<PageRange> GetTableOfContents(Writer db)
         {
-            db = idb;
-            InitializeComponent();
-            updateButton.Enabled = false;
-            worker.ProgressChanged += worker_progress;
-            FormClosing += Writer_Closing;
-            FormClosed += Writer_Closed;
-            cancelButton.Enabled = false;
-            updateButton.Enabled = true;
+            var toc = new List<PageRange>();
             toc.Add(new PageRange(@"MS Paint Adventures",(int)Writer.StoryBoundaries.JAILBREAK_PAGE_ONE,db.lastPage));
             toc.Add(new PageRange(@"=> Jailbreak", (int)Writer.StoryBoundaries.JAILBREAK_PAGE_ONE, (int)Writer.StoryBoundaries.JAILBREAK_LAST_PAGE));
             toc.Add(new PageRange(@"=> Bard Quest",0,0));
             toc.Add(new PageRange(@"=> Problem Sleuth",0,0));
             toc.Add(new PageRange(@"=> Ryanquest",0,0));
-            toc.Add(new PageRange(@"=> Homestuck Beta",0,0));
+            toc.Add(new PageRange(@"=> Homestuck Beta",(int)Writer.StoryBoundaries.HSB,(int)Writer.StoryBoundaries.EOHSB));
             toc.Add(new PageRange(@"=> Homestuck", (int)Writer.StoryBoundaries.HOMESTUCK_PAGE_ONE, db.lastPage));
             toc.Add(new PageRange(@"| => Part 1", (int)Writer.StoryBoundaries.HOMESTUCK_PAGE_ONE, (int)Writer.StoryBoundaries.HS_EOP1));
             toc.Add(new PageRange(@"| | => Act 1: The Note Desolation Plays",(int)Writer.StoryBoundaries.HOMESTUCK_PAGE_ONE,(int)Writer.StoryBoundaries.HS_EOA1));
@@ -92,6 +85,19 @@ namespace Reader_UI
             toc.Add(new PageRange(@"| | | | => Intermission 4",0,0));
             toc.Add(new PageRange(@"| | | | => Act 5",0,0));
             toc.Add(new PageRange(@"| | | | => Intermission 5",0,0));
+            return toc;
+        }
+        public ArchiverWindow(Writer idb)
+        {
+            db = idb;
+            InitializeComponent();
+            updateButton.Enabled = false;
+            worker.ProgressChanged += worker_progress;
+            FormClosing += Writer_Closing;
+            FormClosed += Writer_Closed;
+            cancelButton.Enabled = false;
+            updateButton.Enabled = true;
+            toc = GetTableOfContents(db);
             foreach(PageRange i in toc){
                 startAt.Items.Add(i.listName);
             }

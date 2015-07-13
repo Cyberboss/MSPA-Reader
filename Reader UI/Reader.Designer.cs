@@ -49,15 +49,16 @@
             this.uiToggleButton = new System.Windows.Forms.Button();
             this.toggleFullscreen = new System.Windows.Forms.Button();
             this.monitorGameOver = new System.ComponentModel.BackgroundWorker();
+            this.chapterSelector = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.SuspendLayout();
             // 
             // openArchiver
             // 
             this.openArchiver.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.openArchiver.Location = new System.Drawing.Point(709, 249);
+            this.openArchiver.Location = new System.Drawing.Point(725, 252);
             this.openArchiver.Name = "openArchiver";
-            this.openArchiver.Size = new System.Drawing.Size(117, 31);
+            this.openArchiver.Size = new System.Drawing.Size(101, 31);
             this.openArchiver.TabIndex = 0;
             this.openArchiver.Text = "Open Archiver";
             this.openArchiver.UseVisualStyleBackColor = true;
@@ -66,7 +67,7 @@
             // numericUpDown1
             // 
             this.numericUpDown1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.numericUpDown1.Location = new System.Drawing.Point(12, 301);
+            this.numericUpDown1.Location = new System.Drawing.Point(112, 300);
             this.numericUpDown1.Maximum = new decimal(new int[] {
             10000,
             0,
@@ -78,7 +79,7 @@
             0,
             0});
             this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(110, 20);
+            this.numericUpDown1.Size = new System.Drawing.Size(60, 20);
             this.numericUpDown1.TabIndex = 1;
             this.numericUpDown1.Value = new decimal(new int[] {
             1901,
@@ -90,9 +91,9 @@
             // jumpButton
             // 
             this.jumpButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.jumpButton.Location = new System.Drawing.Point(12, 270);
+            this.jumpButton.Location = new System.Drawing.Point(8, 269);
             this.jumpButton.Name = "jumpButton";
-            this.jumpButton.Size = new System.Drawing.Size(109, 25);
+            this.jumpButton.Size = new System.Drawing.Size(118, 25);
             this.jumpButton.TabIndex = 2;
             this.jumpButton.Text = "Jump";
             this.jumpButton.UseVisualStyleBackColor = true;
@@ -106,9 +107,9 @@
             // goBack
             // 
             this.goBack.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.goBack.Location = new System.Drawing.Point(128, 270);
+            this.goBack.Location = new System.Drawing.Point(132, 269);
             this.goBack.Name = "goBack";
-            this.goBack.Size = new System.Drawing.Size(109, 25);
+            this.goBack.Size = new System.Drawing.Size(118, 25);
             this.goBack.TabIndex = 5;
             this.goBack.Text = "Go Back";
             this.goBack.UseVisualStyleBackColor = true;
@@ -117,9 +118,9 @@
             // loadButton
             // 
             this.loadButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.loadButton.Location = new System.Drawing.Point(128, 241);
+            this.loadButton.Location = new System.Drawing.Point(8, 238);
             this.loadButton.Name = "loadButton";
-            this.loadButton.Size = new System.Drawing.Size(109, 25);
+            this.loadButton.Size = new System.Drawing.Size(118, 25);
             this.loadButton.TabIndex = 6;
             this.loadButton.Text = "Load Game";
             this.loadButton.UseVisualStyleBackColor = true;
@@ -128,9 +129,9 @@
             // saveButton
             // 
             this.saveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.saveButton.Location = new System.Drawing.Point(12, 241);
+            this.saveButton.Location = new System.Drawing.Point(8, 207);
             this.saveButton.Name = "saveButton";
-            this.saveButton.Size = new System.Drawing.Size(110, 25);
+            this.saveButton.Size = new System.Drawing.Size(118, 25);
             this.saveButton.TabIndex = 7;
             this.saveButton.Text = "Save Game";
             this.saveButton.UseVisualStyleBackColor = true;
@@ -140,7 +141,7 @@
             // 
             this.autoSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.autoSave.AutoSize = true;
-            this.autoSave.Location = new System.Drawing.Point(144, 302);
+            this.autoSave.Location = new System.Drawing.Point(178, 302);
             this.autoSave.Name = "autoSave";
             this.autoSave.Size = new System.Drawing.Size(76, 17);
             this.autoSave.TabIndex = 8;
@@ -175,7 +176,7 @@
             this.flashWarning.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.flashWarning.AutoSize = true;
             this.flashWarning.ForeColor = System.Drawing.Color.Red;
-            this.flashWarning.Location = new System.Drawing.Point(606, 252);
+            this.flashWarning.Location = new System.Drawing.Point(625, 252);
             this.flashWarning.MaximumSize = new System.Drawing.Size(100, 0);
             this.flashWarning.Name = "flashWarning";
             this.flashWarning.Size = new System.Drawing.Size(94, 65);
@@ -187,9 +188,9 @@
             // helpButton
             // 
             this.helpButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.helpButton.Location = new System.Drawing.Point(709, 212);
+            this.helpButton.Location = new System.Drawing.Point(725, 215);
             this.helpButton.Name = "helpButton";
-            this.helpButton.Size = new System.Drawing.Size(117, 31);
+            this.helpButton.Size = new System.Drawing.Size(101, 31);
             this.helpButton.TabIndex = 12;
             this.helpButton.Text = "Help and About";
             this.helpButton.UseVisualStyleBackColor = true;
@@ -198,9 +199,9 @@
             // startOverButton
             // 
             this.startOverButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.startOverButton.Location = new System.Drawing.Point(12, 210);
+            this.startOverButton.Location = new System.Drawing.Point(132, 238);
             this.startOverButton.Name = "startOverButton";
-            this.startOverButton.Size = new System.Drawing.Size(110, 25);
+            this.startOverButton.Size = new System.Drawing.Size(118, 25);
             this.startOverButton.TabIndex = 13;
             this.startOverButton.Text = "Start Over";
             this.startOverButton.UseVisualStyleBackColor = true;
@@ -209,9 +210,9 @@
             // deleteButton
             // 
             this.deleteButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.deleteButton.Location = new System.Drawing.Point(128, 210);
+            this.deleteButton.Location = new System.Drawing.Point(132, 207);
             this.deleteButton.Name = "deleteButton";
-            this.deleteButton.Size = new System.Drawing.Size(109, 25);
+            this.deleteButton.Size = new System.Drawing.Size(118, 25);
             this.deleteButton.TabIndex = 14;
             this.deleteButton.Text = "Delete Game";
             this.deleteButton.UseVisualStyleBackColor = true;
@@ -220,9 +221,9 @@
             // uiToggleButton
             // 
             this.uiToggleButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.uiToggleButton.Location = new System.Drawing.Point(709, 286);
+            this.uiToggleButton.Location = new System.Drawing.Point(725, 290);
             this.uiToggleButton.Name = "uiToggleButton";
-            this.uiToggleButton.Size = new System.Drawing.Size(117, 31);
+            this.uiToggleButton.Size = new System.Drawing.Size(101, 31);
             this.uiToggleButton.TabIndex = 16;
             this.uiToggleButton.Text = "Hide UI";
             this.uiToggleButton.UseVisualStyleBackColor = true;
@@ -231,9 +232,9 @@
             // toggleFullscreen
             // 
             this.toggleFullscreen.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.toggleFullscreen.Location = new System.Drawing.Point(709, 175);
+            this.toggleFullscreen.Location = new System.Drawing.Point(725, 178);
             this.toggleFullscreen.Name = "toggleFullscreen";
-            this.toggleFullscreen.Size = new System.Drawing.Size(117, 31);
+            this.toggleFullscreen.Size = new System.Drawing.Size(101, 31);
             this.toggleFullscreen.TabIndex = 17;
             this.toggleFullscreen.Text = "Toggle Fullscreen";
             this.toggleFullscreen.UseVisualStyleBackColor = true;
@@ -245,12 +246,25 @@
             this.monitorGameOver.WorkerSupportsCancellation = true;
             this.monitorGameOver.DoWork += new System.ComponentModel.DoWorkEventHandler(this.monitorGameOver_DoWork);
             // 
+            // chapterSelector
+            // 
+            this.chapterSelector.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.chapterSelector.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.chapterSelector.DropDownWidth = 350;
+            this.chapterSelector.FormattingEnabled = true;
+            this.chapterSelector.Location = new System.Drawing.Point(8, 300);
+            this.chapterSelector.Name = "chapterSelector";
+            this.chapterSelector.Size = new System.Drawing.Size(98, 21);
+            this.chapterSelector.TabIndex = 18;
+            this.chapterSelector.SelectedIndexChanged += new System.EventHandler(this.chapterSelector_SelectedIndexChanged);
+            // 
             // Reader
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(838, 329);
+            this.Controls.Add(this.chapterSelector);
             this.Controls.Add(this.toggleFullscreen);
             this.Controls.Add(this.uiToggleButton);
             this.Controls.Add(this.deleteButton);
@@ -295,6 +309,7 @@
         private System.Windows.Forms.Button uiToggleButton;
         private System.Windows.Forms.Button toggleFullscreen;
         private System.ComponentModel.BackgroundWorker monitorGameOver;
+        private System.Windows.Forms.ComboBox chapterSelector;
 
     }
 }

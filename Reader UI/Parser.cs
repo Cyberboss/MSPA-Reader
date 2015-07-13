@@ -678,8 +678,10 @@ namespace Reader_UI
         }
         int GetStoryFromPage(int pg)
         {
-            if (pg <= 136)
+            if (pg <= (int)Writer.StoryBoundaries.JAILBREAK_LAST_PAGE)
                 return 1;
+            if (pg <= (int)Writer.StoryBoundaries.EOHSB)
+                return 5;
             return 6;
         }
         public bool LoadPage(int pageno)

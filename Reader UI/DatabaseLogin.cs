@@ -165,7 +165,6 @@ namespace Reader_UI
         private void dataSourceInput_SelectedIndexChanged(object sender, EventArgs e)
         {
             dbPathSelect.Visible = false;
-            ipPathLabel.Text = "IP Address";
             Properties.Settings.Default.serverType = dataSourceInput.SelectedIndex;
             switch (dataSourceInput.SelectedIndex)
             {

@@ -82,6 +82,7 @@
             // 
             resources.ApplyResources(this.startAt, "startAt");
             this.startAt.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.startAt.DropDownWidth = 350;
             this.startAt.FormattingEnabled = true;
             this.startAt.Name = "startAt";
             // 

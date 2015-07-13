@@ -150,6 +150,19 @@ namespace Reader_UI
                 }
                 return Writer.ValidRange(ret);
             }
+            public int GetParseCount(int start, int end)
+            {
+                int ret = 0;
+                lock (_sync)
+                {
+                    for (int i = start; i <= end; ++i)
+                        if (archivedPages.IndexOf(i) >= 0)
+                        {
+                            ret++;
+                        }
+                }
+                return ret;
+            }
             public void Add(int page)
             {
                 lock (_sync)
@@ -209,6 +222,8 @@ namespace Reader_UI
        {
            JAILBREAK_PAGE_ONE = 2,
            JAILBREAK_LAST_PAGE = 136,
+           HSB = 1893,
+           EOHSB = 1900,
            HOMESTUCK_PAGE_ONE = 1901,
            HS_EOA1 = 2147,
            HS_A2 = 2149,        //yes i know the act boundaries aren't cohesive but that's not my problem, if the reader want's the inbetweens they should pick part 1 or all of homestuck
@@ -663,6 +678,10 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 return (int)StoryBoundaries.JAILBREAK_PAGE_ONE;
             if (pg <= (int)StoryBoundaries.JAILBREAK_LAST_PAGE)
                 return pg;
+            if (pg < (int)StoryBoundaries.HSB)
+                return (int)StoryBoundaries.HSB;
+            if (pg <= (int)StoryBoundaries.EOHSB)
+                return pg;
             if (pg < (int)StoryBoundaries.HOMESTUCK_PAGE_ONE)
                 return (int)StoryBoundaries.HOMESTUCK_PAGE_ONE;
             //TODO: Check for empty pages
@@ -686,30 +705,42 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 {
 
                     if (!missedRound)
+                    {
                         currentPage = archivedPages.FindLowestPage(startPage, lastPage);
-                    else
-                        currentPage = missedPages[0];
-                    if (currentPage > lastPage)
-                    {
+                        pagesParsed = archivedPages.GetParseCount(startPage, lastPage);
+
+                        currentProgress = (int)(((float)(pagesParsed) / (float)(pagesToParse)) * 100.0f);
                         if (!bgw.CancellationPending)
+                        {
+                            bgw.ReportProgress(currentProgress, "Starting archive operation at page " + startPage);
+                        }
+                        else
+                        {
+                            bgw.ReportProgress(currentProgress, "Operation cancelled.");
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        currentPage = missedPages[0];
+                        currentProgress = (int)(((float)(pagesParsed) / (float)(pagesToParse)) * 100.0f);
+                        if (currentPage > lastPage)
+                        {
                             bgw.ReportProgress(100, "Range already archived!");
-                        return;
+                            return;
+                        }
                     }
-                    currentProgress = (int)(((float)(pagesParsed) / (float)(pagesToParse)) * 100.0f);
 
                     if (!bgw.CancellationPending)
                     {
-                        bgw.ReportProgress(currentProgress, "Starting archive operation at page " + startPage);
+                        if (currentPage != startPage)
+                            bgw.ReportProgress(currentProgress, "Resuming from " + currentPage);
                     }
                     else
-                        return;
-
-                    if (!bgw.CancellationPending)
                     {
-                        bgw.ReportProgress(currentProgress, "Resuming from " + currentPage);
-                    }
-                    else
+                        bgw.ReportProgress(currentProgress, "Operation cancelled.");
                         return;
+                    }
 
                     int oldPage;
                     while (!bgw.CancellationPending)
@@ -725,9 +756,11 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
 
                         var oldMissedPages = missedPages;
 
-
                         if (!SavePage(currentPage, bgw, currentProgress))
+                        {
+                            bgw.ReportProgress(currentProgress, "Failed to parse page " + currentPage + "! Added to miss queue.");
                             missedPages.Add(currentPage);
+                        }
                         else
                             pagesParsed++;
 
@@ -742,7 +775,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                         }
                         else
                         {
-                            if (currentPage == lastPage)
+                            if (currentPage >= lastPage)
                                 break;
                             currentPage = ValidRange(archivedPages.FindLowestPage(currentPage + 1, lastPage));
                         }
@@ -750,10 +783,12 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                     if (bgw.CancellationPending || missedPages.Count() == 0)
                         break;
                     missedRound = true;
-                    bgw.ReportProgress(currentProgress, "Missed " + missedPages.Count() + " pages. Looping back.");
+                    bgw.ReportProgress(currentProgress, "Missed " + missedPages.Count() + " pages. Iterating through missed queue.");
                 }
-
-                bgw.ReportProgress(100, "Operation completed.");
+                if (bgw.CancellationPending)
+                    bgw.ReportProgress(currentProgress, "Operation cancelled.");
+                else
+                    bgw.ReportProgress(100, "Operation completed.");
             }
             catch
             {

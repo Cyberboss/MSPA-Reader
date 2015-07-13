@@ -214,10 +214,12 @@ namespace Reader_UI
         LinkLabel next = null, tereziPassword = null;
         Panel pesterlog = null;
         GifStream headerP = null;
+        List<ArchiverWindow.PageRange> toc;
 
         public Reader(Writer idb)
         {
             db = idb;
+            toc = ArchiverWindow.GetTableOfContents(db);
             InitializeComponent();
 #if linux
             Properties.Settings.Default.fullscreen = false;
@@ -240,6 +242,10 @@ namespace Reader_UI
             autoSave.Checked = Properties.Settings.Default.autoSave;
             ResizeEnd += Reader_ResizeEnd;
             monitorGameOver.ProgressChanged += monitorGameOver_ProgressChanged;
+            chapterSelector.Items.Add("(Select Story)");
+            foreach (var c in toc)
+                chapterSelector.Items.Add(c.listName);
+            chapterSelector.SelectedIndex = 0;
         }
 
         void mrAjax_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -982,7 +988,12 @@ namespace Reader_UI
                             tmpl.Select(page.meta.narr.subTexts[j].begin, page.meta.narr.subTexts[j].length);
                             link.Text = tmpl.SelectedText;
                             link.Font = narrative.Font;
-                            link.Click += (o, i) => { System.Diagnostics.Process.Start(page.meta.narr.subTexts[j].colour); };
+                            var inlineLink = page.meta.narr.subTexts[j].colour;
+                            //for lack of a better place to put this snippet/lazyness'
+                            if (page.number == (int)Writer.StoryBoundaries.EOHSB)
+                                link.Click += (o, i) => { WakeUpMr((int)Writer.StoryBoundaries.HOMESTUCK_PAGE_ONE); };
+                            else
+                                link.Click += (o, i) => { System.Diagnostics.Process.Start(inlineLink); };
                             link.Width = narrative.Width;
                             link.Height = narrative.Height;
                             link.TextAlign = ContentAlignment.MiddleCenter;
@@ -1904,6 +1915,7 @@ namespace Reader_UI
                 startOverButton.Visible = false;
                 flashWarning.Visible = false;
                 toggleFullscreen.Visible = false;
+                chapterSelector.Visible = false;
                 AcceptButton = null;
             }
             else
@@ -1919,6 +1931,7 @@ namespace Reader_UI
                 openArchiver.Visible = true;
                 loadButton.Visible = true;
                 startOverButton.Visible = true;
+                chapterSelector.Visible = true;
 #if !linux
                 toggleFullscreen.Visible = true;
 #endif
@@ -1974,6 +1987,30 @@ namespace Reader_UI
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
             numericUpDown1.Value = Writer.ValidRange((int)numericUpDown1.Value);
+        }
+
+        private void chapterSelector_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (chapterSelector.SelectedIndex == 0)
+                    return;
+                if (toc[chapterSelector.SelectedIndex - 1].begin == 0)
+                {
+                    MessageBox.Show("Page range not yet coded! If you see this in a release build, bug me on github http://github.com/cybnetsurfe3011/MSPA-Reader.");
+                    return;
+                }
+
+                WakeUpMr(toc[chapterSelector.SelectedIndex - 1].begin);
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                chapterSelector.SelectedIndex = 0;
+            }
         }
 
     }

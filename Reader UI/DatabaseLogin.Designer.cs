@@ -74,9 +74,9 @@
             this.ipPathLabel.AutoSize = true;
             this.ipPathLabel.Location = new System.Drawing.Point(12, 100);
             this.ipPathLabel.Name = "ipPathLabel";
-            this.ipPathLabel.Size = new System.Drawing.Size(86, 13);
+            this.ipPathLabel.Size = new System.Drawing.Size(83, 13);
             this.ipPathLabel.TabIndex = 2;
-            this.ipPathLabel.Text = "IP Address : Port";
+            this.ipPathLabel.Text = "Hostname : Port";
             // 
             // ipInput
             // 

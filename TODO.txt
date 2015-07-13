@@ -1,11 +1,12 @@
 ﻿
 Primary: Get inline images working eg 7980, 4943
-Primary: Inline links eg 2623
 Primary: Get Openbound working
 Primary: Fix mono (Deferred)
 
 Tasks:
 
+-- Fix inline link positioning
+-- A better inline link solution? (Currently opens browser)
 -- Allow horizontal scroll to center comic content if window width is too small.
 -- LOWAS in void fireflies
 -- Check if it works with older MSPA works(Jailbreak, problem sleuth), if we're lucky it will jst work with the regular style and we can just lower the minimum page cap
