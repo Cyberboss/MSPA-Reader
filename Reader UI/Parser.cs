@@ -680,6 +680,8 @@ namespace Reader_UI
         {
             if (pg <= (int)Writer.StoryBoundaries.JAILBREAK_LAST_PAGE)
                 return 1;
+            if (pg <= (int)Writer.StoryBoundaries.EOPS)
+                return 4;
             if (pg <= (int)Writer.StoryBoundaries.EOHSB)
                 return 5;
             return 6;

@@ -222,6 +222,30 @@ namespace Reader_UI
        {
            JAILBREAK_PAGE_ONE = 2,
            JAILBREAK_LAST_PAGE = 136,
+           PS = 219,
+           PSC2 = 302,
+           PSC3 = 402,
+           PSC4 = 448,
+           PSC5 = 546,
+           PSC6 = 604,
+           PSC7 = 666,
+           PSC8 = 742,
+           PSC9 = 816,
+           PSC10 = 873,
+           PSC11 = 953,
+           PSC12 = 1030,
+           PSC13 = 1069,
+           PSC14 = 1149,
+           PSC15 = 1257,
+           PSC16 = 1299,
+           PSC17 = 1406,
+           PSC18 = 1466,
+           PSC19 = 1507,
+           PSC20 = 1589,
+           PSC21 = 1655,
+           PSC22 = 1708,
+           PSE = 1841,
+           EOPS = 1892,
            HSB = 1893,
            EOHSB = 1900,
            HOMESTUCK_PAGE_ONE = 1901,
@@ -677,6 +701,10 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             if (pg < (int)StoryBoundaries.JAILBREAK_PAGE_ONE)
                 return (int)StoryBoundaries.JAILBREAK_PAGE_ONE;
             if (pg <= (int)StoryBoundaries.JAILBREAK_LAST_PAGE)
+                return pg;
+            if (pg < (int)StoryBoundaries.PS)
+                return (int)StoryBoundaries.PS;
+            if (pg <= (int)StoryBoundaries.EOPS)
                 return pg;
             if (pg < (int)StoryBoundaries.HSB)
                 return (int)StoryBoundaries.HSB;
