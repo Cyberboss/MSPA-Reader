@@ -392,35 +392,38 @@ namespace Reader_UI
                         while (j < conversationLines.Count())
                         {
                             var currentLine = conversationLines.ElementAt(j);
-                            Text.ScriptLine scriptLine;
-                            if (currentLine.Name == "img")
+                            if (currentLine.Name != "br")
                             {
-                                //just add the image
-                                var pathReg = Regex.Match(currentLine.OuterHtml,gifRegex);
-                                var gifReg = Regex.Match(pathReg.Value, scratchHeaderImageFilenameRegex);
-                                scriptLine = new Text.ScriptLine(gifReg.Groups[1].Value,precedingLineBreaks);
-
-                                //find the resource that matches this image and mark it as pesterlogged
-                                resources.Find(x => x.originalFileName == scriptLine.text).isInPesterLog = true;
-                                j++;
-
-                                continue;
-                            }else{
-                                //there is no way
-                                if (Regex.Match(currentLine.InnerText, chumhandleRegex).Success)
+                                Text.ScriptLine scriptLine;
+                                if (currentLine.Name == "img")
                                 {
-                                    ++j;
-                                    continue;
+                                    //just add the image
+                                    var pathReg = Regex.Match(currentLine.OuterHtml, gifRegex);
+                                    var gifReg = Regex.Match(pathReg.Value, scratchHeaderImageFilenameRegex);
+                                    scriptLine = new Text.ScriptLine(gifReg.Groups[1].Value, precedingLineBreaks);
+
+                                    //find the resource that matches this image and mark it as pesterlogged
+                                    resources.Find(x => x.originalFileName == scriptLine.text).isInPesterLog = true;
+
+                                }
+                                else
+                                {
+                                    //there is no way
+                                    if (Regex.Match(currentLine.InnerText, chumhandleRegex).Success)
+                                    {
+                                        ++j;
+                                        continue;
+                                    }
+
+                                    var hexReg = Regex.Match(currentLine.OuterHtml, hexColourRegex);
+
+                                    scriptLine = new Text.ScriptLine(hexReg.Success ? hexReg.Value : "#000000", currentLine.InnerText, precedingLineBreaks);
+
+                                    CheckLineForSpecialSubText(currentLine, scriptLine);
                                 }
 
-                                var hexReg = Regex.Match(currentLine.OuterHtml, hexColourRegex);
-
-                                scriptLine = new Text.ScriptLine(hexReg.Success ? hexReg.Value : "#000000", currentLine.InnerText,precedingLineBreaks);
-
-                                CheckLineForSpecialSubText(currentLine, scriptLine);
+                                line.Add(scriptLine);
                             }
-
-                            line.Add(scriptLine);
                             //increment i to find the breaks;
                             int jBegin = j + 1;
                             do
