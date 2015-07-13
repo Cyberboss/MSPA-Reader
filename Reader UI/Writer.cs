@@ -386,7 +386,7 @@ namespace Reader_UI
                     {
                         try
                         {
-                            if (SavePage(pageno,bgw) > 0)
+                            if (!SavePage(pageno,bgw))
                                 return null;
                         }
                         catch
@@ -661,7 +661,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             //TODO: Check for empty pages
             return pg;
         }
-        public void ResumeWork(System.ComponentModel.BackgroundWorker bgw, int startPage)
+        public void ResumeWork(System.ComponentModel.BackgroundWorker bgw, int startPage, int lastPage)
         {
 
             int currentProgress;
@@ -669,14 +669,20 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             while (wl.TestAndSet()) { System.Threading.Thread.Sleep(1000); }
             try
             {
+                List<int> missedPages = new List<int>();
+                bool missedRound = false;
                 while (true)
                 {
-                    int missedPages = 0;
 
                     startPage = archivedPages.FindLowestPage(startPage, lastPage);
-                    int currentPage = startPage;
+                    int currentPage;
+                    int pagesParsed = 0;
+                    if (!missedRound)
+                        currentPage = ValidRange(startPage);
+                    else
+                        currentPage = missedPages[0];
                     int pagesToParse = lastPage - startPage;
-                    currentProgress = (int)(((float)(currentPage - 1 - startPage) / (float)(pagesToParse)) * 100.0f);
+                    currentProgress = (int)(((float)(pagesParsed) / (float)(pagesToParse)) * 100.0f);
 
 
                     //debug set current page here
@@ -688,16 +694,21 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                     //currentPage = 6009;
 
                     if (!bgw.CancellationPending)
-                        bgw.ReportProgress(currentProgress, "MSPA is up to page " + lastPage);
+                    {
+                        bgw.ReportProgress(currentProgress, "Starting archive operation at page " + startPage);
+                    }
                     else
                         return;
+
                     if (!bgw.CancellationPending)
-                        bgw.ReportProgress(currentProgress, "Starting archive operation at page " + currentPage);
+                    {
+                        bgw.ReportProgress(currentProgress, "Resuming from " + currentPage);
+                    }
                     else
                         return;
 
                     int oldPage;
-                    while (currentPage != lastPage + 1 && !bgw.CancellationPending)
+                    while (!bgw.CancellationPending)
                     {
                         oldPage = currentPage;
                         var req = (archivedPages.GetRequest());
@@ -706,21 +717,36 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                             currentPage = req;
                             bgw.ReportProgress(currentProgress, "Responding to User Request for Page " + req);
                         }
-                        currentProgress = (int)(((float)(currentPage - 1 - startPage) / (float)(pagesToParse)) * 100.0f);
+                        currentProgress = (int)(((float)(pagesParsed) / (float)(pagesToParse)) * 100.0f);
 
                         var oldMissedPages = missedPages;
 
 
-                        missedPages += SavePage(currentPage,bgw,currentProgress);
-
-                        if (req != 0 && currentPage == req && oldMissedPages == missedPages)
-                            currentPage = oldPage;
+                        if (!SavePage(currentPage, bgw, currentProgress))
+                            missedPages.Add(currentPage);
                         else
-                        currentPage = archivedPages.FindLowestPage(currentPage + 1, lastPage);
+                            pagesParsed++;
+
+                        if (req != 0)
+                            currentPage = oldPage;
+                        else if (missedRound)
+                        {
+                            if (missedPages.Count() == 0)
+                                break;
+                            missedPages.RemoveAt(0);
+                            currentPage = missedPages[0];
+                        }
+                        else
+                        {
+                            if (currentPage == lastPage)
+                                break;
+                            currentPage = ValidRange(archivedPages.FindLowestPage(currentPage + 1, lastPage));
+                        }
                     }
-                    if (!(!bgw.CancellationPending && missedPages != 0))
+                    if (bgw.CancellationPending || missedPages.Count() == 0)
                         break;
-                    bgw.ReportProgress(currentProgress, "Missed " + missedPages + " pages. Looping back.");
+                    missedRound = true;
+                    bgw.ReportProgress(currentProgress, "Missed " + missedPages.Count() + " pages. Looping back.");
                 }
 
                 bgw.ReportProgress(100, "Operation completed.");
@@ -734,7 +760,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 wl.StopRunning();
             }
         }
-        int SavePage(int currentPage, System.ComponentModel.BackgroundWorker bgw = null, int currentProgress = 0)
+        bool SavePage(int currentPage, System.ComponentModel.BackgroundWorker bgw = null, int currentProgress = 0)
         {
             if (Enum.IsDefined(typeof(PagesOfImportance), currentPage))
             {
@@ -774,9 +800,9 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                     Rollback();
                     if (bgw != null)
                         bgw.ReportProgress(currentProgress, "Error parsing special page " + currentPage);
-                    return 1;
+                    return false;
                 }
-                return 0;
+                return true;
             }
             if ((Enum.IsDefined(typeof(SpecialResources), currentPage)))
             {
@@ -799,12 +825,12 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 {
                     if (bgw != null)
                         bgw.ReportProgress(currentProgress, "Error parsing special page " + currentPage);
-                    return 1;
+                    return false;
                 }
-                return 0;
+                return true;
             }
             if (archivedPages.IsPageArchived(currentPage) || (bgw != null && bgw.CancellationPending))
-                return 0;
+                return true;
 
             if (Parser.IsTrickster(currentPage))
                 ParseTrickster(bgw != null);
@@ -831,12 +857,10 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                     }
                 }
                 //simple enough, leave it to the reader to decode the multiple pages
-                return missedPages;
+                return missedPages == 0;
             }
-            else if (!parser.x2Flag)
-                return 1;
             else
-                return 2;
+                return false;
             
         }
         bool WritePage(System.ComponentModel.BackgroundWorker bgw, int currentPage, int currentProgress, int x2phase)

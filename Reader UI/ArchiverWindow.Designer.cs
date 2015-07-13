@@ -36,6 +36,7 @@
             this.updateButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
             this.startAt = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // progressBar1
@@ -78,15 +79,21 @@
             // 
             // startAt
             // 
+            resources.ApplyResources(this.startAt, "startAt");
             this.startAt.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.startAt.FormattingEnabled = true;
-            resources.ApplyResources(this.startAt, "startAt");
             this.startAt.Name = "startAt";
+            // 
+            // label1
+            // 
+            resources.ApplyResources(this.label1, "label1");
+            this.label1.Name = "label1";
             // 
             // ArchiverWindow
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.startAt);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.updateButton);
@@ -108,5 +115,6 @@
         private System.Windows.Forms.Button updateButton;
         private System.Windows.Forms.Button cancelButton;
         private System.Windows.Forms.ComboBox startAt;
+        private System.Windows.Forms.Label label1;
     }
 }

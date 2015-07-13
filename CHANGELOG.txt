@@ -11,3 +11,4 @@ v1.1
 	-- Support for non-default database ports
 	-- Narrative prompts are now formatted correctly
 	-- Added functionality to the header
+	-- Scope based archiving
