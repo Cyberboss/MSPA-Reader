@@ -332,7 +332,7 @@ namespace Reader_UI
         void Reader_FormClosing(object sender, FormClosingEventArgs e)
         {
             Properties.Settings.Default.maximized = WindowState == FormWindowState.Maximized;
-            CleanControls();
+            while (mrAjax.IsBusy) { System.Threading.Thread.Sleep(100); Application.DoEvents(); }
         }
 
         void mrAjax_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -692,6 +692,7 @@ namespace Reader_UI
             comicPanel.Width = 782;
             var oldLocX = comicPanel.Location.X;
             comicPanel.Location = new Point(mainPanel.Width / 2 - comicPanel.Width / 2, comicPanel.Location.Y);
+            title.Location = new Point(comicPanel.Width / 2 - title.Width / 2, title.Location.Y);
             foreach (var tempPB in gifs)
             {
                 tempPB.gif.Location = new Point(comicPanel.Width / 2 - tempPB.gif.Width / 2, tempPB.gif.Location.Y);
@@ -1288,17 +1289,14 @@ namespace Reader_UI
         }
         void Reader_Shown(object sender, EventArgs e)
         {
-            Properties.Settings.Default.fullscreen =! Properties.Settings.Default.fullscreen;
+            Properties.Settings.Default.fullscreen = !Properties.Settings.Default.fullscreen;
             toggleFullscreen_Click(null, null);
             Reader_Resize(null, null);
             CurtainsUp();
-            int pr;
-            if (Properties.Settings.Default.lastReadPage >= (int)Writer.StoryBoundaries.HOMESTUCK_PAGE_ONE &&
-                Properties.Settings.Default.lastReadPage <= db.lastPage)
-                pr = Properties.Settings.Default.lastReadPage;
+            if (Properties.Settings.Default.lastReadPage != 0)
+                WakeUpMr(Properties.Settings.Default.lastReadPage);
             else
-                pr = (int)Writer.StoryBoundaries.HOMESTUCK_PAGE_ONE;
-            WakeUpMr(pr);
+                WakeUpMr((int)Writer.StoryBoundaries.HOMESTUCK_PAGE_ONE);
         }
         void RemoveControl(Control c)
         {

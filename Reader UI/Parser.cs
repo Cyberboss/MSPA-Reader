@@ -224,7 +224,7 @@ namespace Reader_UI
         const string pesterLogRegex = @"-- .*? --";
         //TODO: the above regex is way too vague
         const string chumhandleRegex = @"\[[G|C|A|T]{2}\]|\[EB\]";
-        const string gifFileRegex = @".+\.gif";
+        const string gifFileRegex = @".+\.(?i)gif";
         
 
         public bool x2Flag;

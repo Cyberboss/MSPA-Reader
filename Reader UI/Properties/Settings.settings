@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="lastReadPage" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">1901</Value>
+      <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="autoSave" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>

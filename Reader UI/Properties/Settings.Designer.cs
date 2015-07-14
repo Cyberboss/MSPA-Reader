@@ -25,7 +25,7 @@ namespace Reader_UI.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1901")]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
         public int lastReadPage {
             get {
                 return ((int)(this["lastReadPage"]));
