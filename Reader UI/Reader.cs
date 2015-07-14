@@ -1053,13 +1053,14 @@ namespace Reader_UI
                 comicPanel.Controls.Add(pesterlog);
 
                 pesterHideShow = new Button();
+                pesterHideShow.FlatStyle = FlatStyle.Flat;
                 pesterHideShow.AutoSize = true;
                 pesterHideShow.Font = new System.Drawing.Font("Arial", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
                 pesterHideShow.Text = "Show " + page.meta.promptType;
                 pesterHideShow.Click += pesterHideShow_Click;
                 pesterLogVisible = false;
                 pesterlog.Controls.Add(pesterHideShow);
-                pesterHideShow.Location = new Point(pesterlog.Width / 2 - pesterHideShow.Width / 2, 0);
+                pesterHideShow.Location = new Point(pesterlog.Width / 2 - pesterHideShow.Width / 2, 2);
 
                 pLMaxHeight = currentHeight + REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
                 //log lines

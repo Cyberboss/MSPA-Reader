@@ -234,18 +234,11 @@ namespace Reader_UI
 
         public static SecureString DecryptString(string encryptedData)
         {
-            try
-            {
-                byte[] decryptedData = System.Security.Cryptography.ProtectedData.Unprotect(
-                    Convert.FromBase64String(encryptedData),
-                    entropy,
-                    System.Security.Cryptography.DataProtectionScope.CurrentUser);
-                return ToSecureString(System.Text.Encoding.Unicode.GetString(decryptedData));
-            }
-            catch
-            {
-                return new SecureString();
-            }
+            byte[] decryptedData = System.Security.Cryptography.ProtectedData.Unprotect(
+                Convert.FromBase64String(encryptedData),
+                entropy,
+                System.Security.Cryptography.DataProtectionScope.CurrentUser);
+            return ToSecureString(System.Text.Encoding.Unicode.GetString(decryptedData));
         }
 
         public static SecureString ToSecureString(string input)

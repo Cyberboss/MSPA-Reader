@@ -263,6 +263,17 @@ namespace Reader_UI
            HS_A4 = 3258,
            HS_EOA4 = 3841,
            HS_EOP1 = 3888,  //because that's a lot of missing pages, since EOA4
+           HS_A5A1 = 3389,
+           HS_EOA5A1 = 4525,
+           HS_A5A2 = 4526,
+           HS_A5A2S = 5663,
+           HS_EOA5A2S = 5983,
+           HS_EOA5A2 = 6008,
+           HS_CASCADE = 6009,
+           HS_EOA5 = 6010,
+           HS_I2 = 6011,
+           HS_EOI2 = 6012,
+           HS_A6 = 6013,
        }
         float totalMegabytesDownloaded = 0;
 
@@ -739,7 +750,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 bool missedRound = false;
                 int currentPage;
                 startPage = ValidRange(startPage);
-                int pagesToParse = lastPage - startPage;
+                int pagesToParse = lastPage - startPage + 1;
                 int pagesParsed = 0;
                 while (true)
                 {
@@ -881,6 +892,10 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                         bgw.ReportProgress(currentProgress, "Error parsing special page " + currentPage);
                     return false;
                 }
+                finally
+                {
+                    bgw.ReportProgress(currentProgress, "");
+                }
                 return true;
             }
             if ((Enum.IsDefined(typeof(SpecialResources), currentPage)))
@@ -984,7 +999,10 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 } 
                 if (bgw != null)
                     bgw.ReportProgress(currentProgress, "Total Data Downloaded: " + (int)totalMegabytesDownloaded + "MB");
-               
+
+                if (bgw != null && x2phase != 1)
+                    bgw.ReportProgress(currentProgress, "");
+
                 if(x2phase != 2)
                     Transact();
                 WriteResource(res, currentPage, x2phase == 2);

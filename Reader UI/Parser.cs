@@ -13,6 +13,12 @@ namespace Reader_UI
 {
     public class Parser : IDisposable
     {
+        //yes I know about the page text files but they don't quite measure up to what i need
+        //it's easy enough to get the stuff i want directly from the page (e.g. see 7980)
+        //the main reason i won't use them is because of the lack of wording for the next pages.
+        //in using this i'd have to parse 2 files for one page instead of just the one html
+        //its worked so far no reason to change it now
+
         public const string githubRepo = "https://raw.githubusercontent.com/cybnetsurfe3011/MSPA-Reader/master/CurrentVersion.txt";
         public class Resource
         {
@@ -212,7 +218,7 @@ namespace Reader_UI
             + @"|.*spacer"
             + @"|.*bluetile"
             + @")(.*?)\.(?i)gif";
-        const string scratchHeaderImageRegex = "src=\\\"(.*?\\.[gif|GIF])\\\"";
+        const string scratchHeaderImageRegex = "src=\\\"(.*?\\.(?i)gif)\\\"";
         const string scratchHeaderImageFilenameRegex = @".*\/(.*)";
         const string scratchTitleRegex = "title=\\\"(.*?)\\\"";
         const string swfRegex = @"http:\/\/.*?\.swf";
@@ -647,22 +653,18 @@ namespace Reader_UI
         void ScratchPostParse(HtmlDocument html, int pageno)
         {
             //maunally add the special LE text
-            if (pageno >= 5976 && pageno <=5981)
+            if (pageno >= 5976 && pageno <= 5981)
             {
                 const string LESecretTextfilepref = "http://cdn.mspaintadventures.com/storyfiles/hs2/scraps/";
-                string file = "LEtext"+ (pageno - 5975) +".gif";
+                string file = "LEtext" + (pageno - 5975) + ".gif";
                 resources.Add(new Resource(DownloadFile(LESecretTextfilepref + file), file));
             }
 
             //grab the alt text
             var node = html.DocumentNode.Descendants("img").First();
 
-            try
-            {
+            if (node != null && node.Attributes["title"] != null)
                 texts.altText = node.Attributes["title"].Value;
-            }
-            catch { }
-
         }
         public bool IsScratch(int page)
         {
