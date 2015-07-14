@@ -825,6 +825,11 @@ namespace Reader_UI
             if (flash == null || flash.Disposing || flash.IsDisposed)
                 return;
             switch (page.number) { 
+                case 5760:
+                case 5751:  //godtier clock
+                    flash.Width = 650;
+                    flash.Height = 1612;
+                    break;
                 case (int)Writer.PagesOfImportance.GAMEOVER:
                     flash.Width = 950;
                     flash.Height = 786;
