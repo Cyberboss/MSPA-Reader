@@ -803,11 +803,15 @@ namespace Reader_UI
         }
         //https://stackoverflow.com/questions/1874077/loading-a-flash-movie-from-a-memory-stream-or-a-byte-array
         //*
-        private void InitFlashMovie(WebBrowser f ,Parser.Resource swfFile, bool setDimensions = true)
+        private void InitFlashMovie(WebBrowser f, Parser.Resource swfFile, bool setDimensions = true)
         {
-            if(setDimensions)
+            if (setDimensions)
                 SetFlashDimensions();
-            f.Navigate(WriteTempResource(swfFile));
+            var loc = WriteTempResource(swfFile);
+            if (page.number == 8848 || page.number == 8850)
+                f.DocumentText = "<style>html, body {{ padding: 0; margin: 0 }}</style><img src=\"" + loc + "\" border=\"0\"></img>";
+            else
+                f.Navigate(loc);
             f.Navigating += flash_Navigating;
         }
 
@@ -825,6 +829,11 @@ namespace Reader_UI
             if (flash == null || flash.Disposing || flash.IsDisposed)
                 return;
             switch (page.number) { 
+                case 8848:
+                case 8850:
+                    flash.Width = 682;
+                    flash.Height = 465;
+                    break;
                 case 5760:
                 case 5751:  //godtier clock
                     flash.Width = 650;
@@ -958,7 +967,9 @@ namespace Reader_UI
                 }
                 if (page.resources[i].isInPesterLog)
                     continue;
-                if (!pageContainsFlash && !Parser.IsGif(page.resources[i].originalFileName))
+                if (!pageContainsFlash && 
+                    ((page.number == 8848 || page.number == 8850) //special horizontal scroll
+                    || !Parser.IsGif(page.resources[i].originalFileName)))
                 {
                     flash = new WebBrowser();
                     comicPanel.Controls.Add(flash);
