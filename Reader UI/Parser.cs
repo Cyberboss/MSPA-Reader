@@ -693,6 +693,7 @@ namespace Reader_UI
         public bool LoadPage(int pageno)
         {
             //bardquest is weird as it has this void between pages 136 and 170 so we'll just pretend 136 is 170
+            var oP = pageno;
             if (pageno == (int)Writer.StoryBoundaries.BQ)
                 pageno = 136;
             
@@ -709,7 +710,7 @@ namespace Reader_UI
             try
             {
                 x2Flag = false;
-                var response = client.GetByteArrayAsync(new Uri(prepend2 + (isRQ ? "ryanquest" : GetStoryFromPage(pageno)) + prepend3 + pageno.ToString("D6"))).Result;
+                var response = client.GetByteArrayAsync(new Uri(prepend2 + (isRQ ? "ryanquest" : GetStoryFromPage(oP)) + prepend3 + pageno.ToString("D6"))).Result;
                 String source = Encoding.GetEncoding("utf-8").GetString(response, 0, response.Length - 1);
                 source = WebUtility.HtmlDecode(source);
                 var html = new HtmlDocument();
