@@ -154,6 +154,7 @@ namespace Reader_UI
         int pageRequest;
         Writer.Page page = null;
         Writer.Style previousStyle;
+        List<String> tempFiles = new List<string>();
         Button pesterHideShow = null;
         ImageStream currentIcon = null;
         class TricksterShit : IDisposable
@@ -934,6 +935,7 @@ namespace Reader_UI
         {
             string path = System.IO.Path.GetTempPath() + res.originalFileName;
             File.WriteAllBytes(path, res.data); //let the throw fall through and fail the page load (problems beyond our scope)
+            tempFiles.Add(path);
             return path;
         }
         void LoadRegularPage()
@@ -1600,6 +1602,15 @@ namespace Reader_UI
                 x2Panel.Kill();
                 x2Panel = null;
             }
+            foreach (var p in tempFiles)
+            {
+                try
+                {
+                    File.Delete(p);
+                }
+                catch { }
+            }
+            tempFiles.Clear();
         }
         void CleanControls()
         {
