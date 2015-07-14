@@ -16,24 +16,26 @@ Requirements:
 Flashplayer browser plugin: https://get.adobe.com/flashplayer/
 
 
-Other:
+You will probably also want a database that isn't SQLite:
 
 
-SQLLocalDB: https://www.microsoft.com/en-ca/download/details.aspx?id=29062 Choose SQLLocalDB.MSI for your architecture
+SQLLocalDB (Recommended for Windows users. Choose SQLLocalDB.MSI for your architecture, WINDOWS ONLY): https://www.microsoft.com/en-ca/download/details.aspx?id=29062 
 
-SQL Server Express: https://www.microsoft.com/en-ca/download/details.aspx?id=42299
+SQL Server Express (WINDOWS ONLY): https://www.microsoft.com/en-ca/download/details.aspx?id=42299
 
-If using SQL Server you will need to setup a database named MSPAArchive and assign a user DBO permissions. Using only the server name paramater will attempt to connect with Windows Authentication.
+MySQL Community (Recommended for *nix users. Though you will need to install it from your distro's package manager, this is the windows link): http://dev.mysql.com/get/Downloads/MySQLInstaller/mysql-installer-web-community-5.6.25.0.msi
 
+If using SQL Server or MySQL you will need to assign a user schema creation permissions and use it in the application. Using only the hostname paramater will attempt to connect with Windows Authentication (SQLServer only).
 
-I know it's poorly coded and documented. I did this for fun over the past week.
+NOTE: CURRENTLY ONLY MYSQL WORKS ON LINUX
+
+I know it's poorly documented. I did this for fun.
 
 
 Dependancies:
 
 HtmlAgilityPack
 
-System.Data.Sqlite (on Windows)
-
+System.Data.Sqlite
 
 Roxygen Karezi for endgame ships.
