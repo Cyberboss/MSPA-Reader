@@ -12,4 +12,7 @@ v1.1
 	-- Narrative prompts are now formatted correctly
 	-- Added functionality to the header
 	-- Scope based archiving
+	-- Chapter based navigation
+	-- Fix to multiple links
+	-- Fix to multiple Homestuck pages
 	-- SUPPORT FOR ALL MSPAINTADVENTURES!
