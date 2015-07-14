@@ -1007,6 +1007,7 @@ namespace Reader_UI
             {
                 narrative = new GrowRich();
                 narrative.Width = REGULAR_NARRATIVE_WIDTH;
+                narrative.DetectUrls = true;
                 narrative.SelectionAlignment = HorizontalAlignment.Center;
                 narrative.Font = new System.Drawing.Font("Courier New", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
                 narrative.Text = page.meta.narr.text;
@@ -1112,6 +1113,7 @@ namespace Reader_UI
                     {
                         var tmpl = new GrowRich();
                         tmpl.Width = REGULAR_PESTERLOG_LINE_WIDTH;
+                        tmpl.DetectUrls = true;
                         tmpl.MaximumSize = new Size(tmpl.Width, Int32.MaxValue);
                         tmpl.Font = new System.Drawing.Font("Courier New", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
                         tmpl.BackColor = pesterlog.BackColor;   //can't change forecolour otherwise

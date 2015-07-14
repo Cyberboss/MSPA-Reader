@@ -73,7 +73,7 @@ namespace Reader_UI
                                     string path = (Application.StartupPath + System.IO.Path.DirectorySeparatorChar + System.AppDomain.CurrentDomain.FriendlyName).Replace(".exe", " Update.exe");
                                     if (path == Application.StartupPath + System.IO.Path.DirectorySeparatorChar + System.AppDomain.CurrentDomain.FriendlyName)
                                         path += "Update.exe";
-                                    System.IO.File.WriteAllBytes(path, p.DownloadFile(updateURL,true));
+                                    System.IO.File.WriteAllBytes(path, p.DownloadFile(updateURL));
                                     System.Diagnostics.Process.Start(path);
                                     return;
                                 }

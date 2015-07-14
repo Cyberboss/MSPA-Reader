@@ -116,9 +116,9 @@ namespace Reader_UI
         public void LoadIcons()
         {
             resources.Clear();
-            resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/candycorn.gif",true), "candycorn.gif"));
-            resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/candycorn_scratch.png", true), "candycorn_scratch.png"));
-            resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/a6a6_tooth2.gif", true), "a6a6_tooth2.gif"));
+            resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/candycorn.gif"), "candycorn.gif"));
+            resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/candycorn_scratch.png"), "candycorn_scratch.png"));
+            resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/a6a6_tooth2.gif"), "a6a6_tooth2.gif"));
         }
         public class Link
         {
@@ -178,7 +178,7 @@ namespace Reader_UI
                 }
             }
 
-            public byte[] DownloadData(string address, bool serial) 
+            new public byte[] DownloadData(string address) 
             {
                 res = null;
                 isDownloading = true;
@@ -188,8 +188,7 @@ namespace Reader_UI
                 while (true)
                 {
                     System.Threading.Thread.Sleep(10);
-                    if (serial)
-                        System.Windows.Forms.Application.DoEvents();
+                    System.Windows.Forms.Application.DoEvents();
                     count+= 10;
                     lock (_sync)
                     {
@@ -223,7 +222,7 @@ namespace Reader_UI
         const string scratchTitleRegex = "title=\\\"(.*?)\\\"";
         const string swfRegex = @"http:\/\/.*?\.swf";
         const string linkNumberRegex = @"[0-9]{6}";
-        const string logRegex = @"Dialoglog|Spritelog|Pesterlog";
+        const string logRegex = @"Dialoglog|Spritelog|Pesterlog|Recap log";
         const string npRegex = @"border: 3px solid #c6c6c6; padding: 1px; background: white;";
         const string hexColourRegex = @"#[0-9A-Fa-f]{6}";
         const string underlineRegex = @"underline";
@@ -254,7 +253,7 @@ namespace Reader_UI
             //if this fails we need to check the database
             try
             {
-                var response = DownloadFile("http://www.mspaintadventures.com/?viewlog=6",true);
+                var response = DownloadFile("http://www.mspaintadventures.com/?viewlog=6");
                 String source = Encoding.GetEncoding("utf-8").GetString(response, 0, response.Length - 1);
                 source = WebUtility.HtmlDecode(source);
                 var html = new HtmlDocument();
@@ -279,9 +278,9 @@ namespace Reader_UI
         public void LoadTricksterResources(bool serial)
         {
             resources.Clear();
-            resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/trickster_sitegraphics/Z2.gif", serial), "Z2.gif"));
-            resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/trickster_sitegraphics/menu.swf", serial), "menu.swf"));
-            resources.Add(new Resource(DownloadFile("http://mspaintadventures.com/images/trickster_sitegraphics/bluetile.gif", serial), "bluetile.gif"));
+            resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/trickster_sitegraphics/Z2.gif"), "Z2.gif"));
+            resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/trickster_sitegraphics/menu.swf"), "menu.swf"));
+            resources.Add(new Resource(DownloadFile("http://mspaintadventures.com/images/trickster_sitegraphics/bluetile.gif"), "bluetile.gif"));
         }
         public Text GetText()
         {
@@ -597,6 +596,15 @@ namespace Reader_UI
                     linkListForTextParse.Add(link);
                 }
             }
+            if (links.Count > 20)
+            {    //stupidity
+                var last = links.Last();
+                var ll = linkListForTextParse.Last();
+                links.Clear();
+                linkListForTextParse.Clear();
+                links.Add(last);
+                linkListForTextParse.Add(ll);
+            }
         }
         public static int GetPageNumberFromURL(string url)
         {
@@ -621,16 +629,16 @@ namespace Reader_UI
         {
             return links.ToArray();
         }
-        public byte[] DownloadFile(string file, bool serial = false)
+        public byte[] DownloadFile(string file)
         {
             try
             {
-                return web.DownloadData(file, serial);
+                return web.DownloadData(file);
             }
             catch
             {
                 //try the www if the cdn is jank
-                return web.DownloadData(file.Replace("cdn.mspaintadventures.com", "www.mspaintadventures.com"), serial);
+                return web.DownloadData(file.Replace("cdn.mspaintadventures.com", "www.mspaintadventures.com"));
             }
         }
         void ScratchPreParse(HtmlDocument html)
@@ -715,6 +723,7 @@ namespace Reader_UI
                 source = WebUtility.HtmlDecode(source);
                 var html = new HtmlDocument();
                 html.LoadHtml(source);
+                
 
                 if (IsScratch(pageno))
                 {
@@ -761,7 +770,7 @@ namespace Reader_UI
         public void GetX2Header(bool serial)
         {
             resources.Clear();
-            resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/act6act5act1x2combo.gif", serial), "act6act5act1x2combo.gif"));
+            resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/act6act5act1x2combo.gif"), "act6act5act1x2combo.gif"));
         }
     }
 }
