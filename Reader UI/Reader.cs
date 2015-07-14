@@ -210,8 +210,8 @@ namespace Reader_UI
         List<GifStream> gifs = new List<GifStream>();
         WebBrowser flash = null;
         GrowRich narrative = null;
-        Label linkPrefix = null;
-        LinkLabel next = null, tereziPassword = null;
+        List<Label> linkPrefix = new List<Label>();
+        List<LinkLabel> next = new List<LinkLabel>();
         Panel pesterlog = null;
         GifStream headerP = null;
         List<ArchiverWindow.PageRange> toc;
@@ -471,8 +471,10 @@ namespace Reader_UI
                     }
                 }
 
-                linkPrefix.Location = new Point(linkPrefix.Location.X, linkPrefix.Location.Y - theLEText);
-                next.Location = new Point(next.Location.X, next.Location.Y - theLEText);
+                foreach (var lp in linkPrefix)
+                    lp.Location = new Point(lp.Location.X, lp.Location.Y - theLEText);
+                foreach (var lp in next)
+                    lp.Location = new Point(lp.Location.X, lp.Location.Y - theLEText);
 
                 comicPanel.Height -= theLEText;
                 mainPanel.Height -= theLEText;
@@ -481,8 +483,10 @@ namespace Reader_UI
                 tempPB.gif.MouseEnter += ShowLEText;
                 tempPB.gif.MouseLeave += HideLEText;
             }
-            linkPrefix.ForeColor = Color.White;
-            next.LinkColor = Color.FromArgb(44, 255, 75);   //TODO:
+            foreach (var lp in linkPrefix)
+                lp.ForeColor = Color.White;
+            foreach (var lp in next)
+                lp.LinkColor = Color.FromArgb(44, 255, 75);   //TODO:
         }
 
         void LoadHomosuckPage()
@@ -508,10 +512,13 @@ namespace Reader_UI
                     line.GetControl().BackColor = Color.FromArgb(7, 60, 0);
                 }
             }
-            linkPrefix.BackColor = Color.FromArgb(7, 60, 0);
-            next.BackColor = Color.FromArgb(7, 60, 0);
-            next.LinkColor = Color.FromArgb(46, 215, 58);
-
+            foreach(var lp in linkPrefix)
+                lp.BackColor = Color.FromArgb(7, 60, 0);
+            foreach (var lp in next)
+            {
+                lp.BackColor = Color.FromArgb(7, 60, 0);
+                lp.LinkColor = Color.FromArgb(46, 215, 58);
+            }
             
         }
         void HideLEText(object sender, EventArgs e)
@@ -556,10 +563,16 @@ namespace Reader_UI
                     line.GetControl().BackColor = Color.FromArgb(255, 155, 253); ;
                 }
             }
-            linkPrefix.BackColor = Color.FromArgb(255, 155, 253);
-            linkPrefix.ForeColor = Color.FromArgb(249, 253, 99);
-            next.BackColor = Color.FromArgb(255, 155, 253); ;
-            next.LinkColor = Color.FromArgb(251, 6, 11);
+            foreach (var lp in linkPrefix)
+            {
+                lp.BackColor = Color.FromArgb(255, 155, 253);
+                lp.ForeColor = Color.FromArgb(249, 253, 99);
+            }
+            foreach (var lp in next)
+            {
+                lp.BackColor = Color.FromArgb(255, 155, 253); ;
+                lp.LinkColor = Color.FromArgb(251, 6, 11);
+            }
         }
         void LoadSBAHJPage()
         {
@@ -596,8 +609,10 @@ namespace Reader_UI
 
             newFont = new System.Drawing.Font("Comic Sans MS", title.Font.Size, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             title.Font = newFont;
-            linkPrefix.Font = newFont;
-            next.Font = newFont;
+            foreach(Label lp in linkPrefix)
+                lp.Font = newFont;
+            foreach (LinkLabel lp in next)
+                lp.Font = newFont;
         }
         void LoadX2Page()
         {
@@ -614,13 +629,13 @@ namespace Reader_UI
             if (oldMeta.narr != null)
                 x2Panel = new x2Handler(comicPanel);
             else
-                x2Panel = new x2Handler(mainPanel,comicPanel, pesterlog, linkPrefix, fakeLink.gif, pesterHideShow, conversations, oldMeta.promptType, pLMinHeight, pLMaxHeight);
+                x2Panel = new x2Handler(mainPanel,comicPanel, pesterlog, linkPrefix.First(), fakeLink.gif, pesterHideShow, conversations, oldMeta.promptType, pLMinHeight, pLMaxHeight);
 
             conversations = new List<LineOrPB>();
             LoadRegularPage();
             x2Panel.comicPanel.Location = new Point(mainPanel.Width / 2 - (x2Panel.comicPanel.Width * 2 + 29) / 2, x2Panel.comicPanel.Location.Y);
             comicPanel.Location = new Point(x2Panel.comicPanel.Location.X + x2Panel.comicPanel.Width + 29, comicPanel.Location.Y);
-            fakeLink.gif.Location = new Point(next.Location.X + linkPrefix.Width,next.Location.Y + next.Height);
+            fakeLink.gif.Location = new Point(next.First().Location.X + linkPrefix.First().Width, next.First().Location.Y + next.First().Height);
             x2Panel.comicPanel.Height = comicPanel.Height;
 
             mainPanel.Height = comicPanel.Height + REGULAR_COMIC_PANEL_Y_OFFSET + REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET;
@@ -656,27 +671,32 @@ namespace Reader_UI
             //next page
             var currentHeight = gif.Height + REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
             var leftSide = comicPanel.Width / 2 - REGULAR_PESTERLOG_WIDTH / 2;
-            if (page.number < db.lastPage)
+            if (page.number < db.lastPage && page.links != null)
             {
-
-                linkPrefix = new Label();
-                linkPrefix.AutoSize = true;
-                linkPrefix.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-                linkPrefix.Text = REGULAR_LINK_PREFIX;
-                linkPrefix.Location = new Point(leftSide, currentHeight);
-                comicPanel.Controls.Add(linkPrefix);
-
-                if (page.links != null && page.links.Count() > 0)
+                for (int i = 0; i < page.links.Count(); i++)
                 {
-                    next = new GrowLinkLabel();
-                    next.Width = 600;
-                    next.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-                    next.Text = "    " + page.links[0].originalText;
-                    next.Location = new Point(leftSide, currentHeight);
-                    next.LinkClicked += next_LinkClicked;
-                    comicPanel.Controls.Add(next);
+                    var linkPrefixn = new Label();
+                    linkPrefixn.AutoSize = true;
+                    linkPrefixn.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                    linkPrefixn.Text = REGULAR_LINK_PREFIX;
+                    linkPrefixn.Location = new Point(leftSide, currentHeight);
+                    comicPanel.Controls.Add(linkPrefixn);
+                    linkPrefix.Add(linkPrefixn);
+
+                    var nextn = new GrowLinkLabel();
+                    nextn.Width = 600;
+                    nextn.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                    nextn.Text = "    " + page.links[i].originalText;
+                    nextn.Location = new Point(leftSide, currentHeight);
+                    var tmpi = i;   //I really don't know how these labmdas work sometimes
+                    nextn.LinkClicked += (o, z) => { WakeUpMr(page.links[tmpi].pageNumber); };
+                    comicPanel.Controls.Add(nextn);
+                    next.Add(nextn);
+
+                    linkPrefixn.BringToFront();
+                    if (i < page.links.Count() - 1)
+                        currentHeight += nextn.Height;
                 }
-                linkPrefix.BringToFront();
             }
 
             comicPanel.Height = currentHeight + REGULAR_COMIC_PANEL_BOTTOM_PADDING;
@@ -700,10 +720,10 @@ namespace Reader_UI
             var leftSide = comicPanel.Width / 2 - REGULAR_NARRATIVE_WIDTH / 2;
             if(narrative != null)
                 narrative.Location = new Point(leftSide, narrative.Location.Y);
-            if (linkPrefix != null)
-                linkPrefix.Location = new Point(leftSide, linkPrefix.Location.Y);
-            if (next != null)
-                next.Location = new Point(leftSide, next.Location.Y);
+            foreach(var lp in linkPrefix)
+                lp.Location = new Point(leftSide, lp.Location.Y);
+            foreach (var lp in next)
+                lp.Location = new Point(leftSide, lp.Location.Y);
         }
         void LoadPage()
         {
@@ -867,22 +887,24 @@ namespace Reader_UI
 
 
 
-            linkPrefix = new Label();
-            linkPrefix.AutoSize = true;
-            linkPrefix.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            linkPrefix.Text = REGULAR_LINK_PREFIX;
-            linkPrefix.Location = new Point(REGULAR_PANEL_WIDTH / 2  - REGULAR_PESTERLOG_WIDTH/2, flash.Location.Y + flash.Height + 23);
-            comicPanel.Controls.Add(linkPrefix);
+            var linkPrefixn = new Label();
+            linkPrefixn.AutoSize = true;
+            linkPrefixn.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            linkPrefixn.Text = REGULAR_LINK_PREFIX;
+            linkPrefixn.Location = new Point(REGULAR_PANEL_WIDTH / 2  - REGULAR_PESTERLOG_WIDTH/2, flash.Location.Y + flash.Height + 23);
+            comicPanel.Controls.Add(linkPrefixn);
+            linkPrefix.Add(linkPrefixn);
 
-            next = new GrowLinkLabel();
-            next.Width = 600;
-            next.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            next.Text = "    " + page.links[0].originalText;
-            next.Location = linkPrefix.Location; //TODO: MAGIC NUMBERS!!!
-            next.LinkClicked += next_LinkClicked;
-            comicPanel.Controls.Add(next);
+            var nextn = new GrowLinkLabel();
+            nextn.Width = 600;
+            nextn.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            nextn.Text = "    " + page.links[0].originalText;
+            nextn.Location = linkPrefixn.Location; //TODO: MAGIC NUMBERS!!!
+            nextn.LinkClicked += (o, z) => { WakeUpMr(page.links[0].pageNumber); };
+            comicPanel.Controls.Add(nextn);
+            next.Add(nextn);
 
-            linkPrefix.BringToFront();
+            linkPrefixn.BringToFront();
 
 
             mainPanel.Height = flash.Location.Y + flash.Height +
@@ -1179,27 +1201,32 @@ namespace Reader_UI
             }
 
             //next page
-            if (page.number < db.lastPage && page.links.Count() != 0)
+            if (page.number < db.lastPage && page.links != null)
             {
-
-                linkPrefix = new Label();
-                linkPrefix.AutoSize = true;
-                linkPrefix.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-                linkPrefix.Text = REGULAR_LINK_PREFIX;
-                linkPrefix.Location = new Point(leftSide, currentHeight);
-                comicPanel.Controls.Add(linkPrefix);
-
-                if (page.links != null && page.links.Count() > 0)
+                for (int i = 0; i < page.links.Count(); i++)
                 {
-                    next = new GrowLinkLabel();
-                    next.Width = 600;
-                    next.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-                    next.Text = "    " + page.links[0].originalText;
-                    next.Location = new Point(leftSide, currentHeight);
-                    next.LinkClicked += next_LinkClicked;
-                    comicPanel.Controls.Add(next);
+                    var linkPrefixn = new Label();
+                    linkPrefixn.AutoSize = true;
+                    linkPrefixn.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                    linkPrefixn.Text = REGULAR_LINK_PREFIX;
+                    linkPrefixn.Location = new Point(leftSide, currentHeight);
+                    comicPanel.Controls.Add(linkPrefixn);
+                    linkPrefix.Add(linkPrefixn);
+
+                    var nextn = new GrowLinkLabel();
+                    nextn.Width = 600;
+                    nextn.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                    nextn.Text = "    " + page.links[i].originalText;
+                    nextn.Location = new Point(leftSide, currentHeight);
+                    var tmpi = i;   //I really don't know how these labmdas work sometimes
+                    nextn.LinkClicked += (o, z) => { WakeUpMr(page.links[tmpi].pageNumber); };
+                    comicPanel.Controls.Add(nextn);
+                    next.Add(nextn);
+
+                    linkPrefixn.BringToFront();
+                    if (i < page.links.Count() - 1)
+                        currentHeight += nextn.Height;
                 }
-                linkPrefix.BringToFront();
             }
 
             comicPanel.Height = currentHeight + REGULAR_COMIC_PANEL_BOTTOM_PADDING;
@@ -1240,8 +1267,12 @@ namespace Reader_UI
             else
                 currentHeight += pLMaxHeight;
 
-            linkPrefix.Location = new Point(linkPrefix.Location.X, currentHeight);
-            next.Location = new Point(next.Location.X, currentHeight);
+            for (int i = 0; i < linkPrefix.Count(); i++)
+            {
+                linkPrefix[i].Location = new Point(linkPrefix[i].Location.X, currentHeight);
+                next[i].Location = new Point(next[i].Location.X, currentHeight);
+                currentHeight += next[i].Height;
+            }
             comicPanel.Height = currentHeight + REGULAR_COMIC_PANEL_BOTTOM_PADDING;
 
         }
@@ -1267,12 +1298,6 @@ namespace Reader_UI
 
         }
 
-        void next_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-
-            WakeUpMr(page.links[0].pageNumber);
-
-        }        
         void WakeUpMr(int pg)
         {
 
@@ -1532,9 +1557,12 @@ namespace Reader_UI
                 pic.loc.Dispose();
             }
             gifs.Clear();
-            RemoveControl(linkPrefix);
-            RemoveControl(next);
-            RemoveControl(tereziPassword);
+            foreach (var lp in linkPrefix)
+                RemoveControl(lp);
+            linkPrefix.Clear();
+            foreach (var lp in next)
+                RemoveControl(lp);
+            next.Clear();
             if (monitorGameOver.IsBusy)
             {
                 var tmp = flash;
@@ -1884,7 +1912,7 @@ namespace Reader_UI
 
         private void helpButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("You can use the arrow keys to navigate (on pages without flash)! Left and right change pages, Up and down scroll, spacebar toggles pesterlogs. The Go Back button sends you to the previous page. 'H' hides and shows the UI. F5 refreshes the page, F11 toggles windowed fullscreen (disabled on Mono). Use the archiver to download all of Homestuck at once. Made by Cyberboss (/u/Cyberboss_JHCB). Report bugs at https://github.com/cybnetsurfe3011/MSPA-Reader. MSPA belongs to Hussie not me, don't take credit for or sell this.");
+            MessageBox.Show("You can use the arrow keys to navigate (on pages without flash)! Left and right change pages, Up and down scroll, spacebar toggles pesterlogs. The Go Back button sends you to the previous page you were on. 'H' hides and shows the UI. F5 refreshes the page, F11 toggles windowed fullscreen (disabled on Mono). Use the archiver to download all of Homestuck at once. Made by Cyberboss (/u/Cyberboss_JHCB). Report bugs at https://github.com/cybnetsurfe3011/MSPA-Reader. MSPA belongs to Hussie not me, don't take credit for or sell this.");
         }
 
         private void startOverButton_Click(object sender, EventArgs e)
