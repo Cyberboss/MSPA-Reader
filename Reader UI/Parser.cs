@@ -561,14 +561,14 @@ namespace Reader_UI
                 throw new Exception();
             contentTable = secondContentTable;
             ParseResources(true);
-            ParseLinks();
+            ParseLinks(false);
             ParseText();
         }
         public static bool IsTrickster(int pageno)
         {
             return (pageno >= 7614 && pageno <= 7677);
         }
-        void ParseLinks()
+        void ParseLinks(bool isRQ)
         {
             links.Clear();
             linkListForTextParse.Clear();
@@ -587,7 +587,7 @@ namespace Reader_UI
                 var res = Regex.Match(actualLink, linkNumberRegex);
                 if (res.Success)
                 {
-                    links.Add(new Link(link.InnerText.Trim(), Convert.ToInt32(res.Value)));
+                    links.Add(new Link(link.InnerText.Trim(), Convert.ToInt32(res.Value) + (isRQ ? 136 : 0)));
                     linkListForTextParse.Add(link);
                 }
             }
@@ -676,22 +676,38 @@ namespace Reader_UI
         {
             return pageno == 5982;
         }
-        int GetStoryFromPage(int pg)
+        string GetStoryFromPage(int pg)
         {
             if (pg <= (int)Writer.StoryBoundaries.JAILBREAK_LAST_PAGE)
-                return 1;
+                return "" + 1;
+            if (pg <= (int)Writer.StoryBoundaries.EOBQ)
+                return "" + 2; 
             if (pg <= (int)Writer.StoryBoundaries.EOPS)
-                return 4;
+                return "" + 4;
             if (pg <= (int)Writer.StoryBoundaries.EOHSB)
-                return 5;
-            return 6;
+                return "" + 5;
+            return "" + 6;
         }
         public bool LoadPage(int pageno)
         {
+            //bardquest is weird as it has this void between pages 136 and 170 so we'll just pretend 136 is 170
+            if (pageno == (int)Writer.StoryBoundaries.BQ)
+                pageno = 136;
+            
+            //also since ryanquest's page range clashes with jailbreak we'll put it in that void
+
+            bool isRQ = false;
+            if (pageno >= (int)Writer.StoryBoundaries.RQ && pageno <= (int)Writer.StoryBoundaries.EORQ)
+            {
+                pageno -= 136;
+                isRQ = true;
+            }
+
+
             try
             {
                 x2Flag = false;
-                var response = client.GetByteArrayAsync(new Uri(prepend2 + GetStoryFromPage(pageno) + prepend3 + pageno.ToString("D6"))).Result;
+                var response = client.GetByteArrayAsync(new Uri(prepend2 + (isRQ ? "ryanquest" : GetStoryFromPage(pageno)) + prepend3 + pageno.ToString("D6"))).Result;
                 String source = Encoding.GetEncoding("utf-8").GetString(response, 0, response.Length - 1);
                 source = WebUtility.HtmlDecode(source);
                 var html = new HtmlDocument();
@@ -702,7 +718,7 @@ namespace Reader_UI
                     ScratchPreParse(html);
                     contentTable = html.DocumentNode.Descendants("body").First().Descendants("table").First().Descendants("table").ElementAt(1).Descendants("table").First();
                     ParseResources(false);
-                    ParseLinks();
+                    ParseLinks(false);
                     ParseText();
                     ScratchPostParse(html,pageno);
                     return true;
@@ -729,7 +745,7 @@ namespace Reader_UI
                     contentTable = html.DocumentNode.Descendants("table").First().SelectNodes("tr").ElementAt(1).SelectNodes("td").First().SelectNodes("table").First();
                 }
                 ParseResources(true);
-                ParseLinks();
+                ParseLinks(isRQ);
                 ParseText();
             }
             catch

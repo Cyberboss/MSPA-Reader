@@ -222,6 +222,10 @@ namespace Reader_UI
        {
            JAILBREAK_PAGE_ONE = 2,
            JAILBREAK_LAST_PAGE = 136,
+           BQ = 170,
+           EOBQ = 216,
+           RQ = 137,
+           EORQ = 151,
            PS = 219,
            PSC2 = 302,
            PSC3 = 402,
@@ -701,6 +705,14 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             if (pg < (int)StoryBoundaries.JAILBREAK_PAGE_ONE)
                 return (int)StoryBoundaries.JAILBREAK_PAGE_ONE;
             if (pg <= (int)StoryBoundaries.JAILBREAK_LAST_PAGE)
+                return pg;
+            if (pg < (int)StoryBoundaries.RQ)
+                return (int)StoryBoundaries.RQ;
+            if (pg <= (int)StoryBoundaries.EORQ)
+                return pg;
+            if (pg < (int)StoryBoundaries.BQ)
+                return (int)StoryBoundaries.BQ;
+            if (pg <= (int)StoryBoundaries.EOBQ)
                 return pg;
             if (pg < (int)StoryBoundaries.PS)
                 return (int)StoryBoundaries.PS;

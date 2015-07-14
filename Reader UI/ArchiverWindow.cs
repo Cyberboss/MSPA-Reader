@@ -35,7 +35,8 @@ namespace Reader_UI
             var toc = new List<PageRange>();
             toc.Add(new PageRange(@"MS Paint Adventures",(int)Writer.StoryBoundaries.JAILBREAK_PAGE_ONE,db.lastPage));
             toc.Add(new PageRange(@"=> Jailbreak", (int)Writer.StoryBoundaries.JAILBREAK_PAGE_ONE, (int)Writer.StoryBoundaries.JAILBREAK_LAST_PAGE));
-            toc.Add(new PageRange(@"=> Bard Quest",0,0));
+            toc.Add(new PageRange(@"=> Ryanquest", (int)Writer.StoryBoundaries.RQ, (int)Writer.StoryBoundaries.EORQ));
+            toc.Add(new PageRange(@"=> Bard Quest",(int)Writer.StoryBoundaries.BQ,(int)Writer.StoryBoundaries.EOBQ));
             toc.Add(new PageRange(@"=> Problem Sleuth", (int)Writer.StoryBoundaries.PS, (int)Writer.StoryBoundaries.EOPS));
             toc.Add(new PageRange(@"| => Chapter 1: COMPENSATION, ADEQUATE", (int)Writer.StoryBoundaries.PS, (int)Writer.StoryBoundaries.PSC2 - 1));
             toc.Add(new PageRange(@"| => Chapter 2: TOO HOT TO HANDLE", (int)Writer.StoryBoundaries.PSC2, (int)Writer.StoryBoundaries.PSC3 - 1));
@@ -60,7 +61,6 @@ namespace Reader_UI
             toc.Add(new PageRange(@"| => Chapter 21: BHMK", (int)Writer.StoryBoundaries.PSC21, (int)Writer.StoryBoundaries.PSC22 - 1));
             toc.Add(new PageRange(@"| => Chapter 22: SEPULCHRITUDE", (int)Writer.StoryBoundaries.PSC22, (int)Writer.StoryBoundaries.PSE - 1));
             toc.Add(new PageRange(@"\ => Epilogue", (int)Writer.StoryBoundaries.PSE, (int)Writer.StoryBoundaries.EOPS));
-            toc.Add(new PageRange(@"=> Ryanquest",0,0));
             toc.Add(new PageRange(@"=> Homestuck Beta",(int)Writer.StoryBoundaries.HSB,(int)Writer.StoryBoundaries.EOHSB));
             toc.Add(new PageRange(@"=> Homestuck", (int)Writer.StoryBoundaries.HOMESTUCK_PAGE_ONE, db.lastPage));
             toc.Add(new PageRange(@"| => Part 1", (int)Writer.StoryBoundaries.HOMESTUCK_PAGE_ONE, (int)Writer.StoryBoundaries.HS_EOP1));

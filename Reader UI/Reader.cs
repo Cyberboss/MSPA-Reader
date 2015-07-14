@@ -1178,7 +1178,7 @@ namespace Reader_UI
             }
 
             //next page
-            if (page.number < db.lastPage)
+            if (page.number < db.lastPage && page.links.Count() != 0)
             {
 
                 linkPrefix = new Label();
