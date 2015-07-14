@@ -421,6 +421,8 @@ namespace Reader_UI
 
             comicPanel.Height -= shiftHeight;
             mainPanel.Height -= shiftHeight;
+            pLMaxHeight -= shiftHeight;
+            pLMinHeight -= shiftHeight;
 
             //set colours
 
