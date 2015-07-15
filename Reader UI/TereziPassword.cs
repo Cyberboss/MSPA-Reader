@@ -26,6 +26,8 @@ namespace Reader_UI
             richTextBox1.Text = "<- WRONG! GO B4CK!!!";
             richTextBox1.Select(3, 6);
             richTextBox1.SelectionFont = new System.Drawing.Font("Verdana", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            richTextBox1.SelectAll();
+            richTextBox1.SelectionAlignment = HorizontalAlignment.Center;
             wrong = true;
         }
         public TereziPassword(EventHandler eh, byte[] ms)
