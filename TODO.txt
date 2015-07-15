@@ -17,7 +17,6 @@ Tasks:
 -- Support for archival and serial reading modes (x.gif vs x_retcon.gif, activate retcon once past a certain page)
 -- Better narrative/dialog parsing?
 -- Support line breaks in pesterlogs?
--- Fix pesterlog system message regex?
 -- Read through and mark down problem pages
 -- Fix problem pages
 (DONE? lack of integrity check may make it buggy, no idea how transactions are handled either) -- Support Sqlite

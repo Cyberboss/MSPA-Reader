@@ -226,9 +226,8 @@ namespace Reader_UI
         const string npRegex = @"border: 3px solid #c6c6c6; padding: 1px; background: white;";
         const string hexColourRegex = @"#[0-9A-Fa-f]{6}";
         const string underlineRegex = @"underline";
-        const string pesterLogRegex = @"-- .*? --";
-        //TODO: the above regex is way too vague
-        const string chumhandleRegex = @"\[[G|C|A|T]{2}\]|\[EB\]";
+        const string pesterLogRegex = @"-- .*? --|(.*?(\[[G|C|A|T]{2}\]|\[EB\]).*?(\[[G|C|A|T]{2}\]|\[EB\]).*)";
+        const string chumhandleRegex = @".*?\[[G|C|A|T]{2}\]|\[EB\]";
         const string gifFileRegex = @".+\.(?i)[gif|png]";
         
 
