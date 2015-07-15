@@ -751,10 +751,6 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             ArchivePageNumber((int)PagesOfImportance.JAILBREAK_LAST_PAGE, false);
             Commit();
         }
-        enum BlankPages
-        {
-
-        }
         public static int ValidRange(int pg)
         {
             if (pg < (int)StoryBoundaries.JAILBREAK_PAGE_ONE)
@@ -779,10 +775,6 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 return pg;
             if (pg < (int)StoryBoundaries.HOMESTUCK_PAGE_ONE)
                 return (int)StoryBoundaries.HOMESTUCK_PAGE_ONE;
-
-
-            if (Enum.IsDefined(typeof(BlankPages), pg))
-                return ValidRange(pg + 1);
 
             return pg;
         }
@@ -881,9 +873,6 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                     }
                     if (bgw.CancellationPending || missedPages.Count() == 0)
                         break;
-                    foreach (var p in missedPages)
-                        bgw.ReportProgress(currentProgress, "" + p);
-                    Debugger.Break();
                     missedRound = true;
                     bgw.ReportProgress(currentProgress, "Missed " + missedPages.Count() + " pages. Iterating through missed queue.");
                 }

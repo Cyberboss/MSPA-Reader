@@ -216,8 +216,8 @@ namespace Reader_UI
             + @"|.*v2_blanksquare3"
             + @"|.*spacer"
             + @"|.*bluetile"
-            + @")(.*?)\.(?i)gif";
-        const string scratchHeaderImageRegex = "src=\\\"(.*?\\.(?i)gif)\\\"";
+            + @")(.*?)\.(?i)(gif|png)";
+        const string scratchHeaderImageRegex = "src=\\\"(.*?\\.(?i)(gif|png))\\\"";
         const string scratchHeaderImageFilenameRegex = @".*\/(.*)";
         const string scratchTitleRegex = "title=\\\"(.*?)\\\"";
         const string swfRegex = @"http:\/\/.*?\.swf";
@@ -229,7 +229,7 @@ namespace Reader_UI
         const string pesterLogRegex = @"-- .*? --";
         //TODO: the above regex is way too vague
         const string chumhandleRegex = @"\[[G|C|A|T]{2}\]|\[EB\]";
-        const string gifFileRegex = @".+\.(?i)gif";
+        const string gifFileRegex = @".+\.(?i)[gif|png]";
         
 
         public bool x2Flag;
@@ -468,7 +468,13 @@ namespace Reader_UI
                         for (int i = 0; i < logBox.ChildNodes.Count && logPositionCount < logs.Count; ++i)
                         {
                             var currentNode = logBox.ChildNodes.ElementAt(i);
-                            if (currentNode.Name == "span")
+                            if (line.Count == linePositionCount)
+                            {
+                                line.Insert(linePositionCount, logs[logPositionCount]);
+                                logPositionCount++;
+                                linePositionCount++;
+                            }
+                            else if (currentNode.Name == "span")
                             {
                                 if (currentNode.InnerText == line[linePositionCount].text)
                                 {
@@ -479,7 +485,7 @@ namespace Reader_UI
                             {
                                 linePositionCount++;
                             }
-                            else if(logs[logPositionCount].text.Contains(currentNode.InnerText.Trim()) && currentNode.InnerText.Trim() != "")
+                            else if (logs[logPositionCount].text.Contains(currentNode.InnerText.Trim()) && currentNode.InnerText.Trim() != "")
                             {
                                 //at this point we need to keep incrementing i until we stop matching this one
                                 //we can expect EXACTLY this many matches
@@ -536,6 +542,7 @@ namespace Reader_UI
                 resources.Clear();
             //we are mainly looking for .gifs and .swfs, there are some things we should ignore, such as /images/v2_blankstrip.gif
             var matches = Regex.Matches(contentTable.InnerHtml, gifRegex);
+
 
             for (int i = 0; i < matches.Count; i++)
             {
@@ -631,6 +638,8 @@ namespace Reader_UI
         }
         public byte[] DownloadFile(string file)
         {
+            if (file == "http://andrewhussie.com/whistlessite/preview.php?page=000.gif")
+                return new byte[0];
             try
             {
                 return web.DownloadData(file);
@@ -718,7 +727,8 @@ namespace Reader_UI
             try
             {
                 x2Flag = false;
-                var response = client.GetByteArrayAsync(new Uri(prepend2 + (isRQ ? "ryanquest" : GetStoryFromPage(oP)) + prepend3 + pageno.ToString("D6"))).Result;
+                var uristring = prepend2 + (isRQ ? "ryanquest" : GetStoryFromPage(oP)) + prepend3 + pageno.ToString("D6");
+                var response = client.GetByteArrayAsync(new Uri(uristring)).Result;
                 String source = Encoding.GetEncoding("utf-8").GetString(response, 0, response.Length - 1);
                 source = WebUtility.HtmlDecode(source);
                 var html = new HtmlDocument();
