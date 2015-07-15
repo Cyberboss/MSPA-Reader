@@ -1241,7 +1241,10 @@ namespace Reader_UI
                     nextn.Text = "    " + page.links[i].originalText;
                     nextn.Location = new Point(leftSide, currentHeight);
                     var tmpi = i;   //I really don't know how these labmdas work sometimes
-                    nextn.LinkClicked += (o, z) => { WakeUpMr(page.links[tmpi].pageNumber); };
+                    if (Enum.IsDefined(typeof(Writer.PasswordPages), page.links[tmpi].pageNumber))
+                        nextn.LinkClicked += HandleTereziPassword;
+                    else
+                        nextn.LinkClicked += (o, z) => { WakeUpMr(page.links[tmpi].pageNumber); };
                     comicPanel.Controls.Add(nextn);
                     next.Add(nextn);
 
@@ -1261,6 +1264,48 @@ namespace Reader_UI
 
             RemoveControl(pageLoadingProgress);RemoveControl(progressLabel);
 
+        }
+        void HandleTereziPassword(object sender, System.Windows.Forms.LinkLabelLinkClickedEventArgs e)
+        {
+            int nextPage = 0;
+            TereziPassword p = null;
+            p = new TereziPassword((s, ev) =>
+            {
+                switch (p.GetText())  //which page you get sent to is actually totally dependant on the password, there is no right password for each prompt
+                {
+                    case "HOME":
+                        nextPage = 9059;
+                        break;
+                    case "R3UN1ON":
+                        nextPage = 9110;
+                        break;
+                    case "FR4M3D":
+                        nextPage = 9136;
+                        break;
+                    case "MOM3NT":
+                        nextPage = 9151;
+                        break;
+                    case "MURD3R":
+                        nextPage = 9189;
+                        break;
+                    case "JUST1C3":
+                        nextPage = 9205;
+                        break;
+                    case "HONK":
+                        nextPage = 9223;
+                        break;
+                    case "FL1P":
+                        nextPage = 9264;
+                        break;
+                    default:
+                        p.Wrong();
+                        return;
+                }
+                p.Close();
+            }, db.GetTerezi());
+            p.ShowDialog();
+            if(nextPage != 0)
+                WakeUpMr(nextPage);
         }
         void FixNarrativePrompt()
         {
@@ -1325,6 +1370,10 @@ namespace Reader_UI
 
             if (mrAjax.IsBusy)
                 return;
+
+            if (Enum.IsDefined(typeof(Writer.PasswordPages), pg))
+                pg -= 1;
+
             saveButton.Enabled = false;
             pageContainsFlash = false;
             numericUpDown1.Value = pg;

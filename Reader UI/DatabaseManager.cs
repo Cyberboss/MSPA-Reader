@@ -217,11 +217,23 @@ namespace Reader_UI
         }
         public override byte[] Getx2Header()
         {
-            Parsex2Header(true);
+            Parsex2Header();
             var reader = new MSPADatabase(sqlsRConn);
 
             var icos = from b in writer.Resources
-                       where b.pageId == 100002
+                       where b.pageId == (int)SpecialResources.X2_HEADER
+                       select b;
+            byte[] res = icos.First().data;
+            reader.Dispose();
+            return res;
+        }
+        public override byte[] GetTerezi()
+        {
+            ParseTerezi();
+            var reader = new MSPADatabase(sqlsRConn);
+
+            var icos = from b in writer.Resources
+                       where b.pageId == (int)SpecialResources.TEREZI_PASSWORD
                        select b;
             byte[] res = icos.First().data;
             reader.Dispose();
@@ -333,12 +345,19 @@ namespace Reader_UI
         }
 
         public override bool x2HeaderParsed()
-            {
+        {
             var icos = from b in writer.Resources
-                       where b.pageId == 100002
+                       where b.pageId == (int)SpecialResources.X2_HEADER
                        select b;
             return icos.Count() != 0;
-            }
+        }
+        public override bool TereziParsed()
+        {
+            var icos = from b in writer.Resources
+                       where b.pageId == (int)SpecialResources.TEREZI_PASSWORD
+                       select b;
+            return icos.Count() != 0;
+        }
         override public void WriteLinks(Parser.Link[] res, int pageno)
                 {
             foreach(var link in res)

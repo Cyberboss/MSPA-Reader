@@ -15,6 +15,7 @@ namespace Reader_UI
             CANDYCORNS = 100000,
             TRICKSTER_HEADER = 100001,
             X2_HEADER = 100002,
+            TEREZI_PASSWORD = 100003,
         }
         public enum Versions{
             Database = 4, //update with every commit that affects db layout
@@ -218,6 +219,17 @@ namespace Reader_UI
             GAMEOVER = 008801,
            OVERSHINE = 009304,
         }
+        public enum PasswordPages
+        {
+            _1 = 9135,
+            _2 = 9150,
+            _3 = 9188,
+            _4 = 9204,
+            _5 = 9222,
+            _6 = 9263,
+            _7 = 9109,
+            _8 = 9058,
+        }
        public enum StoryBoundaries
        {
            JAILBREAK_PAGE_ONE = 2,
@@ -387,38 +399,39 @@ namespace Reader_UI
         public abstract bool TricksterParsed();
         public abstract bool x2HeaderParsed();
         public abstract byte[] Getx2Header();
-
+        public abstract bool TereziParsed();
+        public abstract byte[] GetTerezi();
         public abstract Parser.Resource[] GetTricksterShit();
-        protected void ParseTrickster(bool serial)
+        protected void ParseTrickster()
         {
-            
+
             if (!TricksterParsed())
             {
                 if (!wl.TestAndSet())
                 {
-                Transact();
-                try
-                {
-                    parser.LoadTricksterResources(serial);
+                    Transact();
+                    try
+                    {
+                        parser.LoadTricksterResources();
                         WriteResource(parser.GetResources(), (int)SpecialResources.TRICKSTER_HEADER, false);
-                    Commit();
-                }
-                catch
-                {
-                    Rollback();
-                    throw;
+                        Commit();
+                    }
+                    catch
+                    {
+                        Rollback();
+                        throw;
+                    }
                 }
             }
         }
-        }
-        protected void Parsex2Header(bool serial)
+        protected void Parsex2Header()
         {
             if (!x2HeaderParsed())
             {
                 Transact();
                 try
                 {
-                    parser.GetX2Header(serial);
+                    parser.GetX2Header();
                     WriteResource(parser.GetResources(), (int)SpecialResources.X2_HEADER, false);
                     Commit();
                 }
@@ -429,7 +442,24 @@ namespace Reader_UI
                 }
             }
         }
-
+        protected void ParseTerezi()
+        {
+            if (!TereziParsed())
+            {
+                Transact();
+                try
+                {
+                    parser.GetTerezi();
+                    WriteResource(parser.GetResources(), (int)SpecialResources.TEREZI_PASSWORD, false);
+                    Commit();
+                }
+                catch
+                {
+                    Rollback();
+                    throw;
+                }
+            }
+        }
         public abstract Page GetPage(int pageno,bool x2);
         public Style GetStyle(int pageno){
             if (pageno <= (int)StoryBoundaries.JAILBREAK_LAST_PAGE)
@@ -938,38 +968,15 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 }
                 return true;
             }
-            if ((Enum.IsDefined(typeof(SpecialResources), currentPage)))
-            {
-                try
-                {
-                    switch ((SpecialResources)currentPage)
-                    {
-                        case SpecialResources.TRICKSTER_HEADER:
-                            ParseTrickster(false);
-                            break;
-                        case SpecialResources.X2_HEADER:
-                            Parsex2Header(false);
-                            break;
-                        default:
-                            Debugger.Break();
-                            throw new Exception();
-                    }
-                }
-                catch
-                {
-                    if (bgw != null)
-                        bgw.ReportProgress(currentProgress, "Error parsing special page " + currentPage);
-                    return false;
-                }
-                return true;
-            }
             if (archivedPages.IsPageArchived(currentPage) || (bgw != null && bgw.CancellationPending))
                 return true;
 
             if (Parser.IsTrickster(currentPage))
-                ParseTrickster(bgw != null);
+                ParseTrickster();
             if (Parser.Is2x(currentPage))
-                Parsex2Header(bgw != null);
+                Parsex2Header();
+            if (Enum.IsDefined(typeof(PasswordPages), currentPage + 1))
+                ParseTerezi();
 
             if (parser.LoadPage(currentPage))
             {

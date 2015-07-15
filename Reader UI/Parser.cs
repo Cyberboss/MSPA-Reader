@@ -275,7 +275,7 @@ namespace Reader_UI
                 return 0;
             }
         }
-        public void LoadTricksterResources(bool serial)
+        public void LoadTricksterResources()
         {
             resources.Clear();
             resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/trickster_sitegraphics/Z2.gif"), "Z2.gif"));
@@ -777,10 +777,15 @@ namespace Reader_UI
             return true;
          }
 
-        public void GetX2Header(bool serial)
+        public void GetX2Header()
         {
             resources.Clear();
             resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/act6act5act1x2combo.gif"), "act6act5act1x2combo.gif"));
+        }
+        public void GetTerezi()
+        {
+            resources.Clear();
+            resources.Add(new Resource(DownloadFile("http://mspaintadventures.com/storyfiles/hs2/scraps/pwimg.gif"), "act6act5act1x2combo.gif"));
         }
     }
 }

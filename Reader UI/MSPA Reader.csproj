@@ -141,6 +141,18 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="TereziDummy.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TereziDummy.Designer.cs">
+      <DependentUpon>TereziDummy.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TereziPassword.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TereziPassword.Designer.cs">
+      <DependentUpon>TereziPassword.cs</DependentUpon>
+    </Compile>
     <Compile Include="Writer.cs" />
     <Compile Include="DatabaseLogin.cs">
       <SubType>Form</SubType>
@@ -194,6 +206,12 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TereziDummy.resx">
+      <DependentUpon>TereziDummy.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TereziPassword.resx">
+      <DependentUpon>TereziPassword.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

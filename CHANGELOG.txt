@@ -13,6 +13,7 @@ v1.1
 	-- Added functionality to the header
 	-- Scope based archiving
 	-- Chapter based navigation
+	-- Support for Terezi's passwords
 	-- Fix to multiple links
 	-- Fix to multiple Homestuck pages
 	-- SUPPORT FOR ALL MSPAINTADVENTURES!
