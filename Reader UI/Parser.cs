@@ -279,7 +279,7 @@ namespace Reader_UI
             resources.Clear();
             resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/trickster_sitegraphics/Z2.gif"), "Z2.gif"));
             resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/trickster_sitegraphics/menu.swf"), "menu.swf"));
-            resources.Add(new Resource(DownloadFile("http://mspaintadventures.com/images/trickster_sitegraphics/bluetile.gif"), "bluetile.gif"));
+            resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/images/trickster_sitegraphics/bluetile.gif"), "bluetile.gif"));
         }
         public Text GetText()
         {
@@ -733,7 +733,6 @@ namespace Reader_UI
                 var html = new HtmlDocument();
                 html.LoadHtml(source);
                 
-
                 if (IsScratch(pageno))
                 {
                     ScratchPreParse(html);
@@ -760,6 +759,11 @@ namespace Reader_UI
                     //essentially it's two pages of comics right next to each other. Simple enough for the parser. Fucking nightmare for the reader
 
                 }
+                else if (IsOpenBound(pageno))
+                {
+                    ParseOpenbound(pageno,html);
+                    return true;
+                }
                 else
                 {
                     //regular, homosuck, or trickster
@@ -784,7 +788,31 @@ namespace Reader_UI
         public void GetTerezi()
         {
             resources.Clear();
-            resources.Add(new Resource(DownloadFile("http://mspaintadventures.com/storyfiles/hs2/scraps/pwimg.gif"), "act6act5act1x2combo.gif"));
+            resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/storyfiles/hs2/scraps/pwimg.gif"), "act6act5act1x2combo.gif"));
         }
+        public static bool IsOpenBound(int pageno)
+        {
+            return pageno == 7163
+                || pageno == 7208
+                || pageno == 7298;
+        }
+
+        #region Openbound
+        void ParseOpenbound(int pg,HtmlDocument html)
+        {
+            contentTable = html.DocumentNode.Descendants("table").First().SelectNodes("tr").ElementAt(1).SelectNodes("td").First().SelectNodes("table").First();
+            ParseLinks(false);
+            ParseText();    //thats the easy part
+
+            resources.Clear();
+            //okay, openbound resources will have to behave differently from everyone else
+            //first things first, we need to identity the initialization xml and the sburb javascript
+
+            //we know that the xml will always be in the body
+            string jsCall = html.DocumentNode.Descendants("body").First().Attributes["onload"].Value;
+            
+
+        }
+        #endregion
     }
 }
