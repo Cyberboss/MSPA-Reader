@@ -16,4 +16,5 @@ v1.1
 	-- Support for Terezi's passwords
 	-- Fix to multiple links
 	-- Fix to multiple Homestuck pages
+	-- Fix to Openbound not running due to excessive HTML5 attribute (WRY HUSSIE?)
 	-- SUPPORT FOR ALL MSPAINTADVENTURES!

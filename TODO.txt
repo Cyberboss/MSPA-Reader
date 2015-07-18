@@ -1,6 +1,5 @@
 ﻿
 Primary: Get inline images working eg 7980, 4943
-Primary: Get Openbound working
 Primary: Fix mono (Deferred)
 
 Tasks:
