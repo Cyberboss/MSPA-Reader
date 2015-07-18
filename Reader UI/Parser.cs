@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using System.Xml;
 
 namespace Reader_UI
 {
@@ -199,6 +200,7 @@ namespace Reader_UI
                                 throw new Exception("Download failed");
                         
                     }
+                    
                     if (count > Timeout)
                     {
                         CancelAsync();
@@ -252,7 +254,7 @@ namespace Reader_UI
             //if this fails we need to check the database
             try
             {
-                var response = DownloadFile("http://www.mspaintadventures.com/?viewlog=6");
+                var response = client.GetByteArrayAsync(new Uri("http://www.mspaintadventures.com/?viewlog=6")).Result;
                 String source = Encoding.GetEncoding("utf-8").GetString(response, 0, response.Length - 1);
                 source = WebUtility.HtmlDecode(source);
                 var html = new HtmlDocument();
@@ -641,7 +643,7 @@ namespace Reader_UI
                 return new byte[0];
             try
             {
-                return web.DownloadData(file);
+                return web.DownloadData(file.Replace("www.mspaintadventures.com", "cdn.mspaintadventures.com"));
             }
             catch
             {
@@ -790,6 +792,7 @@ namespace Reader_UI
             resources.Clear();
             resources.Add(new Resource(DownloadFile("http://cdn.mspaintadventures.com/storyfiles/hs2/scraps/pwimg.gif"), "act6act5act1x2combo.gif"));
         }
+        #region Openbound
         public static bool IsOpenBound(int pageno)
         {
             return pageno == 7163
@@ -797,7 +800,6 @@ namespace Reader_UI
                 || pageno == 7298;
         }
 
-        #region Openbound
         void ParseOpenbound(int pg,HtmlDocument html)
         {
             contentTable = html.DocumentNode.Descendants("table").First().SelectNodes("tr").ElementAt(1).SelectNodes("td").First().SelectNodes("table").First();
@@ -810,7 +812,141 @@ namespace Reader_UI
 
             //we know that the xml will always be in the body
             string jsCall = html.DocumentNode.Descendants("body").First().Attributes["onload"].Value;
+            var scripts = html.DocumentNode.Descendants("script");
+
+            const string cdn = "http://cdn.mspaintadventures.com/";
+            const string scriptRegex = ".*?Sburb\\.min\\.js";
+            foreach (var s in scripts)
+            {
+                if (s.Attributes["src"] == null)
+                    continue;
+                var reg = Regex.Match(s.Attributes["src"].Value, scriptRegex);
+                if (reg.Success)
+                {
+                    resources.Add(new Resource(DownloadFile(cdn + reg.Value), reg.Value));
+                    break;
+                }
+            }
+
+            const string xmlFromJSCallRegex = @",'(.*?\.xml)'";
+
+            var xmlreg = Regex.Match(jsCall, xmlFromJSCallRegex);
+
+            var nextFile = xmlreg.Groups[1].Value;
+
+
+            byte[] data = DownloadFile(cdn + nextFile);
+
             
+            XmlDocument xml = new XmlDocument();
+            using(var ms = new System.IO.MemoryStream(data)){
+                xml.Load(ms);
+            }
+
+            resources.Add(new Resource(data, nextFile));
+            texts.altText = nextFile;
+
+            Stack<string> addressesToParse = new Stack<string>();
+            List<string> parsedPages = new List<string>();
+
+            string levelPath =  xml.DocumentElement.Attributes["levelPath"].Value + '/';
+            string resourcePath = xml.DocumentElement.Attributes["resourcePath"].Value + '/';
+
+            while (addressesToParse.Count != 0 || xml != null)
+            {
+                if (xml == null)
+                {
+                    while (parsedPages.IndexOf(nextFile) != -1 && addressesToParse.Count > 0)
+                    {
+                        nextFile = addressesToParse.Pop();
+                    }
+                    if (parsedPages.IndexOf(nextFile) != -1)
+                        break;
+                    try
+                    {
+                        data = DownloadFile(cdn + nextFile);
+                    }
+                    catch
+                    {
+                        nextFile = addressesToParse.Pop();
+                        continue;//if the get fails forget it
+                    }
+                    xml = new XmlDocument();
+                    using (var ms = new System.IO.MemoryStream(data))
+                    {
+                        xml.Load(ms);
+                    }
+                    resources.Add(new Resource(data, nextFile));
+                }
+
+                //first grab dependancy xmls
+                var dependancies = xml.SelectNodes(".//dependency");
+                foreach (XmlNode dep in dependancies)
+                {
+                    addressesToParse.Push(levelPath + dep.InnerText);
+                }
+
+                //those don't point to next levels though
+                //check the actions for transitions
+                var actions = xml.SelectNodes(".//action");
+                foreach (XmlNode act in actions)
+                {
+                    const string xmlSearcher = @".*\.xml";
+
+                    var split = act.InnerText.Split(',');
+                    for (int i = 0; i < split.Length; i++)
+                    {
+                        var reg = Regex.Match(split[i], xmlSearcher);
+                        var res = reg.Value.Trim();
+                        if (reg.Success && !res.Contains(' '))
+                        {
+                            addressesToParse.Push(levelPath + res);
+                            break;
+                        }
+                    }
+                }
+
+
+                //then assets
+                var assets = xml.SelectNodes(".//asset");
+                foreach (XmlNode a in assets)
+                {
+                    if (a.Attributes["type"].Value == "graphic"
+                        || a.Attributes["type"].Value == "movie")
+                    {
+                        string path = resourcePath + a.InnerText;
+                        resources.Add(new Resource(DownloadFile(cdn + path), path));
+                    }
+                    else if (a.Attributes["type"].Value == "audio")
+                    {
+                        string path1 = resourcePath + a.InnerText.Substring(0, a.InnerText.IndexOf(';'));
+                        string path2 = resourcePath + a.InnerText.Substring(a.InnerText.IndexOf(';') + 1);
+                        resources.Add(new Resource(DownloadFile(cdn + path1), path1));
+                        resources.Add(new Resource(DownloadFile(cdn + path2), path2));
+                    }
+                    else if (a.Attributes["type"].Value == "font")
+                    {
+                        const string fontReg = @"url:(.*\.(?i)(woff|ttf))";
+
+                        var subFonts = a.InnerText.Split(',');
+                        foreach (var f in subFonts)
+                        {
+                            var reg = Regex.Match(f.Trim(), fontReg);
+                            if (reg.Success)
+                                resources.Add(new Resource(DownloadFile(cdn + resourcePath + reg.Groups[1].Value.Trim()), resourcePath + reg.Groups[1].Value.Trim()));
+                        }
+
+                    }
+                    else if (a.Attributes["type"].Value != "path")
+                    {
+                        Debugger.Break();
+                    }
+                }
+
+                //discard the doc
+                parsedPages.Add(nextFile);
+                xml = null;
+            }
 
         }
         #endregion

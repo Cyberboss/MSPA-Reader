@@ -830,6 +830,12 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                         currentPage = archivedPages.FindLowestPage(startPage, lastPage);
                         pagesParsed = archivedPages.GetParseCount(startPage, lastPage);
 
+                        if (currentPage > lastPage)
+                        {
+                            bgw.ReportProgress(100, "Range already archived!");
+                            return;
+                        }
+
                         currentProgress = (int)(((float)(pagesParsed) / (float)(pagesToParse)) * 100.0f);
                         if (!bgw.CancellationPending)
                         {
@@ -845,11 +851,6 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                     {
                         currentPage = missedPages[0];
                         currentProgress = (int)(((float)(pagesParsed) / (float)(pagesToParse)) * 100.0f);
-                        if (currentPage > lastPage)
-                        {
-                            bgw.ReportProgress(100, "Range already archived!");
-                            return;
-                        }
                     }
 
                     if (!bgw.CancellationPending)
@@ -964,7 +965,8 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 }
                 finally
                 {
-                    bgw.ReportProgress(currentProgress, "");
+                    if (bgw != null)
+                        bgw.ReportProgress(currentProgress, "");
                 }
                 return true;
             }
@@ -977,6 +979,9 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 Parsex2Header();
             if (Enum.IsDefined(typeof(PasswordPages), currentPage + 1))
                 ParseTerezi();
+
+            if(bgw != null && Parser.IsOpenBound(currentPage))
+                bgw.ReportProgress(currentProgress, "Parsing an Openbound page. There are tons of tiny downloads and this will take a couple minutes...");
 
             if (parser.LoadPage(currentPage))
             {

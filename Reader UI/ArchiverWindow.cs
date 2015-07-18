@@ -155,7 +155,7 @@ namespace Reader_UI
             }
             else
             {
-                progressBar1.Value = e.ProgressPercentage;
+                progressBar1.Value = Math.Max(Math.Min(e.ProgressPercentage,100),0);
                 logOutput.AppendText((string)e.UserState + Environment.NewLine);
             }
         }

@@ -815,6 +815,23 @@ namespace Reader_UI
                 f.Navigate(loc);
             f.Navigating += flash_Navigating;
         }
+        void InitOpenbound()
+        {
+            SetFlashDimensions();
+            string sburbpath = null;
+            foreach (var res in page.resources)
+            {
+                var p = WriteTempResource(res, true);
+                if (p != null)
+                    sburbpath = res.originalFileName;
+            }
+
+            var htmlstring = ("<html><head><script type=\"text/javascript\" src=\"" + sburbpath + "\"></script></head><body id=\"JterniaDeploy\" onload=\"Sburb.initialize('JterniaDeploy','" + page.meta.altText +"',false);\"></body></html>");
+            byte[] bytes = Encoding.UTF8.GetBytes(htmlstring);
+            string pageLoc = WriteTempResource(new Parser.Resource(bytes, "openbound.html"));
+            flash.Navigate(pageLoc);
+
+        }
 
         //ITS SO SIMPLE :D
         void flash_Navigating(object sender, WebBrowserNavigatingEventArgs e)
@@ -931,12 +948,16 @@ namespace Reader_UI
 
             RemoveControl(pageLoadingProgress);RemoveControl(progressLabel);
         }
-        string WriteTempResource(Parser.Resource res)
+        string WriteTempResource(Parser.Resource res, bool findSburbScript = false)
         {
             string path = System.IO.Path.GetTempPath() + res.originalFileName;
+            if(Parser.IsOpenBound(page.number))
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
             File.WriteAllBytes(path, res.data); //let the throw fall through and fail the page load (problems beyond our scope)
             tempFiles.Add(path);
-            return path;
+            if(!findSburbScript || Path.GetFileName(path) == "Sburb.min.js")
+                return path;
+            return null;
         }
         void LoadRegularPage()
         {
@@ -960,45 +981,56 @@ namespace Reader_UI
 
             //content
             int currentHeight = title.Location.Y + title.Height + REGULAR_TITLE_Y_OFFSET;
-            for (int i = 0; i < page.resources.Count(); i++)
+            if (Parser.IsOpenBound(page.number))
             {
-                if (i == page.resources.Count() - 1 && Parser.Is2x(page.number) && page.resources != page.resources2)
+                flash = new WebBrowser();
+                comicPanel.Controls.Add(flash);
+                InitOpenbound();
+                flash.Location = new Point(comicPanel.Width / 2 - flash.Width / 2, currentHeight);
+                currentHeight += flash.Height;
+                pageContainsFlash = true;
+            }
+            else
+            {
+                for (int i = 0; i < page.resources.Count(); i++)
                 {
-                    currentHeight -= REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET;
-                    continue;
-                }
-                if (page.resources[i].isInPesterLog)
-                    continue;
-                if (!pageContainsFlash && 
-                    ((page.number == 8848 || page.number == 8850) //special horizontal scroll
-                    || !Parser.IsGif(page.resources[i].originalFileName)))
-                {
-                    flash = new WebBrowser();
-                    comicPanel.Controls.Add(flash);
-                    InitFlashMovie(flash, page.resources[i]);
+                    if (i == page.resources.Count() - 1 && Parser.Is2x(page.number) && page.resources != page.resources2)
+                    {
+                        currentHeight -= REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET;
+                        continue;
+                    }
+                    if (page.resources[i].isInPesterLog)
+                        continue;
+                    if (!pageContainsFlash &&
+                        ((page.number == 8848 || page.number == 8850) //special horizontal scroll
+                        || !Parser.IsGif(page.resources[i].originalFileName)))
+                    {
+                        flash = new WebBrowser();
+                        comicPanel.Controls.Add(flash);
+                        InitFlashMovie(flash, page.resources[i]);
 
-                    flash.Location = new Point(comicPanel.Width / 2 - flash.Width / 2, currentHeight);
-                    currentHeight += flash.Height;
-                    pageContainsFlash = true;
-                }
-                else if (Parser.IsGif(page.resources[i].originalFileName))
-                {
+                        flash.Location = new Point(comicPanel.Width / 2 - flash.Width / 2, currentHeight);
+                        currentHeight += flash.Height;
+                        pageContainsFlash = true;
+                    }
+                    else if (Parser.IsGif(page.resources[i].originalFileName))
+                    {
 
-                    var tempPB = new GifStream();
-                    tempPB.loc = new System.IO.MemoryStream(page.resources[i].data);
-                    tempPB.gif = new PictureBox();
-                    tempPB.gif.Image = Image.FromStream(tempPB.loc);
-                    tempPB.gif.Width = tempPB.gif.Image.Width;
-                    tempPB.gif.Height = tempPB.gif.Image.Height;
-                    tempPB.gif.Location = new Point(comicPanel.Width / 2 - tempPB.gif.Width / 2, currentHeight);
-                    comicPanel.Controls.Add(tempPB.gif);
-                    currentHeight += tempPB.gif.Height;
-                    if (i < page.resources.Count() - 1 || (page.resources[page.resources.Count() - 1].isInPesterLog && i == page.resources.Count() - 1))
-                        currentHeight += REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET;
-                    gifs.Add(tempPB);
+                        var tempPB = new GifStream();
+                        tempPB.loc = new System.IO.MemoryStream(page.resources[i].data);
+                        tempPB.gif = new PictureBox();
+                        tempPB.gif.Image = Image.FromStream(tempPB.loc);
+                        tempPB.gif.Width = tempPB.gif.Image.Width;
+                        tempPB.gif.Height = tempPB.gif.Image.Height;
+                        tempPB.gif.Location = new Point(comicPanel.Width / 2 - tempPB.gif.Width / 2, currentHeight);
+                        comicPanel.Controls.Add(tempPB.gif);
+                        currentHeight += tempPB.gif.Height;
+                        if (i < page.resources.Count() - 1 || (page.resources[page.resources.Count() - 1].isInPesterLog && i == page.resources.Count() - 1))
+                            currentHeight += REGULAR_COMIC_PANEL_BOTTOM_Y_OFFSET;
+                        gifs.Add(tempPB);
+                    }
                 }
             }
-
             currentHeight += REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
 
             //words
@@ -1176,7 +1208,7 @@ namespace Reader_UI
                         //find the resource
                         var tmpI = Array.Find(page.resources, x => x.isInPesterLog == true && x.originalFileName == page.meta.lines[i].text);
                         //TODO: Handle image lines ("SHE HAS WHAT????")
-                        if (Parser.IsGif(page.resources[i].originalFileName))
+                        if (Parser.IsGif(tmpI.originalFileName))
                         {
 
                             var tempPB = new GifStream();
