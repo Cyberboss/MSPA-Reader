@@ -63,27 +63,42 @@ namespace Reader_UI
         }
         class OpenboundServer : IDisposable
         {
-            readonly string docRoot, prefix, startDoc;
+            readonly string docRoot, startDoc;
+            const string prefix = "http://127.0.0.1:41352/"; //413 [EB] 
             HttpListener listener;
             public OpenboundServer(string startDocument)
             {
                 startDoc = startDocument;
                 docRoot = Path.GetDirectoryName(startDocument) + Path.DirectorySeparatorChar;
-                int port = GetRandomUnusedPort();
-
-                listener = new HttpListener();
-                prefix = "http://127.0.0.1:" + port + "/";
-                listener.Prefixes.Add(prefix);
+               
                 try
                 {
-                    listener.Start();
+                    TryListen();
                 }
-                catch { }
+                catch { 
+#if !linux
+                    //try registering the port before giving up
+                    try
+                    {
+                        string cmd = "netsh http add urlacl url="+prefix+" user=everyone & exit";
+                        MessageBox.Show("Due to being written in HTML5, Openbound must be run on a web server. Please allow the following command to be run on an elevated command prompt to allow the listener to start. (\""+cmd+"\")");
+                        Program.ExecuteElevatedCommand(cmd, true);
+                        TryListen();
+                    }
+                    catch
+                    {
+#endif
+                        listener = null;
+                        MessageBox.Show("Unable to launch Openbound!");
+                        return;
+#if !linux
+                    }
+#endif
+                }
 
 
                 ThreadPool.QueueUserWorkItem((o) =>
                 {
-                    Console.WriteLine("Webserver running...");
                     try
                     {
                         while (listener.IsListening)
@@ -110,6 +125,12 @@ namespace Reader_UI
 
                 });
             }
+            void TryListen()
+            {
+                listener = new HttpListener();
+                listener.Prefixes.Add(prefix);
+                listener.Start();
+            }
             byte[] HandleResponse(HttpListenerRequest req)
             {
 
@@ -123,16 +144,10 @@ namespace Reader_UI
             {
                 return startDoc.Replace(docRoot,prefix);
             }
-            public static int GetRandomUnusedPort()
-            {
-                var tlistener = new System.Net.Sockets.TcpListener(IPAddress.Any, 0);
-                tlistener.Start();
-                var port = ((IPEndPoint)tlistener.LocalEndpoint).Port;
-                tlistener.Stop();
-                return port;
-            }
             public void Dispose()
             {
+                if (listener == null)
+                    return;
                 listener.Stop();
                 listener.Close();
             }

@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Configuration;
 using System.Security;
+using System.Diagnostics;
 
 namespace Reader_UI
 {
@@ -117,7 +118,22 @@ namespace Reader_UI
                     mutex.ReleaseMutex();
                 }
         }
+        public static void ExecuteElevatedCommand(string Command, bool wait)
+        {
+            ProcessStartInfo ProcessInfo;
 
+            ProcessInfo = new ProcessStartInfo("cmd.exe", "/K " + Command);
+            ProcessInfo.CreateNoWindow = true;
+            ProcessInfo.UseShellExecute = true;
+#if !linux
+            ProcessInfo.Verb = "runas";
+#endif
+
+            if (wait)
+                Process.Start(ProcessInfo).WaitForExit();
+            else
+                Process.Start(ProcessInfo);
+        }
         public static void Shutdown(Form window, Writer db)
         {
             if (dbr == null && dbw == null)
