@@ -19,6 +19,8 @@
                     components.Dispose();
                 if (trick != null)
                     trick.Dispose();
+                if (openbound != null)
+                    openbound.Dispose();
             }
             base.Dispose(disposing);
         }

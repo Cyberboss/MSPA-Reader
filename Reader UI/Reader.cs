@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
+using System.Threading;
 
 namespace Reader_UI
 {
@@ -58,6 +60,82 @@ namespace Reader_UI
         {
             public Image gif;
             public System.IO.MemoryStream loc;
+        }
+        class OpenboundServer : IDisposable
+        {
+            readonly string docRoot, prefix, startDoc;
+            HttpListener listener;
+            public OpenboundServer(string startDocument)
+            {
+                startDoc = startDocument;
+                docRoot = Path.GetDirectoryName(startDocument) + Path.DirectorySeparatorChar;
+                int port = GetRandomUnusedPort();
+
+                listener = new HttpListener();
+                prefix = "http://127.0.0.1:" + port + "/";
+                listener.Prefixes.Add(prefix);
+                try
+                {
+                    listener.Start();
+                }
+                catch { }
+
+
+                ThreadPool.QueueUserWorkItem((o) =>
+                {
+                    Console.WriteLine("Webserver running...");
+                    try
+                    {
+                        while (listener.IsListening)
+                        {
+                            ThreadPool.QueueUserWorkItem((c) =>
+                            {
+                                var ctx = c as HttpListenerContext;
+                                try
+                                {
+                                    byte[] buf = HandleResponse(ctx.Request);
+                                    ctx.Response.ContentLength64 = buf.Length;
+                                    ctx.Response.OutputStream.Write(buf, 0, buf.Length);
+                                }
+                                catch { } // suppress any exceptions
+                                finally
+                                {
+                                    // always close the stream
+                                    ctx.Response.OutputStream.Close();
+                                }
+                            }, listener.GetContext());
+                        }
+                    }
+                    catch { } // suppress any exceptions
+
+                });
+            }
+            byte[] HandleResponse(HttpListenerRequest req)
+            {
+
+                string path = String.Format("{0}{1}{2}{3}", req.Url.Scheme,
+                    Uri.SchemeDelimiter, req.Url.Authority, req.Url.AbsolutePath);
+
+                var file = docRoot + path.Replace(prefix, "").Replace(prefix.Replace("127.0.0.1", "localhost"), "");
+                return File.ReadAllBytes(file);
+            }
+            public string GetTargetPage()
+            {
+                return startDoc.Replace(docRoot,prefix);
+            }
+            public static int GetRandomUnusedPort()
+            {
+                var tlistener = new System.Net.Sockets.TcpListener(IPAddress.Any, 0);
+                tlistener.Start();
+                var port = ((IPEndPoint)tlistener.LocalEndpoint).Port;
+                tlistener.Stop();
+                return port;
+            }
+            public void Dispose()
+            {
+                listener.Stop();
+                listener.Close();
+            }
         }
         class x2Handler
         {
@@ -157,6 +235,7 @@ namespace Reader_UI
         List<String> tempFiles = new List<string>();
         Button pesterHideShow = null;
         ImageStream currentIcon = null;
+        OpenboundServer openbound = null;
         class TricksterShit : IDisposable
         {
             MemoryStream[] bytes = new MemoryStream[2];
@@ -826,10 +905,11 @@ namespace Reader_UI
                     sburbpath = res.originalFileName;
             }
 
-            var htmlstring = ("<html><head><script type=\"text/javascript\" src=\"" + sburbpath + "\"></script></head><body id=\"JterniaDeploy\" onload=\"Sburb.initialize('JterniaDeploy','" + page.meta.altText +"',false);\"></body></html>");
+            var htmlstring = "<!DOCTYPE html><html><style>* { padding:0; margin:0; overflow:hidden; }</style><head><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" /><script type=\"text/javascript\" src=\"" + sburbpath + "\"></script></head><body class=\"padding: 0; margin: 0;\" id=\"JterniaDeploy\" onload=\"Sburb.initialize('JterniaDeploy','" + page.meta.altText + "',false);\"></body></html>";
             byte[] bytes = Encoding.UTF8.GetBytes(htmlstring);
             string pageLoc = WriteTempResource(new Parser.Resource(bytes, "openbound.html"));
-            flash.Navigate(pageLoc);
+            openbound = new OpenboundServer(pageLoc);
+            flash.Navigate(openbound.GetTargetPage());
 
         }
 
@@ -1685,6 +1765,11 @@ namespace Reader_UI
                 x2Panel.Kill();
                 x2Panel = null;
             }
+            if (openbound != null)
+            {
+                openbound.Dispose();
+                openbound = null;
+            }
             foreach (var p in tempFiles)
             {
                 try
@@ -1694,6 +1779,7 @@ namespace Reader_UI
                 catch { }
             }
             tempFiles.Clear();
+            
         }
         void CleanControls()
         {

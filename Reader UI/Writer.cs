@@ -349,12 +349,17 @@ namespace Reader_UI
                 }
                 else{
                     var pg = archivedPages.Prune();
-                    if (pg != 0)
+                    if (!Parser.IsOpenBound(pg) && pg != (int)PagesOfImportance.CASCADE)
                     {
-                        bgw.ReportProgress(0, "Reparsing last page...");
-                        Prune(pg);
-                        SavePage(pg);
+                        if (pg != 0)
+                        {
+                            bgw.ReportProgress(0, "Reparsing last page...");
+                            Prune(pg);
+                            SavePage(pg);
+                        }
                     }
+                    else
+                        archivedPages.Add(pg);
                 }
 
                 if (!IconsAreParsed())

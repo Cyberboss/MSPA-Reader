@@ -218,7 +218,7 @@ namespace Reader_UI
             + @"|.*v2_blanksquare3"
             + @"|.*spacer"
             + @"|.*bluetile"
-            + @")(.*?)\.(?i)(gif|png)";
+            + @")(.*?)\.(?i)(gif|png|jpg)";
         const string scratchHeaderImageRegex = "src=\\\"(.*?\\.(?i)(gif|png))\\\"";
         const string scratchHeaderImageFilenameRegex = @".*\/(.*)";
         const string scratchTitleRegex = "title=\\\"(.*?)\\\"";
@@ -547,7 +547,8 @@ namespace Reader_UI
 
             for (int i = 0; i < matches.Count; i++)
             {
-                resources.Add(new Resource(DownloadFile(matches[i].Value), System.IO.Path.GetFileName(new Uri(matches[i].Value).LocalPath)));
+                if(matches[i].Value != "http://www.mspaintadventures.com/sweetbroandhellajeff/?cid=035.jpg")
+                    resources.Add(new Resource(DownloadFile(matches[i].Value), System.IO.Path.GetFileName(new Uri(matches[i].Value).LocalPath)));
             }
 
             matches = Regex.Matches(contentTable.InnerHtml, swfRegex);
@@ -823,7 +824,10 @@ namespace Reader_UI
                 var reg = Regex.Match(s.Attributes["src"].Value, scriptRegex);
                 if (reg.Success)
                 {
-                    resources.Add(new Resource(DownloadFile(cdn + reg.Value), reg.Value));
+                    byte[] jsdata = DownloadFile(cdn + reg.Value);
+                    //theres a bug in the javascript that only IE is dumb enough to fall for, a method that CALLS a member.
+                    jsdata = System.Text.Encoding.UTF8.GetBytes(System.Text.Encoding.UTF8.GetString(jsdata).Replace("this.movie.TotalFrames()", "this.movie.TotalFrames"));
+                    resources.Add(new Resource(jsdata, reg.Value));
                     break;
                 }
             }
