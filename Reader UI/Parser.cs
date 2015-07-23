@@ -244,6 +244,7 @@ namespace Reader_UI
         List<Link> links = new List<Link>();
         Text texts;
         List<HtmlNode> linkListForTextParse = new List<HtmlNode>();
+        int currentPage;
 
         public static bool IsGif(string file)
         {
@@ -353,7 +354,7 @@ namespace Reader_UI
             {//title
                 //easy enough, its the very first p in the content table
                 //just clean it up a bit
-                texts.title = contentTable.Descendants("p").First().InnerText.Trim();
+                texts.title =currentPage == 9828 ? "[S][A6A6I5] ====>" :  contentTable.Descendants("p").First().InnerText.Trim();
             }
             
             /*
@@ -519,7 +520,7 @@ namespace Reader_UI
                     try
                     {
                         var decs = contentTable.Descendants("p");
-                        var narrative = decs.ElementAt(1);
+                        var narrative = decs.ElementAt(currentPage == 9828 ? 0 : 1);
                         if (narrative != null)
                         {
                             var hexReg = Regex.Match(narrative.OuterHtml, hexColourRegex);
@@ -712,7 +713,7 @@ namespace Reader_UI
         public bool LoadPage(int pageno)
         {
             //bardquest is weird as it has this void between pages 136 and 170 so we'll just pretend 136 is 170
-            var oP = pageno;
+            currentPage = pageno;
             if (pageno == (int)Writer.StoryBoundaries.BQ)
                 pageno = 136;
             
@@ -729,7 +730,7 @@ namespace Reader_UI
             try
             {
                 x2Flag = false;
-                var uristring = prepend2 + (isRQ ? "ryanquest" : GetStoryFromPage(oP)) + prepend3 + pageno.ToString("D6");
+                var uristring = prepend2 + (isRQ ? "ryanquest" : GetStoryFromPage(currentPage)) + prepend3 + pageno.ToString("D6");
                 var response = client.GetByteArrayAsync(new Uri(uristring)).Result;
                 String source = Encoding.GetEncoding("utf-8").GetString(response, 0, response.Length - 1);
                 source = WebUtility.HtmlDecode(source);

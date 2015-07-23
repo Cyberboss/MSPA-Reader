@@ -802,6 +802,20 @@ namespace Reader_UI
 
             RemoveControl(pageLoadingProgress); RemoveControl(progressLabel);
         }
+        void PostLoad()
+        {
+            switch (page.number)
+            {
+                case 9828:
+                    comicPanel.Controls.Remove(flash);
+                    mainPanel.Controls.Add(flash);
+                    flash.Location = new Point(0, 0);
+                    flash.BringToFront();
+                    break;
+                default:
+                    break;
+            }
+        }
         void LoadJailbreak()
         {
             LoadRegularPage();
@@ -877,7 +891,7 @@ namespace Reader_UI
                         LoadRegularPage();
                         break;
                 }
-
+                PostLoad();
                 //dump the garbage
                 page.resources2 = null;
                 page.resources = null;
@@ -903,6 +917,7 @@ namespace Reader_UI
             if (setDimensions)
                 SetFlashDimensions();
             var loc = WriteTempResource(swfFile);
+            flash.WebBrowserShortcutsEnabled = false;
             if (page.number == 8848 || page.number == 8850)
                 f.DocumentText = "<style>html, body {{ padding: 0; margin: 0 }}</style><img src=\"" + loc + "\" border=\"0\"></img>";
             else
@@ -919,7 +934,7 @@ namespace Reader_UI
                 if (p != null)
                     sburbpath = res.originalFileName;
             }
-
+            flash.WebBrowserShortcutsEnabled = false;
             var htmlstring = "<!DOCTYPE html><html><style>* { padding:0; margin:0; overflow:hidden; }</style><head><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" /><script type=\"text/javascript\" src=\"" + sburbpath + "\"></script></head><body class=\"padding: 0; margin: 0;\" id=\"JterniaDeploy\" onload=\"Sburb.initialize('JterniaDeploy','" + page.meta.altText + "',false);\"></body></html>";
             byte[] bytes = Encoding.UTF8.GetBytes(htmlstring);
             string pageLoc = WriteTempResource(new Parser.Resource(bytes, "openbound.html"));
@@ -942,6 +957,10 @@ namespace Reader_UI
             if (flash == null || flash.Disposing || flash.IsDisposed)
                 return;
             switch (page.number) { 
+                case 9828:
+                    flash.Width = 950;
+                    flash.Height = 700;
+                    break;
                 case 8848:
                 case 8850:
                     flash.Width = 682;
