@@ -39,4 +39,6 @@ HtmlAgilityPack
 
 System.Data.Sqlite
 
-Roxygen Karezi for endgame ships.
+SQLite.CodeFirst
+
+Roxygen, Davejade, Rosemary, N3RDS, and Karkitty for endgame ships.
