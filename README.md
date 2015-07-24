@@ -5,7 +5,7 @@ This is an unofficial, fan-made program that is in no way associated with MS Pai
 
 Simply build the Release configuration with visual studio, or in mono. Both will require nuget package restore (Make sure your ssl ceritificates won't block you from nuget.org). You can safely ignore the missing references.
 
-Note: in v1.1 there are numerous things that are 
+Note: in v1.1 there are numerous things that are mono untested and as a result, I expect it to fail to work completely
 
 Requirements:
 
