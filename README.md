@@ -5,9 +5,7 @@ This is an unofficial, fan-made program that is in no way associated with MS Pai
 
 Simply build the Release configuration with visual studio, or in mono. Both will require nuget package restore (Make sure your ssl ceritificates won't block you from nuget.org). You can safely ignore the missing references.
 
-
-Reccommend using SQLLocalDB or SQLServer if possible. Sqlite has shown to run into deadlocks during archive operations. Support for MySQL coming soon.
-
+Note: in v1.1 there are numerous things that are 
 
 Requirements:
 
@@ -19,7 +17,10 @@ Flashplayer browser plugin: https://get.adobe.com/flashplayer/
 You will probably also want a database that isn't SQLite:
 
 
-SQLLocalDB (Recommended for Windows users. Choose SQLLocalDB.MSI for your architecture, WINDOWS ONLY): https://www.microsoft.com/en-ca/download/details.aspx?id=29062 
+
+RECCOMENDED: SQLLocalDB (Recommended for Windows users. Choose SQLLocalDB.MSI for your architecture, WINDOWS ONLY): https://www.microsoft.com/en-ca/download/details.aspx?id=29062 
+
+
 
 SQL Server Express (WINDOWS ONLY): https://www.microsoft.com/en-ca/download/details.aspx?id=42299
 

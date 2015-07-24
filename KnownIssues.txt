@@ -1,0 +1,4 @@
+There is some sort of EF double access bug that occurs ocasionally during simultaneous reading and archiving
+
+Homestuck:
+3574	all those links

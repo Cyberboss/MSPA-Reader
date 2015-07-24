@@ -57,7 +57,7 @@
             this.dataSourceInput.Location = new System.Drawing.Point(112, 12);
             this.dataSourceInput.Name = "dataSourceInput";
             this.dataSourceInput.Size = new System.Drawing.Size(285, 21);
-            this.dataSourceInput.TabIndex = 0;
+            this.dataSourceInput.TabIndex = 12;
             this.dataSourceInput.SelectedIndexChanged += new System.EventHandler(this.dataSourceInput_SelectedIndexChanged);
             // 
             // label1
@@ -83,7 +83,7 @@
             this.ipInput.Location = new System.Drawing.Point(112, 97);
             this.ipInput.Name = "ipInput";
             this.ipInput.Size = new System.Drawing.Size(285, 20);
-            this.ipInput.TabIndex = 3;
+            this.ipInput.TabIndex = 2;
             // 
             // label3
             // 
@@ -99,7 +99,7 @@
             this.usernameInput.Location = new System.Drawing.Point(112, 142);
             this.usernameInput.Name = "usernameInput";
             this.usernameInput.Size = new System.Drawing.Size(285, 20);
-            this.usernameInput.TabIndex = 5;
+            this.usernameInput.TabIndex = 4;
             // 
             // passwordInput
             // 
@@ -123,7 +123,7 @@
             this.okButton.Location = new System.Drawing.Point(165, 222);
             this.okButton.Name = "okButton";
             this.okButton.Size = new System.Drawing.Size(75, 23);
-            this.okButton.TabIndex = 8;
+            this.okButton.TabIndex = 11;
             this.okButton.Text = "Connect";
             this.okButton.UseVisualStyleBackColor = true;
             this.okButton.Click += new System.EventHandler(this.okButton_Click);
@@ -146,7 +146,7 @@
             this.checkBox1.Location = new System.Drawing.Point(273, 226);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(90, 17);
-            this.checkBox1.TabIndex = 11;
+            this.checkBox1.TabIndex = 8;
             this.checkBox1.Text = "Open Reader";
             this.checkBox1.UseVisualStyleBackColor = true;
             this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
@@ -157,7 +157,7 @@
             this.checkBox2.Location = new System.Drawing.Point(382, 226);
             this.checkBox2.Name = "checkBox2";
             this.checkBox2.Size = new System.Drawing.Size(94, 17);
-            this.checkBox2.TabIndex = 12;
+            this.checkBox2.TabIndex = 9;
             this.checkBox2.Text = "Open Archiver";
             this.checkBox2.UseVisualStyleBackColor = true;
             this.checkBox2.CheckedChanged += new System.EventHandler(this.checkBox2_CheckedChanged);
@@ -167,7 +167,7 @@
             this.dbPathSelect.Location = new System.Drawing.Point(403, 55);
             this.dbPathSelect.Name = "dbPathSelect";
             this.dbPathSelect.Size = new System.Drawing.Size(31, 20);
-            this.dbPathSelect.TabIndex = 13;
+            this.dbPathSelect.TabIndex = 1;
             this.dbPathSelect.Text = "...";
             this.dbPathSelect.UseVisualStyleBackColor = true;
             this.dbPathSelect.Visible = false;
@@ -179,7 +179,7 @@
             this.savePassword.Location = new System.Drawing.Point(403, 190);
             this.savePassword.Name = "savePassword";
             this.savePassword.Size = new System.Drawing.Size(77, 17);
-            this.savePassword.TabIndex = 14;
+            this.savePassword.TabIndex = 7;
             this.savePassword.Text = "Remember";
             this.savePassword.UseVisualStyleBackColor = true;
             this.savePassword.CheckedChanged += new System.EventHandler(this.savePassword_CheckedChanged);
@@ -190,7 +190,7 @@
             this.saveUsername.Location = new System.Drawing.Point(403, 145);
             this.saveUsername.Name = "saveUsername";
             this.saveUsername.Size = new System.Drawing.Size(77, 17);
-            this.saveUsername.TabIndex = 15;
+            this.saveUsername.TabIndex = 5;
             this.saveUsername.Text = "Remember";
             this.saveUsername.UseVisualStyleBackColor = true;
             this.saveUsername.CheckedChanged += new System.EventHandler(this.saveUsername_CheckedChanged);
@@ -209,7 +209,7 @@
             this.databaseNameInput.Location = new System.Drawing.Point(112, 55);
             this.databaseNameInput.Name = "databaseNameInput";
             this.databaseNameInput.Size = new System.Drawing.Size(285, 20);
-            this.databaseNameInput.TabIndex = 17;
+            this.databaseNameInput.TabIndex = 0;
             // 
             // portSelector
             // 
@@ -221,7 +221,7 @@
             0});
             this.portSelector.Name = "portSelector";
             this.portSelector.Size = new System.Drawing.Size(84, 20);
-            this.portSelector.TabIndex = 18;
+            this.portSelector.TabIndex = 3;
             this.portSelector.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // DatabaseLogin
