@@ -17,7 +17,7 @@ using System.Data.SQLite;
 #endif
 namespace Reader_UI
 {
-    class DatabaseManager : Writer
+    class DatabaseManager : Writer, IDisposable
     {
 
 
@@ -25,7 +25,26 @@ namespace Reader_UI
         DbConnection sqlsRConn = null, sqlsWConn = null;
         MSPADatabase writer = null;
         string connectionString = null;
-
+        object writeLock = new object();
+        
+        void Dispose(bool mgd)
+        {
+            if(writer != null)
+                writer.Dispose();
+            if(sqlsWConn != null)
+                sqlsWConn.Dispose();
+            if(sqlsRConn != null)
+                sqlsRConn.Dispose();
+        }
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        ~DatabaseManager()
+        {
+            Dispose(false);
+        }
         public enum DBType
         {
             SQLSERVER,
@@ -181,7 +200,7 @@ namespace Reader_UI
         public override byte[] GetIcon(Writer.IconTypes ic)
         {
             var reader = new MSPADatabase(sqlsRConn);
-            var icos = from b in writer.Resources
+            var icos = from b in reader.Resources
                        where b.pageId == (int)SpecialResources.CANDYCORNS
                        select b;
 
@@ -220,7 +239,7 @@ namespace Reader_UI
             Parsex2Header();
             var reader = new MSPADatabase(sqlsRConn);
 
-            var icos = from b in writer.Resources
+            var icos = from b in reader.Resources
                        where b.pageId == (int)SpecialResources.X2_HEADER
                        select b;
             byte[] res = icos.First().data;
@@ -232,7 +251,7 @@ namespace Reader_UI
             ParseTerezi();
             var reader = new MSPADatabase(sqlsRConn);
 
-            var icos = from b in writer.Resources
+            var icos = from b in reader.Resources
                        where b.pageId == (int)SpecialResources.TEREZI_PASSWORD
                        select b;
             byte[] res = icos.First().data;
@@ -248,6 +267,7 @@ namespace Reader_UI
         }
         public override Parser.Resource[] GetTricksterShit()
         {
+            ParseTrickster();
             var reader = new MSPADatabase(sqlsRConn);
             var selection = from b in reader.Resources
                             where b.pageId == (int)SpecialResources.TRICKSTER_HEADER
@@ -329,11 +349,42 @@ namespace Reader_UI
                 return false;
             }
         }
-        override public void WriteResource(Parser.Resource[] res, int page, bool x2)
+        public override void WriteResource(Parser.Resource[] res, int page)
+        {
+            try{
+                Transact();
+                WriteResource(res, page, false);
+                Commit();
+            }catch{
+                Rollback();
+                throw;
+            }
+        }
+        public void WriteResource(Parser.Resource[] res, int page, bool x2)
         {
             foreach (var link in res)
             {
                 writer.Resources.Add(new MSPADatabase.Resource(link, page, x2));
+            }
+        }
+        public override void WritePageToDB(Page page)
+        {
+            lock (writeLock)
+            {
+                try
+                {
+                    Transact();
+                    WriteText(page.meta, page.number, page.x2);
+                    WriteResource(page.resources, page.number, page.x2);
+                    WriteLinks(page.links, page.number);
+                    ArchivePageNumber(page.number, page.x2);
+                    Commit();
+                }
+                catch
+                {
+                    Rollback();
+                    throw;
+                }
             }
         }
         public override bool IconsAreParsed()
@@ -358,18 +409,18 @@ namespace Reader_UI
                        select b;
             return icos.Count() != 0;
         }
-        override public void WriteLinks(Parser.Link[] res, int pageno)
+        public void WriteLinks(Parser.Link[] res, int pageno)
                 {
             foreach(var link in res)
                         {
                 writer.Links.Add(new MSPADatabase.Link(link,pageno));
                 }
             }
-        override public void WriteText(Parser.Text tex, int pageno, bool x2)
+        public void WriteText(Parser.Text tex, int pageno, bool x2)
         {
             writer.PageMeta.Add(new MSPADatabase.Text(tex,pageno,x2));
         }
-        public override void ArchivePageNumber(int page, bool x2)
+        public void ArchivePageNumber(int page, bool x2)
         {
             if (archivedPages.IsPageArchived(page))
             {//should never happen
@@ -383,15 +434,15 @@ namespace Reader_UI
         {
             writer.Prune(pageno);
         }
-        override public void Rollback()
+        public void Rollback()
         {
             writer.Rollback();
         }
-        override public void Transact()
+        public void Transact()
         {
             writer.Transact();
         }
-        override public void Commit()
+        public void Commit()
         {
             writer.Commit();
         }

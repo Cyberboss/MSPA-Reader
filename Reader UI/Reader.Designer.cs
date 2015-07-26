@@ -37,7 +37,6 @@
             this.openArchiver = new System.Windows.Forms.Button();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.jumpButton = new System.Windows.Forms.Button();
-            this.mrAjax = new System.ComponentModel.BackgroundWorker();
             this.goBack = new System.Windows.Forms.Button();
             this.loadButton = new System.Windows.Forms.Button();
             this.saveButton = new System.Windows.Forms.Button();
@@ -50,7 +49,6 @@
             this.deleteButton = new System.Windows.Forms.Button();
             this.uiToggleButton = new System.Windows.Forms.Button();
             this.toggleFullscreen = new System.Windows.Forms.Button();
-            this.monitorGameOver = new System.ComponentModel.BackgroundWorker();
             this.chapterSelector = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.SuspendLayout();
@@ -100,11 +98,6 @@
             this.jumpButton.Text = "Jump";
             this.jumpButton.UseVisualStyleBackColor = true;
             this.jumpButton.Click += new System.EventHandler(this.jumpPage_Click);
-            // 
-            // mrAjax
-            // 
-            this.mrAjax.WorkerReportsProgress = true;
-            this.mrAjax.DoWork += new System.ComponentModel.DoWorkEventHandler(this.mrAjax_DoWork);
             // 
             // goBack
             // 
@@ -242,12 +235,6 @@
             this.toggleFullscreen.UseVisualStyleBackColor = true;
             this.toggleFullscreen.Click += new System.EventHandler(this.toggleFullscreen_Click);
             // 
-            // monitorGameOver
-            // 
-            this.monitorGameOver.WorkerReportsProgress = true;
-            this.monitorGameOver.WorkerSupportsCancellation = true;
-            this.monitorGameOver.DoWork += new System.ComponentModel.DoWorkEventHandler(this.monitorGameOver_DoWork);
-            // 
             // chapterSelector
             // 
             this.chapterSelector.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -296,7 +283,6 @@
 
         private System.Windows.Forms.Button openArchiver;
         private System.Windows.Forms.NumericUpDown numericUpDown1;
-        private System.ComponentModel.BackgroundWorker mrAjax;
         private System.Windows.Forms.Button jumpButton;
         private System.Windows.Forms.Button goBack;
         private System.Windows.Forms.Button loadButton;
@@ -310,7 +296,6 @@
         private System.Windows.Forms.Button deleteButton;
         private System.Windows.Forms.Button uiToggleButton;
         private System.Windows.Forms.Button toggleFullscreen;
-        private System.ComponentModel.BackgroundWorker monitorGameOver;
         private System.Windows.Forms.ComboBox chapterSelector;
 
     }

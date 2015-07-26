@@ -251,6 +251,7 @@ namespace Reader_UI
         Button pesterHideShow = null;
         ImageStream currentIcon = null;
         OpenboundServer openbound = null;
+        ForegroundWorker mrAjax = new ForegroundWorker(), monitorGameOver = new ForegroundWorker(); 
         class TricksterShit : IDisposable
         {
             MemoryStream[] bytes = new MemoryStream[2];
@@ -332,11 +333,15 @@ namespace Reader_UI
                 candyCorn[i] = null;
             mrAjax.RunWorkerCompleted += mrAjax_RunWorkerCompleted;
             mrAjax.ProgressChanged += mrAjax_ProgressChanged;
+            mrAjax.DoWork += mrAjax_DoWork;
+            Controls.Add(mrAjax);
             FormClosing += Reader_FormClosing;
             Resize += Reader_Resize;
             autoSave.Checked = Properties.Settings.Default.autoSave;
             ResizeEnd += Reader_ResizeEnd;
             monitorGameOver.ProgressChanged += monitorGameOver_ProgressChanged;
+            monitorGameOver.DoWork +=monitorGameOver_DoWork;
+            Controls.Add(monitorGameOver);
             chapterSelector.Items.Add("(Select Story)");
             foreach (var c in toc)
                 chapterSelector.Items.Add(c.listName);
@@ -427,10 +432,16 @@ namespace Reader_UI
         void Reader_FormClosing(object sender, FormClosingEventArgs e)
         {
             Properties.Settings.Default.maximized = WindowState == FormWindowState.Maximized;
-            while (mrAjax.IsBusy) { System.Threading.Thread.Sleep(100); Application.DoEvents(); }
+            if (mrAjax.IsBusy)
+            {
+                var closer = new Initializing();
+                closer.Show();
+                while (mrAjax.IsBusy) { System.Threading.Thread.Sleep(100); Application.DoEvents(); }
+                closer.Close();
+            }
         }
 
-        void mrAjax_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        void mrAjax_RunWorkerCompleted(object sender, EventArgs e)
         {
             if (page == null)
             {
@@ -2096,7 +2107,7 @@ namespace Reader_UI
             WindowState = FormWindowState.Minimized;
         }
 
-        private void mrAjax_DoWork(object sender, DoWorkEventArgs e)
+        private void mrAjax_DoWork(object sender, EventArgs e)
         {
             page = null;
             page = db.WaitPage(pageRequest,mrAjax);
@@ -2224,12 +2235,12 @@ namespace Reader_UI
             Reader_ResizeEnd(null, null);
         }
 
-        private void monitorGameOver_DoWork(object sender, DoWorkEventArgs e)
+        private void monitorGameOver_DoWork(object sender, EventArgs e)
         {
             while (!monitorGameOver.CancellationPending)
             {
                 System.Threading.Thread.Sleep(100);
-                monitorGameOver.ReportProgress(0);
+                monitorGameOver.ReportProgress(0,null);
             }
         }
 

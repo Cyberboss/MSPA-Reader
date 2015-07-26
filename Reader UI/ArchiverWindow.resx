@@ -174,9 +174,6 @@
   <data name="&gt;&gt;logOutput.ZOrder" xml:space="preserve">
     <value>6</value>
   </data>
-  <metadata name="worker.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>17, 17</value>
-  </metadata>
   <data name="openReader.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Right</value>
   </data>
@@ -374,12 +371,6 @@
   </data>
   <data name="$this.Text" xml:space="preserve">
     <value>Archiver</value>
-  </data>
-  <data name="&gt;&gt;worker.Name" xml:space="preserve">
-    <value>worker</value>
-  </data>
-  <data name="&gt;&gt;worker.Type" xml:space="preserve">
-    <value>System.ComponentModel.BackgroundWorker, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>ArchiverWindow</value>

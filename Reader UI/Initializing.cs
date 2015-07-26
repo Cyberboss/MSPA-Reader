@@ -34,7 +34,13 @@ namespace Reader_UI
             initializer.RunWorkerCompleted += initializer_RunWorkerCompleted;
             initializer.RunWorkerAsync();
         }
-
+        public Initializing()
+        {
+            //used for when closing archiver window
+            InitializeComponent();
+            Text = "Please Wait";
+            stateLabel.Text = "Finishing active downloads...";
+        }
         void Initializing_FormClosing(object sender, FormClosingEventArgs e)
         {
             e.Cancel = working;

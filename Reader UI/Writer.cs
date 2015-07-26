@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Collections.Concurrent;
+using System.Threading;
 namespace Reader_UI
 {
-    public abstract class Writer : IDisposable
+    public abstract class Writer
     {
         public enum SpecialResources
         {
@@ -19,22 +20,8 @@ namespace Reader_UI
         }
         public enum Versions{
             Database = 4, //update with every commit that affects db layout
-            Program = 2,
+            Program = 3,
             Release = Program + 1
-        }
-        void Dispose(bool mgd)
-        {
-            if(parser != null)
-                parser.Dispose();
-        }
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        ~Writer()
-        {
-            Dispose(false);
         }
         public enum Style
         {
@@ -60,13 +47,18 @@ namespace Reader_UI
             {
                 number = no;
             }
+            public Page(int no, Parser.Text t, Parser.Resource[] r, Parser.Link[] l)
+            {
+                number = no;
+                meta = t;
+                resources = r;
+                links = l;
+            }
             public Parser.Text meta,meta2;
             public Parser.Resource[] resources,resources2;
             public Parser.Link[] links,links2;
             public bool x2 = false;
         }
-
-        Parser parser = null;
         public int lastPage;
         class WorkerLock
         {
@@ -92,6 +84,167 @@ namespace Reader_UI
             }
         }
         WorkerLock wl = new WorkerLock();
+        class BGWSerializer
+        {
+            class ProgMessage{
+                public int Progress {get; set;}
+                public string Message {get; set;}
+            }
+            private ForegroundWorker bgw;
+
+            object _klock = new object();
+            object _wlock = new object();
+            UInt64 k = 0;
+            Dictionary<UInt64, List<ProgMessage>> messageQueue = new Dictionary<UInt64, List<ProgMessage>>();
+            public BGWSerializer(ForegroundWorker b)
+            {
+                bgw = b;
+            }
+            public UInt64 GetKey()
+            {
+                lock (_klock)
+                {
+                    var ret = k;
+                    k = checked(k + 1);
+                    messageQueue.Add(ret, new List<ProgMessage>());
+                    return ret;    //overflow really should never occur, an int 16 could handle this job
+                }
+            }
+            public void ReportProgress(UInt64 key, int prog, string msg)
+            {
+                lock (_wlock)
+                {
+                    messageQueue[key].Add(new ProgMessage { Progress = prog, Message = msg });
+                }
+            }
+            public void Commit(UInt64 key)
+            {
+                lock(_wlock){
+                    var commital = messageQueue[key];
+                    messageQueue.Remove(key);
+                    foreach (var pm in commital)
+                        bgw.ReportProgress(pm.Progress, pm.Message);
+                }
+            }
+        }
+        class WrapBGW
+        {
+            public UInt64 key;
+            public BGWSerializer bgw;
+            public WrapBGW(BGWSerializer b, UInt64 k)
+            {
+                bgw = b;
+                key = k;
+            }
+            public void ReportProgress(int prog, string msg)
+            {
+                bgw.ReportProgress(key, prog, msg);
+            }
+        }
+        class PageSavesManager
+        {
+            object _rwlock = new object();
+            object _plock = new object();
+            object _mlock = new object();
+            object _proglock = new object();
+            ForegroundWorker bgw;
+            int runningWorkers = 0, _pagesParsed, _currentProgress;
+            List<int> missedPages = new List<int>();
+            public PageSavesManager(int pp, ForegroundWorker b)
+            {
+                _pagesParsed = pp;
+                bgw = b;
+            }
+            public int CurrentProgress
+            {
+                get
+                {
+                    lock (_proglock)
+                    {
+                        return _currentProgress;
+                    }
+                }
+                set
+                {
+                    lock (_proglock)
+                    {
+                        _currentProgress = value;
+                    }
+                }
+            }
+            public int PagesParsed
+            {
+                get
+                {
+                    lock (_plock)
+                    {
+                        return _pagesParsed;
+                    }
+                }
+            }
+            public bool AddWorker()
+            {
+                lock (_rwlock)
+                {
+                    if (bgw.CancellationPending)
+                        return false;
+                    runningWorkers++;
+                    return true;
+                }
+            }
+            public void RemoveWorker(int pagefail)
+            {
+                if (pagefail != 0)
+                {
+                    lock (_mlock)
+                    {
+                        missedPages.Add(pagefail);
+                    }
+                }
+                else
+                {
+                    lock (_plock)
+                    {
+                        _pagesParsed++;
+                    }
+                }
+                lock (_rwlock)
+                {
+                    runningWorkers--;
+                }
+            }
+            public bool WaitForWorkers()
+            {
+                lock (_rwlock)
+                {
+                    return runningWorkers == 0;
+                }
+            }
+        
+            public int MissedPagesCount()
+            {
+                lock (_mlock)
+                {
+                    return missedPages.Count;
+                }
+            }
+            public int MissedPagesTop()
+            {
+                lock (_mlock)
+                {
+                    return missedPages[0];
+                }
+            }
+            public int MissedPagesPop()
+            {
+                lock (_mlock)
+                {
+                    var ret = missedPages[0];
+                    missedPages.RemoveAt(0);
+                    return ret;
+                }
+            }
+        }
         public abstract void Prune(int pageno);
         protected class ArchiveLock
         {
@@ -193,7 +346,7 @@ namespace Reader_UI
                 lock (_sync)
                 {
                     ff = true;
-        }
+                }
             }
             public bool Failed()
             {
@@ -335,48 +488,48 @@ namespace Reader_UI
         {
             if (ReadLastIndexedOrCreateDatabase(bgw))
             {
-                parser = new Parser();
-                bgw.ReportProgress(0, "Checking MSPA for latest page...");
-                lastPage = parser.GetLatestPage();
-                if (lastPage == 0)
+                using (var parser = new Parser())
                 {
-                    lastPage = archivedPages.FindHighestPage();
+                    bgw.ReportProgress(0, "Checking MSPA for latest page...");
+                    lastPage = parser.GetLatestPage();
                     if (lastPage == 0)
                     {
-                        MessageBox.Show("The database is empty. Cannot read MSPA.");
-                        return false;
-                    }
-                }
-                else{
-                    var pg = archivedPages.Prune();
-                    if (!Parser.IsOpenBound(pg) && pg != (int)PagesOfImportance.CASCADE)
-                    {
-                        if (pg != 0)
+                        lastPage = archivedPages.FindHighestPage();
+                        if (lastPage == 0)
                         {
-                            bgw.ReportProgress(0, "Reparsing last page...");
-                            Prune(pg);
-                            SavePage(pg);
+                            MessageBox.Show("The database is empty. Cannot read MSPA.");
+                            return false;
                         }
                     }
                     else
-                        archivedPages.Add(pg);
-                }
-
-                if (!IconsAreParsed())
-                {
-                    bgw.ReportProgress(0, "Downloading header icons...");
-                    Transact();
-                    try
                     {
-                        parser.LoadIcons();
-                        WriteResource(parser.GetResources(), (int)SpecialResources.CANDYCORNS, false);
-                        Commit();
+                        var pg = archivedPages.Prune();
+                        if (!Parser.IsOpenBound(pg) && pg != (int)PagesOfImportance.CASCADE)
+                        {
+                            if (pg != 0)
+                            {
+                                bgw.ReportProgress(0, "Reparsing last page...");
+                                Prune(pg);
+                                SavePage(pg);
+                            }
+                        }
+                        else
+                            archivedPages.Add(pg);
                     }
-                    catch
+
+                    if (!IconsAreParsed())
                     {
-                        Rollback();
-                        MessageBox.Show("Unable to load icons above pages! Parsing failure!");
-                        return false;
+                        bgw.ReportProgress(0, "Downloading header icons...");
+                        try
+                        {
+                            parser.LoadIcons();
+                            WriteResource(parser.GetResources(), (int)SpecialResources.CANDYCORNS);
+                        }
+                        catch
+                        {
+                            MessageBox.Show("Unable to load icons above pages! Parsing failure!");
+                            return false;
+                        }
                     }
                 }
                 return true;
@@ -393,13 +546,8 @@ namespace Reader_UI
         public abstract byte[] GetIcon(IconTypes ic);
         public abstract bool IconsAreParsed();
         public abstract bool ReadLastIndexedOrCreateDatabase(System.ComponentModel.BackgroundWorker bgw);
-        public abstract void WriteResource(Parser.Resource[] res, int page, bool x2);
-        public abstract void WriteLinks(Parser.Link[] res, int page);
-        public abstract void WriteText(Parser.Text tex, int page, bool x2);
-        public abstract void ArchivePageNumber(int page, bool x2);
-        public abstract void Transact();
-        public abstract void Rollback();
-        public abstract void Commit();
+        public abstract void WritePageToDB(Page page);
+        public abstract void WriteResource(Parser.Resource[] res, int page);
         public abstract void Close();
         public abstract bool TricksterParsed();
         public abstract bool x2HeaderParsed();
@@ -414,17 +562,10 @@ namespace Reader_UI
             {
                 if (!wl.TestAndSet())
                 {
-                    Transact();
-                    try
+                    using (var parser = new Parser())
                     {
                         parser.LoadTricksterResources();
-                        WriteResource(parser.GetResources(), (int)SpecialResources.TRICKSTER_HEADER, false);
-                        Commit();
-                    }
-                    catch
-                    {
-                        Rollback();
-                        throw;
+                        WriteResource(parser.GetResources(), (int)SpecialResources.TRICKSTER_HEADER);
                     }
                 }
             }
@@ -433,17 +574,10 @@ namespace Reader_UI
         {
             if (!x2HeaderParsed())
             {
-                Transact();
-                try
+                using (var parser = new Parser())
                 {
                     parser.GetX2Header();
-                    WriteResource(parser.GetResources(), (int)SpecialResources.X2_HEADER, false);
-                    Commit();
-                }
-                catch
-                {
-                    Rollback();
-                    throw;
+                    WriteResource(parser.GetResources(), (int)SpecialResources.X2_HEADER);
                 }
             }
         }
@@ -451,17 +585,10 @@ namespace Reader_UI
         {
             if (!TereziParsed())
             {
-                Transact();
-                try
+                using (var parser = new Parser())
                 {
                     parser.GetTerezi();
-                    WriteResource(parser.GetResources(), (int)SpecialResources.TEREZI_PASSWORD, false);
-                    Commit();
-                }
-                catch
-                {
-                    Rollback();
-                    throw;
+                    WriteResource(parser.GetResources(), (int)SpecialResources.TEREZI_PASSWORD);
                 }
             }
         }
@@ -481,7 +608,7 @@ namespace Reader_UI
                 return Style.X2;
             if (pageno == (int)PagesOfImportance.CALIBORN_PAGE_SMASH || pageno == (int)PagesOfImportance.CALIBORN_PAGE_SMASH2)
                 return Style.SMASH;
-            if (parser.IsScratch(pageno))
+            if (Parser.IsScratch(pageno))
                 return Style.SCRATCH;
             if (pageno == (int)PagesOfImportance.GAMEOVER)
                 return Style.GAMEOVER;
@@ -495,55 +622,43 @@ namespace Reader_UI
                 return Style.OVERSHINE;
             return Style.REGULAR;
         }
-        public Page WaitPage(int pageno, System.ComponentModel.BackgroundWorker bgw)
+        public Page WaitPage(int pageno, ForegroundWorker bgw)
         {
             try
             {
-                if (Enum.IsDefined(typeof(SpecialResources), pageno))
+                if (!wl.TestAndSet())
                 {
-                    if (!wl.TestAndSet())
+                    try
                     {
-                        SavePage(pageno, bgw);
+                        if (!archivedPages.IsPageArchived(pageno))
+                        {
+                            var s = new BGWSerializer(bgw);
+                            var k = s.GetKey();
+                            var ret = SavePage(pageno, new WrapBGW(s, k));
+                            s.Commit(k);
+                            if (!ret)
+                                return null;
+                        }
+                    }
+                    catch
+                    {
+                        throw;
+                    }
+                    finally
+                    {
                         wl.StopRunning();
                     }
-                    else
-                    {
-                        do
-                        {
-                            archivedPages.Request(pageno);
-                            System.Threading.Thread.Sleep(1000);
-                        } while (archivedPages.GetRequest() != 0);
-                    }
-                    return null;
                 }
-                if (!archivedPages.IsPageArchived(pageno))
+                else if (!archivedPages.IsPageArchived(pageno))
                 {
-                    if (!wl.TestAndSet())
+                    archivedPages.Request(pageno);
+                    do
                     {
-                        try
-                        {
-                            if (!SavePage(pageno,bgw))
-                                return null;
-                        }
-                        catch
-                        {
-                            throw;
-                        }
-                        finally
-                        {
-                            wl.StopRunning();
-                        }
-                    }
-                    else
-                    {
-                        archivedPages.Request(pageno);
-                        do
-                        {
-                            System.Threading.Thread.Sleep(1000);
-                            if (archivedPages.Failed())
-                                return null;
-                        } while (!archivedPages.IsPageArchived(pageno));
-                    }
+                        System.Threading.Thread.Sleep(1000);
+                        if (archivedPages.Failed())
+                            return null;
+                    } while (!archivedPages.IsPageArchived(pageno));
+
                 }
                 return GetPage(pageno, Parser.Is2x(pageno));
             }
@@ -553,7 +668,7 @@ namespace Reader_UI
             }
         }
 
-        void HandleCascade(System.ComponentModel.BackgroundWorker bgw, int progress)
+        void HandleCascade(WrapBGW bgw, int progress)
         {
             //cascade is hosted on newgrounds
             //also its split into a loader and 5 segments
@@ -575,11 +690,11 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             next[0] = new Parser.Link("END OF ACT 5", (int)PagesOfImportance.CASCADE + 1);
             try
             {
-                cascadeSegments[0] = new Parser.Resource(parser.DownloadFile("http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_loaderExt.swf"), "cascade_loaderExt.swf");
+                cascadeSegments[0] = new Parser.Resource(Parser.DownloadFile("http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_loaderExt.swf"), "cascade_loaderExt.swf");
             }
             catch
             {
-                cascadeSegments[0] = new Parser.Resource(parser.DownloadFile("http://cdn.mspaintadventures.com/cascade/cascade_loaderExt.swf"), "cascade_loaderExt.swf");
+                cascadeSegments[0] = new Parser.Resource(Parser.DownloadFile("http://cdn.mspaintadventures.com/cascade/cascade_loaderExt.swf"), "cascade_loaderExt.swf");
             }
             var fileSize = cascadeSegments[0].data.Count();
             totalMegabytesDownloaded += (float)fileSize / (1024.0f * 1024.0f);
@@ -590,11 +705,11 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 
                 try
                 {
-                    cascadeSegments[i] = new Parser.Resource(parser.DownloadFile("http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment" + i + ".swf"), "cascade_segment" + i + ".swf");
+                    cascadeSegments[i] = new Parser.Resource(Parser.DownloadFile("http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment" + i + ".swf"), "cascade_segment" + i + ".swf");
                 }
                 catch
                 {
-                    cascadeSegments[i] = new Parser.Resource(parser.DownloadFile("http://cdn.mspaintadventures.com/cascade/cascade_segment" + i + ".swf"), "cascade_segment" + i + ".swf");
+                    cascadeSegments[i] = new Parser.Resource(Parser.DownloadFile("http://cdn.mspaintadventures.com/cascade/cascade_segment" + i + ".swf"), "cascade_segment" + i + ".swf");
                 }
                 var fileSize2 = cascadeSegments[i].data.Count();
                 totalMegabytesDownloaded += (float)fileSize2 / (1024.0f * 1024.0f);
@@ -602,28 +717,23 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                     bgw.ReportProgress(progress, cascadeSegments[i].originalFileName + ": " + fileSize2 / 1024 + "KB");
             }
 
-            cascadeSegments[6] = new Parser.Resource(parser.DownloadFile("http://www.mspaintadventures.com/images/header_cascade.gif"), "header_cascade.gif");
+            cascadeSegments[6] = new Parser.Resource(Parser.DownloadFile("http://www.mspaintadventures.com/images/header_cascade.gif"), "header_cascade.gif");
 
             Parser.Text asdf = new Parser.Text();
             asdf.narr = new Parser.Text.ScriptLine("#000000", "", 0);
             asdf.title = "[S] Cascade.";
-            Transact();
-            WriteResource(cascadeSegments, (int)PagesOfImportance.CASCADE, false);
-            WriteLinks(next, (int)PagesOfImportance.CASCADE);
-            WriteText(asdf, (int)PagesOfImportance.CASCADE, false);
 
-            ///BRB
-            ArchivePageNumber((int)PagesOfImportance.CASCADE,false);
-            Commit();
+            WritePageToDB(new Page((int)PagesOfImportance.CASCADE, asdf, cascadeSegments, next));
+            
             if (bgw != null)
                 bgw.ReportProgress(progress, "Cascade committed!");
         }
-        void HandlePageSmash(System.ComponentModel.BackgroundWorker bgw, int progress)
+        void HandlePageSmash(WrapBGW bgw, int progress)
         {
             if (bgw != null)
                 bgw.ReportProgress(progress, "Now parsing Caliborn's hissy fit.");
             Parser.Resource[] FUCKYOU = new Parser.Resource[1];
-            FUCKYOU[0] = new Parser.Resource(parser.DownloadFile("http://cdn.mspaintadventures.com/007395/05492.swf"), "05492.swf");
+            FUCKYOU[0] = new Parser.Resource(Parser.DownloadFile("http://cdn.mspaintadventures.com/007395/05492.swf"), "05492.swf");
 
             var fileSize2 = FUCKYOU[0].data.Count();
             totalMegabytesDownloaded += (float)fileSize2 / (1024.0f * 1024.0f);
@@ -635,20 +745,15 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             Parser.Text asdf = new Parser.Text();
             asdf.narr = new Parser.Text.ScriptLine("#000000", "", 0);
             asdf.title = "[S] Cascade.";
-            Transact();
-            WriteResource(FUCKYOU, (int)PagesOfImportance.CALIBORN_PAGE_SMASH, false);
-            WriteLinks(lnk, (int)PagesOfImportance.CALIBORN_PAGE_SMASH);
-            WriteText(asdf, (int)PagesOfImportance.CALIBORN_PAGE_SMASH, false);
-            ArchivePageNumber((int)PagesOfImportance.CALIBORN_PAGE_SMASH, false);
-            Commit();
+            WritePageToDB(new Page((int)PagesOfImportance.CALIBORN_PAGE_SMASH,asdf,FUCKYOU,lnk));
 
         }
-        void HandlePageSmash2(System.ComponentModel.BackgroundWorker bgw, int progress)
+        void HandlePageSmash2(WrapBGW bgw, int progress)
         {
             if (bgw != null)
                 bgw.ReportProgress(progress, "Now parsing Caliborn's hissy fit.");
             Parser.Resource[] FUCKYOU = new Parser.Resource[1];
-            FUCKYOU[0] = new Parser.Resource(parser.DownloadFile("http://www.mspaintadventures.com/007680/05777_2.swf"), "05777_2.swf");
+            FUCKYOU[0] = new Parser.Resource(Parser.DownloadFile("http://www.mspaintadventures.com/007680/05777_2.swf"), "05777_2.swf");
 
             var fileSize2 = FUCKYOU[0].data.Count();
             totalMegabytesDownloaded += (float)fileSize2 / (1024.0f * 1024.0f);
@@ -660,20 +765,15 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             Parser.Text asdf = new Parser.Text();
             asdf.narr = new Parser.Text.ScriptLine("#000000", "", 0);
             asdf.title = "[S] Cascade.";
-            Transact();
-            WriteLinks(lnk, (int)PagesOfImportance.CALIBORN_PAGE_SMASH2);
-            WriteResource(FUCKYOU, (int)PagesOfImportance.CALIBORN_PAGE_SMASH2, false);
-            WriteText(asdf, (int)PagesOfImportance.CALIBORN_PAGE_SMASH2, false);
-            ArchivePageNumber((int)PagesOfImportance.CALIBORN_PAGE_SMASH2, false);
-            Commit();
+            WritePageToDB(new Page((int)PagesOfImportance.CALIBORN_PAGE_SMASH2, asdf, FUCKYOU, lnk));
 
         }
-        void HandleDota(System.ComponentModel.BackgroundWorker bgw, int progress)
+        void HandleDota(WrapBGW bgw, int progress)
         {
             if (bgw != null)
                 bgw.ReportProgress(progress, "Now parsing Hussie's rekage.");
             Parser.Resource[] FUCKYOU = new Parser.Resource[1];
-            FUCKYOU[0] = new Parser.Resource(parser.DownloadFile("http://cdn.mspaintadventures.com/DOTA/04812.swf"), "04812.swf");
+            FUCKYOU[0] = new Parser.Resource(Parser.DownloadFile("http://cdn.mspaintadventures.com/DOTA/04812.swf"), "04812.swf");
 
             var fileSize2 = FUCKYOU[0].data.Count();
             totalMegabytesDownloaded += (float)fileSize2 / (1024.0f * 1024.0f);
@@ -685,19 +785,14 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             asdf.title = "";
             Parser.Link[] lnk = new Parser.Link[1];
             lnk[0] = new Parser.Link("", (int)PagesOfImportance.DOTA + 1);
-            Transact();
-            WriteResource(FUCKYOU, (int)PagesOfImportance.DOTA, false);
-            WriteLinks(lnk, (int)PagesOfImportance.DOTA);
-            WriteText(asdf, (int)PagesOfImportance.DOTA, false);
-            ArchivePageNumber((int)PagesOfImportance.DOTA, false);
-            Commit();
+            WritePageToDB(new Page((int)PagesOfImportance.DOTA, asdf, FUCKYOU, lnk));
         }
-        void FailToHandleVriska(System.ComponentModel.BackgroundWorker bgw, int progress)
+        void FailToHandleVriska(WrapBGW bgw, int progress)
         {
             if (bgw != null)
                 bgw.ReportProgress(progress, "Now parsing the huge 8itch.");
             Parser.Resource[] FUCKYOU = new Parser.Resource[1];
-            FUCKYOU[0] = new Parser.Resource(parser.DownloadFile("http://www.mspaintadventures.com/shes8ack/07402.swf"), "07402.swf");
+            FUCKYOU[0] = new Parser.Resource(Parser.DownloadFile("http://www.mspaintadventures.com/shes8ack/07402.swf"), "07402.swf");
 
             var fileSize2 = FUCKYOU[0].data.Count();
             totalMegabytesDownloaded += (float)fileSize2 / (1024.0f * 1024.0f);
@@ -709,19 +804,14 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             asdf.title = "";
             Parser.Link[] lnk = new Parser.Link[1];
             lnk[0] = new Parser.Link("", (int)PagesOfImportance.SHES8ACK + 1);
-            Transact();
-            WriteResource(FUCKYOU, (int)PagesOfImportance.SHES8ACK, false);
-            WriteLinks(lnk, (int)PagesOfImportance.SHES8ACK);
-            WriteText(asdf, (int)PagesOfImportance.SHES8ACK, false);
-            ArchivePageNumber((int)PagesOfImportance.SHES8ACK, false);
-            Commit();
+            WritePageToDB(new Page((int)PagesOfImportance.SHES8ACK, asdf, FUCKYOU, lnk));
         }
-        void FailMiserably(System.ComponentModel.BackgroundWorker bgw, int progress)
+        void FailMiserably(WrapBGW bgw, int progress)
         {
             if (bgw != null)
                 bgw.ReportProgress(progress, "Now parsing death.");
             Parser.Resource[] FUCKYOU = new Parser.Resource[1];
-            FUCKYOU[0] = new Parser.Resource(parser.DownloadFile("http://cdn.mspaintadventures.com/storyfiles/hs2/GAMEOVER/06898.swf"), "06898.swf");
+            FUCKYOU[0] = new Parser.Resource(Parser.DownloadFile("http://cdn.mspaintadventures.com/storyfiles/hs2/GAMEOVER/06898.swf"), "06898.swf");
 
             var fileSize2 = FUCKYOU[0].data.Count();
             totalMegabytesDownloaded += (float)fileSize2 / (1024.0f * 1024.0f);
@@ -733,19 +823,14 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             asdf.title = "";
             Parser.Link[] lnk = new Parser.Link[1];
             lnk[0] = new Parser.Link("", (int)PagesOfImportance.GAMEOVER + 1);
-            Transact();
-            WriteResource(FUCKYOU, (int)PagesOfImportance.GAMEOVER, false);
-            WriteLinks(lnk, (int)PagesOfImportance.GAMEOVER);
-            WriteText(asdf, (int)PagesOfImportance.GAMEOVER, false);
-            ArchivePageNumber((int)PagesOfImportance.GAMEOVER, false);
-            Commit();
+            WritePageToDB(new Page((int)PagesOfImportance.GAMEOVER, asdf, FUCKYOU, lnk));
         }
-        void HandleOvershine(System.ComponentModel.BackgroundWorker bgw, int progress)
+        void HandleOvershine(WrapBGW bgw, int progress)
         {
             if (bgw != null)
                 bgw.ReportProgress(progress, "Now parsing zap.");
             Parser.Resource[] FUCKYOU = new Parser.Resource[1];
-            FUCKYOU[0] = new Parser.Resource(parser.DownloadFile("http://cdn.mspaintadventures.com/storyfiles/hs2/07401.gif"), "07401.gif");
+            FUCKYOU[0] = new Parser.Resource(Parser.DownloadFile("http://cdn.mspaintadventures.com/storyfiles/hs2/07401.gif"), "07401.gif");
 
             var fileSize2 = FUCKYOU[0].data.Count();
             totalMegabytesDownloaded += (float)fileSize2 / (1024.0f * 1024.0f);
@@ -757,19 +842,14 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             asdf.title = "";
             Parser.Link[] lnk = new Parser.Link[1];
             lnk[0] = new Parser.Link("[S][A6A6I4] ====>", (int)PagesOfImportance.OVERSHINE + 1);
-            Transact();
-            WriteResource(FUCKYOU, (int)PagesOfImportance.OVERSHINE, false);
-            WriteLinks(lnk, (int)PagesOfImportance.OVERSHINE);
-            WriteText(asdf, (int)PagesOfImportance.OVERSHINE, false);
-            ArchivePageNumber((int)PagesOfImportance.OVERSHINE, false);
-            Commit();
+            WritePageToDB(new Page((int)PagesOfImportance.OVERSHINE, asdf, FUCKYOU, lnk));
         }
-        void HandleJailbreakLast(System.ComponentModel.BackgroundWorker bgw, int progress)
+        void HandleJailbreakLast(WrapBGW bgw, int progress)
         {
             if (bgw != null)
                 bgw.ReportProgress(progress, "Now parsing your victory.");
             Parser.Resource[] FUCKYOU = new Parser.Resource[1];
-            FUCKYOU[0] = new Parser.Resource(parser.DownloadFile("http://cdn.mspaintadventures.com/storyfiles/jb2/YOUWIN.gif"), "YOUWIN.gif");
+            FUCKYOU[0] = new Parser.Resource(Parser.DownloadFile("http://cdn.mspaintadventures.com/storyfiles/jb2/YOUWIN.gif"), "YOUWIN.gif");
 
             var fileSize2 = FUCKYOU[0].data.Count();
             totalMegabytesDownloaded += (float)fileSize2 / (1024.0f * 1024.0f);
@@ -779,12 +859,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             Parser.Text asdf = new Parser.Text();
             asdf.narr = new Parser.Text.ScriptLine("#000000", "Would you like to play again?", 0);
             asdf.title = "Enjoy restful slumber.";
-            Transact();
-            WriteResource(FUCKYOU, (int)PagesOfImportance.JAILBREAK_LAST_PAGE, false);
-            WriteLinks(new Parser.Link[0], (int)PagesOfImportance.JAILBREAK_LAST_PAGE);
-            WriteText(asdf, (int)PagesOfImportance.JAILBREAK_LAST_PAGE, false);
-            ArchivePageNumber((int)PagesOfImportance.JAILBREAK_LAST_PAGE, false);
-            Commit();
+            WritePageToDB(new Page((int)PagesOfImportance.JAILBREAK_LAST_PAGE, asdf, FUCKYOU, new Parser.Link[0]));
         }
         public static int ValidRange(int pg)
         {
@@ -813,92 +888,96 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
 
             return pg;
         }
-        public void ResumeWork(System.ComponentModel.BackgroundWorker bgw, int startPage, int lastPage)
+        class ThreadedSaveParams
+        {
+            public bool Request { get; set; }
+            public PageSavesManager Manager { get; set; }
+            public int CurrentPage { get; set; }
+            public int PagesToParse { get; set; }
+            public UInt64 BGWKey { get; set; }
+            public BGWSerializer BGW { get; set; }
+        }
+        void LaunchThreadedSave(object state)
+        {
+            ThreadedSaveParams stuff = (ThreadedSaveParams)state;
+            if (stuff.Request || stuff.Manager.AddWorker())
+            {
+                if (!SavePage(stuff.CurrentPage, new WrapBGW(stuff.BGW, stuff.BGWKey), stuff.Manager.CurrentProgress))
+                {
+                    stuff.BGW.ReportProgress(stuff.BGWKey, stuff.Manager.CurrentProgress, "Failed to parse page " + stuff.CurrentPage + "! Added to miss queue.");
+                    stuff.BGW.Commit(stuff.BGWKey);
+                    if (!stuff.Request)
+                        stuff.Manager.RemoveWorker(stuff.CurrentPage);
+                }
+                else if (!stuff.Request)
+                {
+                    stuff.BGW.Commit(stuff.BGWKey);
+                    stuff.Manager.RemoveWorker(0);
+                }
+            }
+
+            stuff.Manager.CurrentProgress = (int)(((float)(stuff.Manager.PagesParsed) / (float)(stuff.PagesToParse)) * 100.0f);
+        }
+        public void ResumeWork(ForegroundWorker bgw2, int startPage, int lastPage)
         {
 
-            int currentProgress;
+            var bgw = new BGWSerializer(bgw2);
 
             while (wl.TestAndSet()) { System.Threading.Thread.Sleep(1000); }
             try
             {
-                List<int> missedPages = new List<int>();
                 bool missedRound = false;
-                int currentPage;
                 startPage = ValidRange(startPage);
                 int pagesToParse = lastPage - startPage + 1;
-                int pagesParsed = 0;
+                int currentPage = archivedPages.FindLowestPage(startPage, lastPage);;
+                var manager = new Writer.PageSavesManager(archivedPages.GetParseCount(startPage, lastPage), bgw2);
+                if (currentPage > lastPage)
+                {
+                    bgw2.ReportProgress(100, "Range already archived!");
+                    return;
+                }
+
+                manager.CurrentProgress = (int)(((float)(manager.PagesParsed) / (float)(pagesToParse)) * 100.0f);
+                if (!bgw2.CancellationPending)
+                {
+                    bgw2.ReportProgress(manager.CurrentProgress, "Starting archive operation at page " + startPage);
+                }
+                else
+                {
+                    bgw2.ReportProgress(manager.CurrentProgress, "Operation cancelled.");
+                    return;
+                }
                 while (true)
                 {
 
-                    if (!missedRound)
+                    if (missedRound)
                     {
-                        currentPage = archivedPages.FindLowestPage(startPage, lastPage);
-                        pagesParsed = archivedPages.GetParseCount(startPage, lastPage);
-
-                        if (currentPage > lastPage)
-                        {
-                            bgw.ReportProgress(100, "Range already archived!");
-                            return;
-                        }
-
-                        currentProgress = (int)(((float)(pagesParsed) / (float)(pagesToParse)) * 100.0f);
-                        if (!bgw.CancellationPending)
-                        {
-                            bgw.ReportProgress(currentProgress, "Starting archive operation at page " + startPage);
-                        }
-                        else
-                        {
-                            bgw.ReportProgress(currentProgress, "Operation cancelled.");
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        currentPage = missedPages[0];
-                        currentProgress = (int)(((float)(pagesParsed) / (float)(pagesToParse)) * 100.0f);
+                        currentPage = manager.MissedPagesTop();
+                        manager.CurrentProgress = (int)(((float)(manager.PagesParsed) / (float)(pagesToParse)) * 100.0f);
                     }
 
-                    if (!bgw.CancellationPending)
+                    if (!bgw2.CancellationPending)
                     {
                         if (currentPage != startPage)
-                            bgw.ReportProgress(currentProgress, "Resuming from " + currentPage);
+                            bgw2.ReportProgress(manager.CurrentProgress, "Resuming from " + currentPage);
                     }
                     else
                     {
-                        bgw.ReportProgress(currentProgress, "Operation cancelled.");
+                        bgw2.ReportProgress(manager.CurrentProgress, "Operation cancelled.");
                         return;
                     }
 
-                    int oldPage;
-                    while (!bgw.CancellationPending)
+                    while (true)
                     {
-                        oldPage = currentPage;
-                        var req = (archivedPages.GetRequest());
-                        if (req != 0)
-                        {
-                            currentPage = req;
-                            bgw.ReportProgress(currentProgress, "Responding to User Request for Page " + req);
-                        }
-                        currentProgress = (int)(((float)(pagesParsed) / (float)(pagesToParse)) * 100.0f);
+                        UInt64 k = bgw.GetKey();
 
-                        var oldMissedPages = missedPages;
-
-                        if (!SavePage(currentPage, bgw, currentProgress))
+                        System.Threading.ThreadPool.QueueUserWorkItem(LaunchThreadedSave, new ThreadedSaveParams { Request = false, BGW = bgw, BGWKey = k, CurrentPage = currentPage, Manager = manager, PagesToParse = pagesToParse });
+                        
+                        if (missedRound)
                         {
-                            bgw.ReportProgress(currentProgress, "Failed to parse page " + currentPage + "! Added to miss queue.");
-                            missedPages.Add(currentPage);
-                        }
-                        else
-                            pagesParsed++;
-
-                        if (req != 0)
-                            currentPage = oldPage;
-                        else if (missedRound)
-                        {
-                            if (missedPages.Count() == 0)
+                            if (manager.MissedPagesCount() == 0)
                                 break;
-                            missedPages.RemoveAt(0);
-                            currentPage = missedPages[0];
+                            currentPage = manager.MissedPagesPop();
                         }
                         else
                         {
@@ -906,16 +985,33 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                                 break;
                             currentPage = ValidRange(archivedPages.FindLowestPage(currentPage + 1, lastPage));
                         }
+
+
                     }
-                    if (bgw.CancellationPending || missedPages.Count() == 0)
+
+                    while (!manager.WaitForWorkers() && !bgw2.CancellationPending)
+                    {
+                        Thread.Sleep(1);    //since we run alongside the threadpool we have to be quick about things
+                        var req = (archivedPages.GetRequest());
+                        if (req != 0)
+                        {
+                            UInt64 k = bgw.GetKey();
+                            bgw.ReportProgress(k, manager.CurrentProgress, "Responding to user request for page " + req);
+                            LaunchThreadedSave(new ThreadedSaveParams { Request = true, BGW = bgw, BGWKey = k, CurrentPage = req, Manager = manager, PagesToParse = pagesToParse });
+                            if(!archivedPages.IsPageArchived(req))
+                            archivedPages.FailFlag();
+                        }
+                    }
+                    while (!manager.WaitForWorkers()) { Thread.Sleep(1); }
+                    if (bgw2.CancellationPending || manager.MissedPagesCount() == 0)
                         break;
                     missedRound = true;
-                    bgw.ReportProgress(currentProgress, "Missed " + missedPages.Count() + " pages. Iterating through missed queue.");
+                    bgw2.ReportProgress(manager.CurrentProgress, "Missed " + manager.MissedPagesCount() + " pages. Iterating through missed queue.");
                 }
-                if (bgw.CancellationPending)
-                    bgw.ReportProgress(currentProgress, "Operation cancelled.");
+                if (bgw2.CancellationPending)
+                    bgw2.ReportProgress(manager.CurrentProgress, "Operation cancelled.");
                 else
-                    bgw.ReportProgress(100, "Operation completed.");
+                    bgw2.ReportProgress(100, "Operation completed.");
             }
             catch
             {
@@ -926,7 +1022,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 wl.StopRunning();
             }
         }
-        bool SavePage(int currentPage, System.ComponentModel.BackgroundWorker bgw = null, int currentProgress = 0)
+        bool SavePage(int currentPage, WrapBGW bgw = null, int currentProgress = 0)
         {
             if (Enum.IsDefined(typeof(PagesOfImportance), currentPage))
             {
@@ -963,7 +1059,6 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 }
                 catch
                 {
-                    Rollback();
                     if (bgw != null)
                         bgw.ReportProgress(currentProgress, "Error parsing special page " + currentPage);
                     return false;
@@ -975,7 +1070,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 }
                 return true;
             }
-            if (archivedPages.IsPageArchived(currentPage) || (bgw != null && bgw.CancellationPending))
+            if (archivedPages.IsPageArchived(currentPage))
                 return true;
 
             if (Parser.IsTrickster(currentPage))
@@ -988,33 +1083,36 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             if(bgw != null && Parser.IsOpenBound(currentPage))
                 bgw.ReportProgress(currentProgress, "Parsing an Openbound page. There are tons of tiny downloads and this will take a couple minutes...");
 
-            if (parser.LoadPage(currentPage))
+            using (var parser = new Parser())
             {
-                int missedPages = 0;
-                if (!parser.x2Flag)
+                if (parser.LoadPage(currentPage))
                 {
-                    if (!WritePage(bgw, currentPage, currentProgress, 0))
-                        missedPages++;
-                }
-                else
-                {
-                    if (!WritePage(bgw, currentPage, currentProgress, 1))
-                        missedPages += 2;
+                    int missedPages = 0;
+                    if (!parser.x2Flag)
+                    {
+                        if (!WritePage(bgw, currentPage, currentProgress, 0, parser))
+                            missedPages++;
+                    }
                     else
                     {
-                        parser.Reparse();
-                        if (!WritePage(bgw, currentPage, currentProgress, 2))
+                        if (!WritePage(bgw, currentPage, currentProgress, 1, parser))
                             missedPages += 2;
+                        else
+                        {
+                            parser.Reparse();
+                            if (!WritePage(bgw, currentPage, currentProgress, 2, parser))
+                                missedPages += 2;
+                        }
                     }
+                    //simple enough, leave it to the reader to decode the multiple pages
+                    return missedPages == 0;
                 }
-                //simple enough, leave it to the reader to decode the multiple pages
-                return missedPages == 0;
+                else
+                    return false;
             }
-            else
-                return false;
             
         }
-        bool WritePage(System.ComponentModel.BackgroundWorker bgw, int currentPage, int currentProgress, int x2phase)
+        bool WritePage(WrapBGW bgw, int currentPage, int currentProgress, int x2phase, Parser parser)
         {
             try
             {
@@ -1060,15 +1158,11 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 if (bgw != null && x2phase != 1)
                     bgw.ReportProgress(currentProgress, "");
 
-                if(x2phase != 2)
-                    Transact();
-                WriteResource(res, currentPage, x2phase == 2);
-                WriteLinks(links, currentPage);
-                WriteText(text, currentPage, x2phase == 2);
-                ArchivePageNumber(currentPage, x2phase == 2);
+                var p = new Page(currentPage, text, res, links);
+                p.x2 = x2phase == 2;
+                WritePageToDB(p);
                 if (x2phase != 1)
                 {
-                    Commit();
                     archivedPages.Add(currentPage);
                 }
 
@@ -1076,7 +1170,6 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             catch
             {
                 Debugger.Break();
-                Rollback(); 
                 if (bgw != null)
                     bgw.ReportProgress(currentProgress, "Error in archiving page: " + currentPage);
                 return false;

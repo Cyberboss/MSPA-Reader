@@ -19,3 +19,6 @@ v1.1
 	-- Fix to Openbound not running due to excessive HTML5 attribute (WRY HUSSIE?)
 	-- Fix page 9828
 	-- SUPPORT FOR ALL MSPAINTADVENTURES!
+v1.2
+	-- Massive increase to archiving speeds via concurrent downloads instead of serial
+	-- Fix to concurrency bugs that could occur while reading and archiving simultaneously

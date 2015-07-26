@@ -35,7 +35,6 @@ namespace Reader_UI
         }
         void Dispose(bool mgd)
         {
-            web.Dispose();
             client.Dispose();
         }
         public void Dispose()
@@ -146,70 +145,62 @@ namespace Reader_UI
             return 0;
         }
         //http://stackoverflow.com/questions/1585985/how-to-use-the-webclient-downloaddataasync-method-in-this-context
-        class WebDownload : WebClient
+        class WebDownload
         {
-            /// <summary>
-            /// Time in milliseconds
-            /// </summary>
-
-            bool isDownloading;
-            byte[] res;
-            object _sync = new object(); 
-
-            public int Timeout { get; set; }
-
-            public WebDownload() : this(20000) { }
-
-            public WebDownload(int timeout)
+            const int MAX_CLIENTS = 100;
+            List<WebClient> downloaders = new List<WebClient>();
+            List<UInt64> toServe = new List<UInt64>();
+            UInt64 nextToServe = 0;
+            object _slock = new object(), _dlock = new object();
+            public byte[] DownloadData(string address) 
             {
-                this.Timeout = timeout;
-                DownloadDataCompleted += WebDownload_DownloadDataCompleted;
-            }
-
-            void WebDownload_DownloadDataCompleted(object sender, DownloadDataCompletedEventArgs e)
-            {
-                if (e.Cancelled)
-                    return;
-                
-                lock (_sync)
+                WebClient use;
+                UInt64 serviceNumber;
+                lock (_slock)
                 {
-                    isDownloading = false;
-                    if(e.Error == null)
-                        res = e.Result;
+                    toServe.Add(nextToServe);
+                    serviceNumber = nextToServe;
+                    nextToServe++;  //overflow shoudn't matter
                 }
-            }
-
-            new public byte[] DownloadData(string address) 
-            {
-                res = null;
-                isDownloading = true;
-                DownloadDataAsync(new Uri(address));
-                int count = 0;
-
                 while (true)
                 {
-                    System.Threading.Thread.Sleep(10);
-                    System.Windows.Forms.Application.DoEvents();
-                    count+= 10;
-                    lock (_sync)
+                    lock (_slock)
                     {
-                        if (!isDownloading)
-                            if (res != null)
-                                break;
-                            else
-                                throw new Exception("Download failed");
-                        
+                        if (serviceNumber == toServe.First())
+                        {
+                            break;
+                        }
                     }
-                    
-                    if (count > Timeout)
+                    System.Threading.Thread.Sleep(100);
+                }
+                    lock (_dlock)
                     {
-                        CancelAsync();
-                        throw new Exception("Download timed out");
+                        if (downloaders.Count > 0)
+                        {
+                            use = downloaders.First();
+                            downloaders.RemoveAt(0);
+                        }
+                        else
+                            use = new WebClient();
                     }
+                lock (_slock)
+                {
+                    toServe.RemoveAt(0);
+                }
+                var res = use.DownloadData(address);
+
+                lock (_dlock)
+                {
+                    downloaders.Add(use);
                 }
                 return res;
             }
+            void Dispose()
+            {
+
+            }
         }
+        static WebDownload downloader = new WebDownload();
         const string prepend2 = "http://www.mspaintadventures.com/?s=";
         const string prepend3 = "&p=";
         const string gifRegex = @"http:\/\/(?!" + 
@@ -235,7 +226,6 @@ namespace Reader_UI
 
         public bool x2Flag;
 
-        WebDownload web = new WebDownload();
         HttpClient client = new HttpClient();
 
         HtmlNode contentTable,secondContentTable;
@@ -255,7 +245,7 @@ namespace Reader_UI
             //if this fails we need to check the database
             try
             {
-                var response = client.GetByteArrayAsync(new Uri("http://www.mspaintadventures.com/?viewlog=6")).Result;
+                var response = DownloadFile("http://www.mspaintadventures.com/?viewlog=6",true);
                 String source = Encoding.GetEncoding("utf-8").GetString(response, 0, response.Length - 1);
                 source = WebUtility.HtmlDecode(source);
                 var html = new HtmlDocument();
@@ -639,18 +629,20 @@ namespace Reader_UI
         {
             return links.ToArray();
         }
-        public byte[] DownloadFile(string file)
+        public static byte[] DownloadFile(string file, bool explic = false)
         {
             if (file == "http://andrewhussie.com/whistlessite/preview.php?page=000.gif")
                 return new byte[0];
+            if (explic)
+                return downloader.DownloadData(file);
             try
             {
-                return web.DownloadData(file.Replace("www.mspaintadventures.com", "cdn.mspaintadventures.com"));
+                return downloader.DownloadData(file.Replace("www.mspaintadventures.com", "cdn.mspaintadventures.com"));
             }
             catch
             {
                 //try the www if the cdn is jank
-                return web.DownloadData(file.Replace("cdn.mspaintadventures.com", "www.mspaintadventures.com"));
+                return downloader.DownloadData(file.Replace("cdn.mspaintadventures.com", "www.mspaintadventures.com"));
             }
         }
         void ScratchPreParse(HtmlDocument html)
@@ -686,7 +678,7 @@ namespace Reader_UI
             if (node != null && node.Attributes["title"] != null)
                 texts.altText = node.Attributes["title"].Value;
         }
-        public bool IsScratch(int page)
+        public static bool IsScratch(int page)
         {
             return page >= 5664 && page <= 5981;
         }
@@ -731,7 +723,7 @@ namespace Reader_UI
             {
                 x2Flag = false;
                 var uristring = prepend2 + (isRQ ? "ryanquest" : GetStoryFromPage(currentPage)) + prepend3 + pageno.ToString("D6");
-                var response = client.GetByteArrayAsync(new Uri(uristring)).Result;
+                var response = DownloadFile(uristring,true);
                 String source = Encoding.GetEncoding("utf-8").GetString(response, 0, response.Length - 1);
                 source = WebUtility.HtmlDecode(source);
                 var html = new HtmlDocument();

@@ -26,10 +26,12 @@ namespace Reader_UI
         }
         List<PageRange> toc;
         Writer db = null;
+        ForegroundWorker worker = new ForegroundWorker();
         bool running = false;
         bool closeRequested = false;
         int startingPage;
         int lastPage;
+        Initializing closer = null;
         public static List<PageRange> GetTableOfContents(Writer db)
         {
             var toc = new List<PageRange>();
@@ -110,6 +112,8 @@ namespace Reader_UI
             InitializeComponent();
             updateButton.Enabled = false;
             worker.ProgressChanged += worker_progress;
+            worker.DoWork += worker_DoWork;
+            Controls.Add(worker);
             FormClosing += Writer_Closing;
             FormClosed += Writer_Closed;
             cancelButton.Enabled = false;
@@ -122,6 +126,8 @@ namespace Reader_UI
         }
         void Writer_Closed(object sender, System.EventArgs e)
         {
+            if (closer != null)
+                closer.Close();
             Program.Shutdown(this, db);
         }
         void Writer_Closing(object sender, FormClosingEventArgs e)
@@ -129,6 +135,8 @@ namespace Reader_UI
             if (!running)
                 return;
             e.Cancel = true;
+            if (closeRequested)
+                return;
             closeRequested = true;
             Cursor.Current = Cursors.WaitCursor;
             worker.CancelAsync();
@@ -136,6 +144,8 @@ namespace Reader_UI
             {
                 c.Enabled = false;
             }
+            closer = new Initializing();
+            closer.Show();
         }
         void worker_progress(object sender, ProgressChangedEventArgs e)
         {
@@ -155,7 +165,7 @@ namespace Reader_UI
             }
             else
             {
-                progressBar1.Value = Math.Max(Math.Min(e.ProgressPercentage,100),0);
+                progressBar1.Value = Math.Max(Math.Min(Math.Max(e.ProgressPercentage, progressBar1.Value), 100), 0);
                 logOutput.AppendText((string)e.UserState + Environment.NewLine);
             }
         }
@@ -174,7 +184,7 @@ namespace Reader_UI
             lastPage = toc[startAt.SelectedIndex].end;
             return true;
         }
-        private void worker_DoWork(object sender, DoWorkEventArgs e)
+        private void worker_DoWork(object sender, EventArgs e)
         {
             db.ResumeWork(worker, startingPage, lastPage);
             worker.ReportProgress(100, "FormMessageClose");

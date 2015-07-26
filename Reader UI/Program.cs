@@ -69,21 +69,16 @@ namespace Reader_UI
                                              "Update Available",
                                              MessageBoxButtons.YesNo) == DialogResult.Yes)
                             {
-                                Parser p = new Parser();
                                 try{
                                     string path = (Application.StartupPath + System.IO.Path.DirectorySeparatorChar + System.AppDomain.CurrentDomain.FriendlyName).Replace(".exe", " Update.exe");
                                     if (path == Application.StartupPath + System.IO.Path.DirectorySeparatorChar + System.AppDomain.CurrentDomain.FriendlyName)
                                         path += "Update.exe";
-                                    System.IO.File.WriteAllBytes(path, p.DownloadFile(updateURL));
+                                    System.IO.File.WriteAllBytes(path, Parser.DownloadFile(updateURL));
                                     System.Diagnostics.Process.Start(path);
                                     return;
                                 }
                                 catch {
                                     MessageBox.Show("Error downloading/saving the update! You can get it manually at https://github.com/cybnetsurfe3011/MSPA-Reader/releases.");
-                                }
-                                finally
-                                {
-                                    p.Dispose();
                                 }
                             }
                         }
