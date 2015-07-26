@@ -23,14 +23,11 @@ namespace Reader_UI
 
 
         DbConnection sqlsRConn = null, sqlsWConn = null;
-        MSPADatabase writer = null;
         string connectionString = null;
         object writeLock = new object();
         
         void Dispose(bool mgd)
         {
-            if(writer != null)
-                writer.Dispose();
             if(sqlsWConn != null)
                 sqlsWConn.Dispose();
             if(sqlsRConn != null)
@@ -260,10 +257,16 @@ namespace Reader_UI
         }
         public override bool TricksterParsed()
         {
-            var icos = from b in writer.Resources
-                       where b.pageId == (int)SpecialResources.TRICKSTER_HEADER
-                       select b;
-            return icos.Count() != 0;
+            lock (writeLock)
+            {
+                using (var writer = new MSPADatabase(sqlsWConn))
+                {
+                    var icos = from b in writer.Resources
+                               where b.pageId == (int)SpecialResources.TRICKSTER_HEADER
+                               select b;
+                    return icos.Count() != 0;
+                }
+            }
         }
         public override Parser.Resource[] GetTricksterShit()
         {
@@ -324,21 +327,23 @@ namespace Reader_UI
                 else
                     bgw.ReportProgress(0, "Initializing Entity Framework...");
 
-                writer = MSPADatabase.Initialize(sqlsWConn, resetFlag || autoDrop, databaseType);
-
-                if (writer.Versions.Count() == 0)
+                using (var writer = MSPADatabase.Initialize(sqlsWConn, resetFlag || autoDrop, databaseType))
                 {
-                    var tmp = new MSPADatabase.Version();
-                    tmp.DatabaseVersion = (int)Versions.Database;
-                    writer.Versions.Add(tmp);
+
+                    if (writer.Versions.Count() == 0)
+                    {
+                        var tmp = new MSPADatabase.Version();
+                        tmp.DatabaseVersion = (int)Versions.Database;
+                        writer.Versions.Add(tmp);
+                    }
+                    sqlsRConn.Open();
+
+                    bgw.ReportProgress(0, "Listing archived pages...");
+                    foreach (var page in writer.ArchivedPages)
+                        archivedPages.Add(page.pageId);
                 }
-                sqlsRConn.Open();
-
-                bgw.ReportProgress(0, "Listing archived pages...");
-                foreach (var page in writer.ArchivedPages)
-                    archivedPages.Add(page.pageId);
-
                 return true;
+
             }
             catch
             {
@@ -351,76 +356,109 @@ namespace Reader_UI
         }
         public override void WriteResource(Parser.Resource[] res, int page)
         {
-            try{
-                Transact();
-                WriteResource(res, page, false);
-                Commit();
-            }catch{
-                Rollback();
-                throw;
+
+            lock (writeLock)
+            {
+                using (var writer = new MSPADatabase(sqlsWConn))
+                {
+                    try
+                    {
+                        Transact(writer);
+                        WriteResource(res, page, false, writer);
+                        Commit(writer);
+
+                    }
+                    catch
+                    {
+                        Rollback(writer);
+                        throw;
+                    }
+                }
             }
         }
-        public void WriteResource(Parser.Resource[] res, int page, bool x2)
+        public void WriteResource(Parser.Resource[] res, int page, bool x2, MSPADatabase writer)
         {
             foreach (var link in res)
             {
                 writer.Resources.Add(new MSPADatabase.Resource(link, page, x2));
             }
+
         }
         public override void WritePageToDB(Page page)
         {
             lock (writeLock)
             {
-                try
+                using (var writer = new MSPADatabase(sqlsWConn))
                 {
-                    Transact();
-                    WriteText(page.meta, page.number, page.x2);
-                    WriteResource(page.resources, page.number, page.x2);
-                    WriteLinks(page.links, page.number);
-                    ArchivePageNumber(page.number, page.x2);
-                    Commit();
-                }
-                catch
-                {
-                    Rollback();
-                    throw;
+                    try
+                    {
+                        Transact(writer);
+                        WriteText(page.meta, page.number, page.x2, writer);
+                        WriteResource(page.resources, page.number, page.x2, writer);
+                        WriteLinks(page.links, page.number, writer);
+                        ArchivePageNumber(page.number, page.x2, writer);
+                        Commit(writer);
+                    }
+                    catch
+                    {
+                        Rollback(writer);
+                        throw;
+                    }
                 }
             }
         }
         public override bool IconsAreParsed()
         {
-            var icos = from b in writer.Resources
-                        where b.pageId == (int)SpecialResources.CANDYCORNS
-                        select b;
-            return icos.Count() != 0;
+            lock (writeLock)
+            {
+                using (var writer = new MSPADatabase(sqlsWConn))
+                {
+                    var icos = from b in writer.Resources
+                               where b.pageId == (int)SpecialResources.CANDYCORNS
+                               select b;
+                    return icos.Count() != 0;
+                }
+            }
         }
 
         public override bool x2HeaderParsed()
         {
-            var icos = from b in writer.Resources
-                       where b.pageId == (int)SpecialResources.X2_HEADER
-                       select b;
-            return icos.Count() != 0;
+            lock (writeLock)
+            {
+                using (var writer = new MSPADatabase(sqlsWConn))
+                {
+                    var icos = from b in writer.Resources
+                               where b.pageId == (int)SpecialResources.X2_HEADER
+                               select b;
+                    return icos.Count() != 0;
+                }
+            }
         }
         public override bool TereziParsed()
         {
-            var icos = from b in writer.Resources
-                       where b.pageId == (int)SpecialResources.TEREZI_PASSWORD
-                       select b;
-            return icos.Count() != 0;
-        }
-        public void WriteLinks(Parser.Link[] res, int pageno)
+            lock (writeLock)
+            {
+                using (var writer = new MSPADatabase(sqlsWConn))
                 {
-            foreach(var link in res)
-                        {
-                writer.Links.Add(new MSPADatabase.Link(link,pageno));
+                    var icos = from b in writer.Resources
+                               where b.pageId == (int)SpecialResources.TEREZI_PASSWORD
+                               select b;
+                    return icos.Count() != 0;
                 }
             }
-        public void WriteText(Parser.Text tex, int pageno, bool x2)
+        }
+        public void WriteLinks(Parser.Link[] res, int pageno, MSPADatabase writer)
+        {
+            foreach (var link in res)
+            {
+                writer.Links.Add(new MSPADatabase.Link(link, pageno));
+            }
+        }
+        public void WriteText(Parser.Text tex, int pageno, bool x2, MSPADatabase writer)
         {
             writer.PageMeta.Add(new MSPADatabase.Text(tex,pageno,x2));
         }
-        public void ArchivePageNumber(int page, bool x2)
+        public void ArchivePageNumber(int page, bool x2, MSPADatabase writer)
         {
             if (archivedPages.IsPageArchived(page))
             {//should never happen
@@ -432,17 +470,23 @@ namespace Reader_UI
 
         public override void Prune(int pageno)
         {
-            writer.Prune(pageno);
+            lock (writeLock)
+            {
+                using (var writer = new MSPADatabase(sqlsWConn))
+                {
+                    writer.Prune(pageno);
+                }
+            }
         }
-        public void Rollback()
+        public void Rollback(MSPADatabase writer)
         {
             writer.Rollback();
         }
-        public void Transact()
+        public void Transact(MSPADatabase writer)
         {
             writer.Transact();
         }
-        public void Commit()
+        public void Commit(MSPADatabase writer)
         {
             writer.Commit();
         }
@@ -454,13 +498,11 @@ namespace Reader_UI
                 sqlsRConn.Close();
                 sqlsRConn = null;
             }
-            if (writer != null)
-                writer.Dispose();
-            else if (sqlsWConn != null)
+            if (sqlsWConn != null)
             {
                 sqlsWConn.Close();
+                sqlsRConn = null;
             }
-            sqlsWConn = null;
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Reader_UI
         DbContextTransaction transaction = null;
         private readonly bool isSqlite, reset;
         public MSPADatabase(DbConnection existingConnection, bool r, DatabaseManager.DBType dbtype)
-            : base(existingConnection, true)
+            : base(existingConnection, false)
         {
             isSqlite = dbtype == DatabaseManager.DBType.SQLITE;
             reset = r;
@@ -342,6 +342,17 @@ namespace Reader_UI
             }
 
             return page;
+            
+        }
+        public void DetachAll()
+        {
+            var manager = ((System.Data.Entity.Infrastructure.IObjectContextAdapter)this).ObjectContext;
+            var objectStateEntries = manager.ObjectStateManager.GetObjectStateEntries(EntityState.Added);
+
+            foreach (var objectStateEntry in objectStateEntries)
+            {
+                manager.Detach(objectStateEntry.Entity);
+            }
         }
 
     }

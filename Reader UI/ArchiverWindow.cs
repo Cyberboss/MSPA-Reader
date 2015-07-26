@@ -87,7 +87,7 @@ namespace Reader_UI
             toc.Add(new PageRange(@"| | | => Act 3: Nobles",(int)Writer.StoryBoundaries.HS_A6A3, (int)Writer.StoryBoundaries.HS_EOA6A3));
             toc.Add(new PageRange(@"| | | => Intermission 3: Ballet of the Dancestors",(int)Writer.StoryBoundaries.HS_A6I3, (int)Writer.StoryBoundaries.HS_EOA6I3));
             toc.Add(new PageRange(@"| | | => Act 4: Void", (int)Writer.StoryBoundaries.HS_A6A4, (int)Writer.StoryBoundaries.HS_A6A4));
-            toc.Add(new PageRange(@"| | | => Intermission 4: Dead", (int)Writer.StoryBoundaries.HS_A6I4, (int)Writer.StoryBoundaries.HS_EOA6I4));
+            toc.Add(new PageRange(@"| | | => Intermission 4: Dead", (int)Writer.StoryBoundaries.HS_A6I4, (int)Writer.StoryBoundaries.HS_A6I4 + 1));
             toc.Add(new PageRange(@"| | | => Act 5: Of Gods and Tricksters", (int)Writer.StoryBoundaries.HS_A6A5, (int)Writer.StoryBoundaries.HS_EOA6A5));
             toc.Add(new PageRange(@"| | | | => Act 1", (int)Writer.StoryBoundaries.HS_A6A5, (int)Writer.StoryBoundaries.HS_EOA6A5A1));
             toc.Add(new PageRange(@"| | | \ => Act 2", (int)Writer.StoryBoundaries.HS_A6A5A2, (int)Writer.StoryBoundaries.HS_EOA6A5A2));
@@ -168,6 +168,8 @@ namespace Reader_UI
                 progressBar1.Value = Math.Max(Math.Min(Math.Max(e.ProgressPercentage, progressBar1.Value), 100), 0);
                 logOutput.AppendText((string)e.UserState + Environment.NewLine);
             }
+            if (logOutput.Text.Length > 10000)
+                logOutput.Text = logOutput.Text.Substring(5000);
         }
         private void openReader_Click(object sender, EventArgs e)
         {

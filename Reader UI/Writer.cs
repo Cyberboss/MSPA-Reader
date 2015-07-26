@@ -148,7 +148,7 @@ namespace Reader_UI
             object _mlock = new object();
             object _proglock = new object();
             ForegroundWorker bgw;
-            int runningWorkers = 0, _pagesParsed, _currentProgress;
+            int runningWorkers = 0, expectedWorkers = 0, _pagesParsed, _currentProgress;
             List<int> missedPages = new List<int>();
             public PageSavesManager(int pp, ForegroundWorker b)
             {
@@ -186,6 +186,7 @@ namespace Reader_UI
             {
                 lock (_rwlock)
                 {
+                    expectedWorkers--;
                     if (bgw.CancellationPending)
                         return false;
                     runningWorkers++;
@@ -217,7 +218,7 @@ namespace Reader_UI
             {
                 lock (_rwlock)
                 {
-                    return runningWorkers == 0;
+                    return runningWorkers == 0 && expectedWorkers == 0;
                 }
             }
         
@@ -242,6 +243,14 @@ namespace Reader_UI
                     var ret = missedPages[0];
                     missedPages.RemoveAt(0);
                     return ret;
+                }
+            }
+
+            public void ExpectWorker()
+            {
+                lock (_rwlock)
+                {
+                    expectedWorkers++;
                 }
             }
         }
@@ -449,8 +458,8 @@ namespace Reader_UI
            HS_A6A3 = 6720,
            HS_EOA6A3 = 7162,
            HS_A6I3 = 7163,
-           HS_EOA6I3 = 7339,
-           HS_A6A4 = 7340,
+           HS_EOA6I3 = 7337,
+           HS_A6A4 = 7338,
            HS_A6I4 = 7341,
            HS_EOA6I4 = 7411,
            HS_A6A5 = 7412,
@@ -970,7 +979,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                     while (true)
                     {
                         UInt64 k = bgw.GetKey();
-
+                        manager.ExpectWorker();
                         System.Threading.ThreadPool.QueueUserWorkItem(LaunchThreadedSave, new ThreadedSaveParams { Request = false, BGW = bgw, BGWKey = k, CurrentPage = currentPage, Manager = manager, PagesToParse = pagesToParse });
                         
                         if (missedRound)
