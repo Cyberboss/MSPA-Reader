@@ -818,6 +818,7 @@ namespace Reader_UI
             switch (page.number)
             {
                 case 9828:
+                case 9859:
                     comicPanel.Controls.Remove(flash);
                     mainPanel.Controls.Add(flash);
                     flash.Location = new Point(0, 0);
@@ -968,6 +969,10 @@ namespace Reader_UI
             if (flash == null || flash.Disposing || flash.IsDisposed)
                 return;
             switch (page.number) { 
+                case 9859:
+                    flash.Width = 950;
+                    flash.Height = 675;
+                    break;
                 case 9828:
                     flash.Width = 950;
                     flash.Height = 700;
