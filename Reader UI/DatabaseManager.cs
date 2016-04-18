@@ -306,13 +306,17 @@ namespace Reader_UI
                 myCommand.CommandText += "SELECT DatabaseVersion FROM Versions";
                 try
                 {
-                    if (!resetFlag && Convert.ToInt32(myCommand.ExecuteScalar()) != (int)Versions.Database)
-                    { //if the table doesn't exist assume corrupt and overwrite
-                        autoDrop = (MessageBox.Show("Database version differs from that of the program. Wipe database and create updated version?",
-                                     "Version Mismatch",
-                                         MessageBoxButtons.YesNo) == DialogResult.Yes);
-                        if (!autoDrop)
-                            return false;
+                    if (!resetFlag)
+                    {
+                        var dbVersion = Convert.ToInt32(myCommand.ExecuteScalar());
+                        if (dbVersion != (int)Versions.Database)
+                        { //if the table doesn't exist assume corrupt and overwrite
+                            autoDrop = (MessageBox.Show("Database version differs from that of the program. Wipe database and create updated version?",
+                                         "Version Mismatch",
+                                             MessageBoxButtons.YesNo) == DialogResult.Yes);
+                            if (!autoDrop)
+                                return false;
+                        }
                     }
                 }
                 catch
@@ -335,6 +339,7 @@ namespace Reader_UI
                         var tmp = new MSPADatabase.Version();
                         tmp.DatabaseVersion = (int)Versions.Database;
                         writer.Versions.Add(tmp);
+                        writer.SaveChanges();
                     }
                     sqlsRConn.Open();
 

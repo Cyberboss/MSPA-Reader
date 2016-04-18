@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
-using System.Collections.Concurrent;
 using System.Threading;
+using VideoLibrary;
+
 namespace Reader_UI
 {
     public abstract class Writer
@@ -380,6 +379,8 @@ namespace Reader_UI
             SHES8ACK = 009305,
             GAMEOVER = 008801,
            OVERSHINE = 009304,
+           COLLIDE = 009987,
+           ACT7 = 010027,
         }
         public enum PasswordPages
         {
@@ -488,7 +489,10 @@ namespace Reader_UI
            HS_A6A6A5 = 9309,
            HS_EOA6A6A5 = 9347,  //mental breakdown isn't green so i don't consider it part of the act
            HS_A6A6I5 = 9349,
-       }
+           HS_A6A6A6 = 009987,
+           HS_A7 = 010027,
+           HS_END = 010028,
+        }
         float totalMegabytesDownloaded = 0;
 
 
@@ -510,20 +514,15 @@ namespace Reader_UI
                             return false;
                         }
                     }
-                    else
+                    else if (lastPage != (int)StoryBoundaries.HS_END)
                     {
                         var pg = archivedPages.Prune();
-                        if (!Parser.IsOpenBound(pg) && pg != (int)PagesOfImportance.CASCADE)
+                        if (pg != 0)
                         {
-                            if (pg != 0)
-                            {
-                                bgw.ReportProgress(0, "Reparsing last page...");
-                                Prune(pg);
-                                SavePage(pg);
-                            }
+                            bgw.ReportProgress(0, "Reparsing last page... The may take a while if you stopped on a big page");
+                            Prune(pg);
+                            SavePage(pg);
                         }
-                        else
-                            archivedPages.Add(pg);
                     }
 
                     if (!IconsAreParsed())
@@ -870,6 +869,38 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             asdf.title = "Enjoy restful slumber.";
             WritePageToDB(new Page((int)PagesOfImportance.JAILBREAK_LAST_PAGE, asdf, FUCKYOU, new Parser.Link[0]));
         }
+        void HandleYoutubeVideo(WrapBGW bgw, int progress, bool AIsCollide)
+        {
+            if (bgw != null)
+                bgw.ReportProgress(progress, "Now parsing " + (AIsCollide ? "physical catharsis." : "the end...") + " This will take a while...");
+
+
+            var VidObject = YouTube.Default.GetVideo(AIsCollide ? "https://www.youtube.com/watch?v=Y5wYN6rB_Rg" : "https://www.youtube.com/watch?v=FevMNMwvdPw");
+
+            Parser.Resource[] TheVid = new Parser.Resource[1];
+            TheVid[0] = new Parser.Resource(VidObject.GetBytes(),  "video" + VidObject.FileExtension);
+
+            var fileSize2 = TheVid[0].data.Count();
+            totalMegabytesDownloaded += (float)fileSize2 / (1024.0f * 1024.0f);
+            if (bgw != null)
+                bgw.ReportProgress(progress, TheVid[0].originalFileName + ": " + fileSize2 / 1024 + "KB");
+
+            Parser.Text asdf = new Parser.Text();
+            Parser.Link[] lnk = new Parser.Link[1];
+            asdf.narr = new Parser.Text.ScriptLine("#000000", "", 0);
+            if (AIsCollide)
+            {
+                asdf.title = "[S] Collide";
+                lnk[0] = new Parser.Link("END OF ACT 6", (int)PagesOfImportance.COLLIDE + 1);
+            }
+            else
+            {
+                asdf.narr = new Parser.Text.ScriptLine("#000000", "", 0);
+                asdf.title = "[S] ACT 7";
+                lnk[0] = new Parser.Link("==>", (int)PagesOfImportance.ACT7 + 1);
+            }
+            WritePageToDB(new Page(AIsCollide ? (int)PagesOfImportance.COLLIDE : (int)PagesOfImportance.ACT7, asdf, TheVid, new Parser.Link[0]));
+        }
         public static int ValidRange(int pg)
         {
             if (pg < (int)StoryBoundaries.JAILBREAK_PAGE_ONE)
@@ -1062,6 +1093,10 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                             break;
                         case PagesOfImportance.JAILBREAK_LAST_PAGE:
                             HandleJailbreakLast(bgw, currentProgress);
+                            break;
+                        case PagesOfImportance.COLLIDE:
+                        case PagesOfImportance.ACT7:
+                            HandleYoutubeVideo(bgw, currentProgress,(PagesOfImportance)currentPage == PagesOfImportance.COLLIDE);
                             break;
                     }
                     archivedPages.Add(currentPage);

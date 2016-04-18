@@ -78,8 +78,8 @@ namespace Reader_UI
             toc.Add(new PageRange(@"| | | \ => Scratch: excellent h[o]st",(int)Writer.StoryBoundaries.HS_A5A2S,(int)Writer.StoryBoundaries.HS_EOA5A2S));
             toc.Add(new PageRange(@"| | \ => Cascade", (int)Writer.StoryBoundaries.HS_CASCADE, (int)Writer.StoryBoundaries.HS_CASCADE));
             toc.Add(new PageRange(@"| \ => Intermission 2: The Man in the Cairo Overcoat",(int)Writer.StoryBoundaries.HS_I2,(int)Writer.StoryBoundaries.HS_EOI2));
-            toc.Add(new PageRange(@"| => Part 3", (int)Writer.StoryBoundaries.HS_A6, db.lastPage));
-            toc.Add(new PageRange(@"| | => Act 6", (int)Writer.StoryBoundaries.HS_A6, db.lastPage));
+            toc.Add(new PageRange(@"| => Part 3", (int)Writer.StoryBoundaries.HS_A6, (int)Writer.StoryBoundaries.HS_END));
+            toc.Add(new PageRange(@"| | => Act 6", (int)Writer.StoryBoundaries.HS_A6, (int)Writer.StoryBoundaries.HS_A6A6A6));
             toc.Add(new PageRange(@"| | | => Act 1: Through Broken Glass", (int)Writer.StoryBoundaries.HS_A6, (int)Writer.StoryBoundaries.HS_EOA6A1));
             toc.Add(new PageRange(@"| | | => Intermission 1: corpse party", (int)Writer.StoryBoundaries.HS_A6I1, (int)Writer.StoryBoundaries.HS_EOA6I1));
             toc.Add(new PageRange(@"| | | => Act 2: Your shit is wrecked.",(int)Writer.StoryBoundaries.HS_A6A2, (int)Writer.StoryBoundaries.HS_EOA6A2));
@@ -93,7 +93,7 @@ namespace Reader_UI
             toc.Add(new PageRange(@"| | | \ => Act 2", (int)Writer.StoryBoundaries.HS_A6A5A2, (int)Writer.StoryBoundaries.HS_EOA6A5A2));
             toc.Add(new PageRange(@"| | | => Intermission 5: I'M PUTTING YOU ON SPEAKER CRAB.", (int)Writer.StoryBoundaries.HS_A6I5, (int)Writer.StoryBoundaries.HS_EOA6I5));
             //no, fuck this
-            toc.Add(new PageRange(@"| | | => Act 6", (int)Writer.StoryBoundaries.HS_A6A6, db.lastPage));
+            toc.Add(new PageRange(@"| | | => Act 6", (int)Writer.StoryBoundaries.HS_A6A6, (int)Writer.StoryBoundaries.HS_A6A6A6));
             toc.Add(new PageRange(@"| | | | => Act 1", (int)Writer.StoryBoundaries.HS_A6A6, (int)Writer.StoryBoundaries.HS_EOA6A6A1));
             toc.Add(new PageRange(@"| | | | => Intermission 1", (int)Writer.StoryBoundaries.HS_A6A6I1, (int)Writer.StoryBoundaries.HS_EOA6A6I1));
             toc.Add(new PageRange(@"| | | | => Act 2", (int)Writer.StoryBoundaries.HS_A6A6A2, (int)Writer.StoryBoundaries.HS_EOA6A6A2));
@@ -103,7 +103,9 @@ namespace Reader_UI
             toc.Add(new PageRange(@"| | | | => Act 4", (int)Writer.StoryBoundaries.HS_A6A6A4, (int)Writer.StoryBoundaries.HS_EOA6A6A4));
             toc.Add(new PageRange(@"| | | | => Intermission 4", (int)Writer.StoryBoundaries.HS_A6A6I4, (int)Writer.StoryBoundaries.HS_EOA6A6I4));
             toc.Add(new PageRange(@"| | | | => Act 5", (int)Writer.StoryBoundaries.HS_A6A6A5, (int)Writer.StoryBoundaries.HS_EOA6A6A5));
-            toc.Add(new PageRange(@"| | | | => Intermission 5", (int)Writer.StoryBoundaries.HS_A6A6I5, db.lastPage));
+            toc.Add(new PageRange(@"| | | | => Intermission 5", (int)Writer.StoryBoundaries.HS_A6A6I5, (int)Writer.StoryBoundaries.HS_A6A6A6 - 1));
+            toc.Add(new PageRange(@"| | | \ => Act 6 ([S] Collide)", (int)Writer.StoryBoundaries.HS_A6A6A6, (int)Writer.StoryBoundaries.HS_A6A6A6));
+            toc.Add(new PageRange(@"| \  => [S] Act 7", (int)Writer.StoryBoundaries.HS_A7, (int)Writer.StoryBoundaries.HS_END));
             return toc;
         }
         public ArchiverWindow(Writer idb)
