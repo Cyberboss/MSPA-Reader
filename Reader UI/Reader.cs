@@ -929,7 +929,7 @@ namespace Reader_UI
             if (setDimensions)
                 SetFlashDimensions();
             var loc = WriteTempResource(swfFile);
-            flash.WebBrowserShortcutsEnabled = false;
+            f.WebBrowserShortcutsEnabled = false;
             if (page.number == 8848 || page.number == 8850)
                 f.DocumentText = "<style>html, body {{ padding: 0; margin: 0 }}</style><img src=\"" + loc + "\" border=\"0\"></img>";
             else

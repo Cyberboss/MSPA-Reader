@@ -276,10 +276,11 @@ namespace Reader_UI
                             where b.pageId == (int)SpecialResources.TRICKSTER_HEADER
                             select b;
             Parser.Resource[] res = new Parser.Resource[selection.Count()];
-            for (int i = 0; i < selection.Count(); ++i){
-                var elem = selection.ElementAt(i);
+            int i = 0;
+            foreach (var elem in selection ){
                 res[i] = new Parser.Resource(elem.data, elem.originalFileName, elem.titleText);
                 res[i].isInPesterLog = elem.isInPesterLog;
+                ++i;
             }
             reader.Dispose();
             return res; 

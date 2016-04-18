@@ -369,7 +369,7 @@ namespace Reader_UI
         }
 
         protected ArchiveLock archivedPages = new ArchiveLock();
-       public  enum PagesOfImportance
+       public enum PagesOfImportance
         {
            JAILBREAK_LAST_PAGE = 000136,
             CASCADE = 006009,

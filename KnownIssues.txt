@@ -1,8 +1,11 @@
 There is some sort of EF double access bug that occurs ocasionally during simultaneous reading and archiving
 
 Homestuck:
-3574 all those links
-1911 link over text
+pg3574 all those links
+pg1911 link over text
 Davepetasprite^2 text isn't right
 [S] Remember, [S] Collide, and [S] Act 7
 Framing issues on the image set between EOA6 and A7
+One off logs are broken (Serious Businesslog, Tricksterlog)
+Trickster page advancer doesn't work
+Basically trickster mode is crap

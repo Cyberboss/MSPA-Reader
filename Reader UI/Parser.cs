@@ -530,7 +530,7 @@ namespace Reader_UI
         }
         void ParseResources(bool clear)
         {
-            if(clear)
+            if (clear)
                 resources.Clear();
             //we are mainly looking for .gifs and .swfs, there are some things we should ignore, such as /images/v2_blankstrip.gif
             var matches = Regex.Matches(contentTable.InnerHtml, gifRegex);
@@ -538,7 +538,7 @@ namespace Reader_UI
 
             for (int i = 0; i < matches.Count; i++)
             {
-                if(matches[i].Value != "http://www.mspaintadventures.com/sweetbroandhellajeff/?cid=035.jpg")
+                if (matches[i].Value != "http://www.mspaintadventures.com/sweetbroandhellajeff/?cid=035.jpg")
                     resources.Add(new Resource(DownloadFile(matches[i].Value), System.IO.Path.GetFileName(new Uri(matches[i].Value).LocalPath)));
             }
 
@@ -550,10 +550,19 @@ namespace Reader_UI
             }
             matchNames = matchNames.Distinct().ToList();
 
-            for (int i = 0; i < matchNames.Count; i++) 
+            //seriously couldn't think of a better place to put this
+            //not defined in pages of importance because that breaks the flow of things
+            if (currentPage == 7623)
+                foreach (var match in matchNames)
+                    if (match == "http://www.mspaintadventures.com/storyfiles/hs2/scraps/PEACHY.gif" || match == "http://cdn.mspaintadventures.com/storyfiles/hs2/scraps/PEACHY.gif")
+                        match.Replace("PEACHY.gif", "CAUCASIAN.gif");
+                    else if (match == "http://www.mspaintadventures.com/storyfiles/hs2/scraps/fruitone.gif" || match == "http://cdn.mspaintadventures.com/storyfiles/hs2/scraps/fruitone.gif")
+                        match.Replace("/scraps/fruitone.gif", "05720_2.gif");
+
+            for (int i = 0; i < matchNames.Count; i++)
                 resources.Add(new Resource(DownloadFile(matchNames[i]), System.IO.Path.GetFileName(new Uri(matchNames[i]).LocalPath)));
 
-            resources = resources.Distinct().ToList();  
+            resources = resources.Distinct().ToList();
         }
         public Resource[] GetResources()
         {

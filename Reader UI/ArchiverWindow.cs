@@ -92,7 +92,6 @@ namespace Reader_UI
             toc.Add(new PageRange(@"| | | | => Act 1", (int)Writer.StoryBoundaries.HS_A6A5, (int)Writer.StoryBoundaries.HS_EOA6A5A1));
             toc.Add(new PageRange(@"| | | \ => Act 2", (int)Writer.StoryBoundaries.HS_A6A5A2, (int)Writer.StoryBoundaries.HS_EOA6A5A2));
             toc.Add(new PageRange(@"| | | => Intermission 5: I'M PUTTING YOU ON SPEAKER CRAB.", (int)Writer.StoryBoundaries.HS_A6I5, (int)Writer.StoryBoundaries.HS_EOA6I5));
-            //no, fuck this
             toc.Add(new PageRange(@"| | | => Act 6", (int)Writer.StoryBoundaries.HS_A6A6, (int)Writer.StoryBoundaries.HS_A6A6A6));
             toc.Add(new PageRange(@"| | | | => Act 1", (int)Writer.StoryBoundaries.HS_A6A6, (int)Writer.StoryBoundaries.HS_EOA6A6A1));
             toc.Add(new PageRange(@"| | | | => Intermission 1", (int)Writer.StoryBoundaries.HS_A6A6I1, (int)Writer.StoryBoundaries.HS_EOA6A6I1));
