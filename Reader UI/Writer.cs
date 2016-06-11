@@ -116,14 +116,21 @@ namespace Reader_UI
                     messageQueue[key].Add(new ProgMessage { Progress = prog, Message = msg });
                 }
             }
-            public void Commit(UInt64 key)
+            public void Commit(UInt64 key, bool KeepKey = false)
             {
                 lock(_wlock){
                     var commital = messageQueue[key];
-                    messageQueue.Remove(key);
                     foreach (var pm in commital)
                         bgw.ReportProgress(pm.Progress, pm.Message);
+                    if (!KeepKey)
+                        messageQueue.Remove(key);
+                    else
+                        commital.Clear();
                 }
+            }
+            public bool Cancelled()
+            {
+                return bgw.CancellationPending;
             }
         }
         class WrapBGW
@@ -135,9 +142,15 @@ namespace Reader_UI
                 bgw = b;
                 key = k;
             }
-            public void ReportProgress(int prog, string msg)
+            public void ReportProgress(int prog, string msg, bool LongOp = false)
             {
                 bgw.ReportProgress(key, prog, msg);
+                if (LongOp)
+                    Commit();
+            }
+            void Commit()
+            {
+                bgw.Commit(key, true);
             }
         }
         class PageSavesManager
@@ -692,7 +705,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
              * They are actually also availiable on the www and cdn, so we can try those too
              */
             if (bgw != null)
-                bgw.ReportProgress(progress, "Now parsing Cascade, page 6009");
+                bgw.ReportProgress(progress, "Now parsing Cascade", true);
             Parser.Resource[] cascadeSegments = new Parser.Resource[7];
             Parser.Link[] next = new Parser.Link[1];
             next[0] = new Parser.Link("END OF ACT 5", (int)PagesOfImportance.CASCADE + 1);
@@ -707,8 +720,15 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
             var fileSize = cascadeSegments[0].data.Count();
             totalMegabytesDownloaded += (float)fileSize / (1024.0f * 1024.0f);
             if (bgw != null)
+            {
                 bgw.ReportProgress(progress, cascadeSegments[0].originalFileName + ": " + fileSize / 1024 + "KB");
-            for(int i = 1; i <= 5; ++i){
+                if (bgw.bgw.Cancelled())
+                {
+                    bgw.ReportProgress(progress, "Cascade download cancelled");
+                    throw new Exception();
+                }
+            }
+            for (int i = 1; i <= 5; ++i){
             
                 
                 try
@@ -722,7 +742,14 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                 var fileSize2 = cascadeSegments[i].data.Count();
                 totalMegabytesDownloaded += (float)fileSize2 / (1024.0f * 1024.0f);
                 if (bgw != null)
+                {
                     bgw.ReportProgress(progress, cascadeSegments[i].originalFileName + ": " + fileSize2 / 1024 + "KB");
+                    if (bgw.bgw.Cancelled())
+                    {
+                        bgw.ReportProgress(progress, "Cascade download cancelled");
+                        throw new Exception();
+                    }
+                }
             }
 
             cascadeSegments[6] = new Parser.Resource(Parser.DownloadFile("http://www.mspaintadventures.com/images/header_cascade.gif"), "header_cascade.gif");
@@ -759,7 +786,7 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
         void HandlePageSmash2(WrapBGW bgw, int progress)
         {
             if (bgw != null)
-                bgw.ReportProgress(progress, "Now parsing Caliborn's hissy fit.");
+                bgw.ReportProgress(progress, "Now parsing Caliborn's second hissy fit.");
             Parser.Resource[] FUCKYOU = new Parser.Resource[1];
             FUCKYOU[0] = new Parser.Resource(Parser.DownloadFile("http://www.mspaintadventures.com/007680/05777_2.swf"), "05777_2.swf");
 
@@ -872,13 +899,23 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
         void HandleYoutubeVideo(WrapBGW bgw, int progress, bool AIsCollide)
         {
             if (bgw != null)
-                bgw.ReportProgress(progress, "Now parsing " + (AIsCollide ? "physical catharsis." : "the end...") + " This will take a while...");
-
-
+                bgw.ReportProgress(progress, "Now parsing " + (AIsCollide ? " Collide." : "the end...") + " This will take a while...", true);
             var VidObject = YouTube.Default.GetVideo(AIsCollide ? "https://www.youtube.com/watch?v=Y5wYN6rB_Rg" : "https://www.youtube.com/watch?v=FevMNMwvdPw");
 
+            var DLTask = VidObject.GetBytesAsync();
+            if (bgw != null)
+                do
+                {
+                    Thread.Sleep(100);
+                    if (bgw.bgw.Cancelled())
+                    {
+                        bgw.ReportProgress(progress, "Video download cancelled");
+                        throw new Exception();
+                    }
+                } while (!DLTask.IsCompleted);
+
             Parser.Resource[] TheVid = new Parser.Resource[1];
-            TheVid[0] = new Parser.Resource(VidObject.GetBytes(),  "video" + VidObject.FileExtension);
+            TheVid[0] = new Parser.Resource(DLTask.Result,  "video" + VidObject.FileExtension);
 
             var fileSize2 = TheVid[0].data.Count();
             totalMegabytesDownloaded += (float)fileSize2 / (1024.0f * 1024.0f);
@@ -1096,14 +1133,14 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
                             break;
                         case PagesOfImportance.COLLIDE:
                         case PagesOfImportance.ACT7:
-                            HandleYoutubeVideo(bgw, currentProgress,(PagesOfImportance)currentPage == PagesOfImportance.COLLIDE);
+                            HandleYoutubeVideo(bgw, currentProgress, (PagesOfImportance)currentPage == PagesOfImportance.COLLIDE);
                             break;
                     }
                     archivedPages.Add(currentPage);
                 }
                 catch
                 {
-                    if (bgw != null)
+                    if (bgw != null && !bgw.bgw.Cancelled())
                         bgw.ReportProgress(currentProgress, "Error parsing special page " + currentPage);
                     return false;
                 }
