@@ -1111,10 +1111,9 @@ namespace Reader_UI
             ctl.Width = Width;
             ctl.Height = Height;
             ctl.BeginInit();
-            var folder = Properties.Settings.Default.vlcLibFolder;
             for(;;)
             {
-                ctl.VlcLibDirectory = new DirectoryInfo(folder);
+                ctl.VlcLibDirectory = new DirectoryInfo(Properties.Settings.Default.vlcLibFolder);
                 try
                 {
                     ctl.EndInit();
@@ -1125,10 +1124,10 @@ namespace Reader_UI
                     MessageBox.Show("Invalid VLC Library directory. Please select the folder which contains the 32-bit libvlc.dll");
                     FolderBrowserDialog fbd = new FolderBrowserDialog();
                     fbd.Description = "Select the folder which contains the 32-bit libvlc.dll";
-                    fbd.SelectedPath = folder;
+                    fbd.SelectedPath = Properties.Settings.Default.vlcLibFolder;
                     if(fbd.ShowDialog() != DialogResult.OK)
                         return null;
-                    folder = fbd.SelectedPath;
+                    Properties.Settings.Default.vlcLibFolder = fbd.SelectedPath;
                 }
             }
             return ctl;
