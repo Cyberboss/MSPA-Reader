@@ -852,6 +852,12 @@ namespace Reader_UI
                 {
                     Properties.Settings.Default.lastReadPage = page.number;
                 }
+                if (pageQueue.Count > 0)
+                {
+                    var Top = pageQueue.Pop();
+                    if (Top != page.number)
+                        pageQueue.Push(Top);
+                }
                 pageQueue.Push(page.number);
                 saveButton.Enabled = true;
                 switch (db.GetStyle(pageRequest))
