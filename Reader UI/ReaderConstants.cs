@@ -56,9 +56,9 @@ namespace Reader_UI
 
         public const int CASCADE_PANEL_Y_OFFSET = 125;
 
-        public const int REGULAR_PANEL_COLOUR_R = 192;
-        public const int REGULAR_PANEL_COLOUR_B = 192;
-        public const int REGULAR_PANEL_COLOUR_G = 192;
+        public const int REGULAR_PANEL_COLOUR_R = 198;
+        public const int REGULAR_PANEL_COLOUR_B = 198;
+        public const int REGULAR_PANEL_COLOUR_G = 198;
 
         public const int CASCADE_PANEL_COLOUR_R = 38;
         public const int CASCADE_PANEL_COLOUR_B = 38;
