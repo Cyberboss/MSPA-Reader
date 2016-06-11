@@ -83,6 +83,7 @@ namespace Reader_UI
             }
         }
         WorkerLock wl = new WorkerLock();
+        private object FVideoDownloadLock = new object();
         class BGWSerializer
         {
             class ProgMessage{
@@ -898,45 +899,50 @@ http://uploads.ungrounded.net/userassets/3591000/3591093/cascade_segment5.swf
         }
         void HandleYoutubeVideo(WrapBGW bgw, int progress, bool AIsCollide)
         {
-            if (bgw != null)
-                bgw.ReportProgress(progress, "Now parsing " + (AIsCollide ? " Collide." : "the end...") + " This will take a while...", true);
-            var VidObject = YouTube.Default.GetVideo(AIsCollide ? "https://www.youtube.com/watch?v=Y5wYN6rB_Rg" : "https://www.youtube.com/watch?v=FevMNMwvdPw");
+            //do not under any circumstances let 2 videos download at once, it'll kill the memory
+            lock (FVideoDownloadLock)
+            {
+                if (bgw != null)
+                    bgw.ReportProgress(progress, "Now parsing " + (AIsCollide ? " Collide." : "the end...") + " This will take a while...", true);
+                var VidObject = YouTube.Default.GetVideo(AIsCollide ? "https://www.youtube.com/watch?v=Y5wYN6rB_Rg" : "https://www.youtube.com/watch?v=FevMNMwvdPw");
 
-            var DLTask = VidObject.GetBytesAsync();
-            if (bgw != null)
-                do
-                {
-                    Thread.Sleep(100);
-                    if (bgw.bgw.Cancelled())
+                var DLTask = VidObject.GetBytesAsync();
+                if (bgw != null)
+                    do
                     {
-                        bgw.ReportProgress(progress, "Video download cancelled");
-                        throw new Exception();
-                    }
-                } while (!DLTask.IsCompleted);
+                        Thread.Sleep(100);
+                        if (bgw.bgw.Cancelled())
+                        {
+                            bgw.ReportProgress(progress, "Video download cancelled");
+                            throw new Exception();
+                        }
+                    } while (!DLTask.IsCompleted);
 
-            Parser.Resource[] TheVid = new Parser.Resource[1];
-            TheVid[0] = new Parser.Resource(DLTask.Result,  "video" + VidObject.FileExtension);
+                Parser.Resource[] TheVid = new Parser.Resource[1];
+                TheVid[0] = new Parser.Resource(DLTask.Result, "video" + VidObject.FileExtension);
 
-            var fileSize2 = TheVid[0].data.Count();
-            totalMegabytesDownloaded += (float)fileSize2 / (1024.0f * 1024.0f);
-            if (bgw != null)
-                bgw.ReportProgress(progress, TheVid[0].originalFileName + ": " + fileSize2 / 1024 + "KB");
+                var fileSize2 = TheVid[0].data.Count();
+                totalMegabytesDownloaded += (float)fileSize2 / (1024.0f * 1024.0f);
+                if (bgw != null)
+                    bgw.ReportProgress(progress, TheVid[0].originalFileName + ": " + fileSize2 / 1024 + "KB");
 
-            Parser.Text asdf = new Parser.Text();
-            Parser.Link[] lnk = new Parser.Link[1];
-            asdf.narr = new Parser.Text.ScriptLine("#000000", "", 0);
-            if (AIsCollide)
-            {
-                asdf.title = "[S] Collide";
-                lnk[0] = new Parser.Link("END OF ACT 6", (int)PagesOfImportance.COLLIDE + 1);
-            }
-            else
-            {
+                Parser.Text asdf = new Parser.Text();
+                Parser.Link[] lnk = new Parser.Link[1];
                 asdf.narr = new Parser.Text.ScriptLine("#000000", "", 0);
-                asdf.title = "[S] ACT 7";
-                lnk[0] = new Parser.Link("==>", (int)PagesOfImportance.ACT7 + 1);
+                if (AIsCollide)
+                {
+                    asdf.title = "[S] Collide";
+                    lnk[0] = new Parser.Link("END OF ACT 6", (int)PagesOfImportance.COLLIDE + 1);
+                }
+                else
+                {
+                    asdf.narr = new Parser.Text.ScriptLine("#000000", "", 0);
+                    asdf.title = "[S] ACT 7";
+                    lnk[0] = new Parser.Link("==>", (int)PagesOfImportance.ACT7 + 1);
+                }
+                WritePageToDB(new Page(AIsCollide ? (int)PagesOfImportance.COLLIDE : (int)PagesOfImportance.ACT7, asdf, TheVid, new Parser.Link[0]));
+                GC.Collect();
             }
-            WritePageToDB(new Page(AIsCollide ? (int)PagesOfImportance.COLLIDE : (int)PagesOfImportance.ACT7, asdf, TheVid, new Parser.Link[0]));
         }
         public static int ValidRange(int pg)
         {
