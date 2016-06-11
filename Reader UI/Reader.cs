@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Threading;
+using Vlc.DotNet.Forms;
 
 namespace Reader_UI
 {
@@ -251,6 +250,7 @@ namespace Reader_UI
         Button pesterHideShow = null;
         ImageStream currentIcon = null;
         OpenboundServer openbound = null;
+        VlcControl FVideoPlayer = null;
         ForegroundWorker mrAjax = new ForegroundWorker(), monitorGameOver = new ForegroundWorker(); 
         class TricksterShit : IDisposable
         {
@@ -389,6 +389,13 @@ namespace Reader_UI
                         if (page.number < db.lastPage)
                             WakeUpMr(page.number + 1);
                         return true;
+                    case Keys.Escape:
+                        if (FVideoPlayer != null)
+                            goBack_Click(null, null);
+                        break;
+                    case Keys.Back:
+                        goBack_Click(null, null);
+                        return true;
                     case Keys.Space:
                         if (page != null && (page.meta.lines != null && page.meta.lines.Count() != 0)
                             || (page.meta2 != null && page.meta2.lines != null && page.meta2.lines.Count() != 0))
@@ -425,6 +432,11 @@ namespace Reader_UI
 
                 FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
                 SizeGripStyle = System.Windows.Forms.SizeGripStyle.Auto;
+            }
+            if(FVideoPlayer != null)
+            {
+                FVideoPlayer.Width = Width;
+                FVideoPlayer.Height = Height;
             }
         }
 
@@ -821,6 +833,8 @@ namespace Reader_UI
                 flash.Location = new Point(0, 0);
                 flash.BringToFront();
             }
+            if (FVideoPlayer != null)
+                FVideoPlayer.BringToFront();
         }
         void LoadJailbreak()
         {
@@ -928,7 +942,7 @@ namespace Reader_UI
         {
             if (setDimensions)
                 SetFlashDimensions();
-            var loc = WriteTempResource(swfFile);
+            var loc = WriteTempResource(ref swfFile);
             f.WebBrowserShortcutsEnabled = false;
             if (page.number == 8848 || page.number == 8850)
                 f.DocumentText = "<style>html, body {{ padding: 0; margin: 0 }}</style><img src=\"" + loc + "\" border=\"0\"></img>";
@@ -940,16 +954,18 @@ namespace Reader_UI
         {
             SetFlashDimensions();
             string sburbpath = null;
-            foreach (var res in page.resources)
+            for (int I = 0; I < page.resources.Length; ++I)
             {
-                var p = WriteTempResource(res, true);
+                var ofn = page.resources[I].originalFileName;
+                var p = WriteTempResource(ref page.resources[I], true);
                 if (p != null)
-                    sburbpath = res.originalFileName;
+                    sburbpath = ofn;
             }
             flash.WebBrowserShortcutsEnabled = false;
             var htmlstring = "<!DOCTYPE html><html><style>* { padding:0; margin:0; overflow:hidden; }</style><head><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" /><script type=\"text/javascript\" src=\"" + sburbpath + "\"></script></head><body class=\"padding: 0; margin: 0;\" id=\"JterniaDeploy\" onload=\"Sburb.initialize('JterniaDeploy','" + page.meta.altText + "',false);\"></body></html>";
             byte[] bytes = Encoding.UTF8.GetBytes(htmlstring);
-            string pageLoc = WriteTempResource(new Parser.Resource(bytes, "openbound.html"));
+            var tmpres = new Parser.Resource(bytes, "openbound.html");
+            string pageLoc = WriteTempResource(ref tmpres);
             openbound = new OpenboundServer(pageLoc);
             flash.Navigate(openbound.GetTargetPage());
 
@@ -1037,11 +1053,11 @@ namespace Reader_UI
             //*
 
             //first write the segments
-            WriteTempResource(page.resources[1]);
-            WriteTempResource(page.resources[2]);
-            WriteTempResource(page.resources[3]);
-            WriteTempResource(page.resources[4]);
-            WriteTempResource(page.resources[5]);
+            WriteTempResource(ref page.resources[1]);
+            WriteTempResource(ref page.resources[2]);
+            WriteTempResource(ref page.resources[3]);
+            WriteTempResource(ref page.resources[4]);
+            WriteTempResource(ref page.resources[5]);
 
             flash = new WebBrowser();
             comicPanel.Controls.Add(flash);
@@ -1082,12 +1098,49 @@ namespace Reader_UI
 
             RemoveControl(pageLoadingProgress);RemoveControl(progressLabel);
         }
-        string WriteTempResource(Parser.Resource res, bool findSburbScript = false)
+        VlcControl TryInitVLC()
+        {
+            VlcControl ctl = new VlcControl();
+            ctl.EndReached += (a, b) => {
+                if (page.number < db.lastPage)
+                    WakeUpMr(page.number + 1);
+                else
+                    goBack_Click(null, null);
+            };
+            ctl.Location = new Point(0, 0);
+            ctl.Width = Width;
+            ctl.Height = Height;
+            ctl.BeginInit();
+            var folder = Properties.Settings.Default.vlcLibFolder;
+            for(;;)
+            {
+                ctl.VlcLibDirectory = new DirectoryInfo(folder);
+                try
+                {
+                    ctl.EndInit();
+                    break;
+                }
+                catch
+                {
+                    MessageBox.Show("Invalid VLC Library directory. Please select the folder which contains the 32-bit libvlc.dll");
+                    FolderBrowserDialog fbd = new FolderBrowserDialog();
+                    fbd.Description = "Select the folder which contains the 32-bit libvlc.dll";
+                    fbd.SelectedPath = folder;
+                    if(fbd.ShowDialog() != DialogResult.OK)
+                        return null;
+                    folder = fbd.SelectedPath;
+                }
+            }
+            return ctl;
+        }
+        string WriteTempResource(ref Parser.Resource res, bool findSburbScript = false)
         {
             string path = System.IO.Path.GetTempPath() + res.originalFileName;
             if(Parser.IsOpenBound(page.number))
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
             File.WriteAllBytes(path, res.data); //let the throw fall through and fail the page load (problems beyond our scope)
+            res = null;
+            GC.Collect();
             tempFiles.Add(path);
             if(!findSburbScript || Path.GetFileName(path) == "Sburb.min.js")
                 return path;
@@ -1139,14 +1192,30 @@ namespace Reader_UI
                         ((page.number == 8848 || page.number == 8850) //special horizontal scroll
                         || !Parser.IsGif(page.resources[i].originalFileName)))
                     {
-                        flash = new WebBrowser();
-                        comicPanel.Controls.Add(flash);
-                        InitFlashMovie(flash, page.resources[i]);
+                        if (Path.GetExtension(page.resources[i].originalFileName) == ".mp4")
+                        {
+                            FVideoPlayer = TryInitVLC();
+                            if (FVideoPlayer == null)
+                                return;
+                            var loc = WriteTempResource(ref page.resources[i]);
+                            FVideoPlayer.Width = Width;
+                            FVideoPlayer.Height = Height;
+                            FVideoPlayer.SetMedia(new FileInfo(loc));
+                            FVideoPlayer.Play();
+                            Controls.Add(FVideoPlayer);
+                            currentHeight += 750;
+                        }
+                        else
+                        {
+                            flash = new WebBrowser();
+                            comicPanel.Controls.Add(flash);
+                            InitFlashMovie(flash, page.resources[i]);
 
-                        flash.Location = new Point(comicPanel.Width / 2 - flash.Width / 2, currentHeight);
-                        currentHeight += flash.Height;
-                        pageContainsFlash = true;
-                    }
+                            flash.Location = new Point(comicPanel.Width / 2 - flash.Width / 2, currentHeight);
+                            currentHeight += flash.Height;
+                            pageContainsFlash = true;
+                        }
+                       }
                     else if (Parser.IsGif(page.resources[i].originalFileName))
                     {
 
@@ -1818,6 +1887,8 @@ namespace Reader_UI
             conversations.Clear();
             RemoveControl(pesterlog);
             RemoveControl(comicPanel);
+            RemoveControl(FVideoPlayer);
+            FVideoPlayer = null;
             if (x2Panel != null)
             {
                 x2Panel.Kill();
