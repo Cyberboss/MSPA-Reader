@@ -39,6 +39,12 @@ namespace Reader_UI
             VOID,
             OVERSHINE,
         }
+        public enum FullScreenFlashes
+        {
+            HORSE = 9828,
+            REMEMBER = 9859,
+            GOLDPILOT = 8178,
+        }
         public class Page
         {
             public readonly int number;

@@ -815,17 +815,11 @@ namespace Reader_UI
         }
         void PostLoad()
         {
-            switch (page.number)
-            {
-                case 9828:
-                case 9859:
-                    comicPanel.Controls.Remove(flash);
-                    mainPanel.Controls.Add(flash);
-                    flash.Location = new Point(0, 0);
-                    flash.BringToFront();
-                    break;
-                default:
-                    break;
+            if (Enum.IsDefined(typeof(Writer.FullScreenFlashes), page.number)) {
+                comicPanel.Controls.Remove(flash);
+                mainPanel.Controls.Add(flash);
+                flash.Location = new Point(0, 0);
+                flash.BringToFront();
             }
         }
         void LoadJailbreak()
@@ -977,6 +971,10 @@ namespace Reader_UI
                     flash.Width = 950;
                     flash.Height = 700;
                     break;
+                case 8178:
+                    flash.Width = 950;
+                    flash.Height = 750;
+                    break;
                 case 8848:
                 case 8850:
                     flash.Width = 682;
@@ -1110,7 +1108,7 @@ namespace Reader_UI
             title.Location = new Point(comicPanel.Width / 2 - title.Width / 2, REGULAR_TITLE_Y_OFFSET);
 
             //content
-            int currentHeight = title.Location.Y + title.Height + REGULAR_TITLE_Y_OFFSET;
+            int currentHeight = !Enum.IsDefined(typeof(Writer.FullScreenFlashes), page.number) ? title.Location.Y + title.Height + REGULAR_TITLE_Y_OFFSET : 0;
             if (Parser.IsOpenBound(page.number))
             {
                 flash = new WebBrowser();
@@ -1161,7 +1159,8 @@ namespace Reader_UI
                     }
                 }
             }
-            currentHeight += REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
+            if (!Enum.IsDefined(typeof(Writer.FullScreenFlashes), page.number))
+                currentHeight += REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
 
             //words
             int leftSide;
@@ -1232,7 +1231,9 @@ namespace Reader_UI
                     }
                 leftSide = comicPanel.Width / 2 - narrative.Width / 2;
                 narrative.Location = new Point(leftSide, currentHeight);
+                
                 currentHeight += narrative.Height;
+
                 comicPanel.Controls.Add(narrative);
 
                 foreach (var link in conversations)
@@ -1366,7 +1367,8 @@ namespace Reader_UI
                 pLMaxHeight += REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
             }
 
-            currentHeight += REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
+            if (!Enum.IsDefined(typeof(Writer.FullScreenFlashes), page.number))
+                currentHeight += REGULAR_SPACE_BETWEEN_CONTENT_AND_TEXT;
 
             //add 2x fake link 
 

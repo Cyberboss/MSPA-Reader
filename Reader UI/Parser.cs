@@ -510,7 +510,7 @@ namespace Reader_UI
                     try
                     {
                         var decs = contentTable.Descendants("p");
-                        var narrative = decs.ElementAt(currentPage == 9828 || currentPage == 9859 ? 0 : 1);
+                        var narrative = decs.ElementAt(Enum.IsDefined(typeof(Writer.FullScreenFlashes), currentPage) ? 0 : 1);
                         if (narrative != null)
                         {
                             var hexReg = Regex.Match(narrative.OuterHtml, hexColourRegex);
